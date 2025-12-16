@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ case.case_number }} - Case Report</title>
+    {% load static %}
+    <style>
+        @media print {
+            .no-print { display: none; }
+            @page { margin: 1.5cm; }
+        }
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .header-logo {
+            text-align: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 3px solid #2563eb;
+        }
+        .header-logo img {
+            height: 80px;
+            width: auto;
+        }
+        h1 { color: #2563eb; border-bottom: 3px solid #2563eb; padding-bottom: 10px; }
+        h2 { color: #1e40af; margin-top: 30px; border-bottom: 2px solid #ddd; padding-bottom: 5px; }
+        h3 { color: #1e3a8a; margin-top: 20px; }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+        table, th, td {
+            border: 1px solid #ddd;
+        }
+        th {
+            background-color: #f3f4f6;
+            padding: 12px;
+            text-align: left;
+            font-weight: bold;
+        }
+        td {
+            padding: 10px;
+        }
+        .badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+        .badge-green { background-color: #d1fae5; color: #065f46; }
+        .badge-yellow { background-color: #fef3c7; color: #92400e; }
+        .badge-red { background-color: #fee2e2; color: #991b1b; }
+        .badge-gray { background-color: #f3f4f6; color: #374151; }
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+            margin: 20px 0;
+        }
+        .info-item {
+            padding: 10px;
+            background-color: #f9fafb;
+            border-left: 3px solid #2563eb;
+        }
+        .info-label {
+            font-weight: bold;
+            color: #6b7280;
+            font-size: 12px;
+            text-transform: uppercase;
+        }
+        .info-value {
+            margin-top: 5px;
+            color: #111827;
+        }
+        .print-button {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 12px 24px;
+            background-color: #2563eb;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+        }
+        .print-button:hover {
+            background-color: #1e40af;
+        }
+        .evidence-card {
+            border: 1px solid #e5e7eb;
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 8px;
+            background-color: #fafafa;
+        }
+        .evidence-card img {
+            max-width: 150px;
+            max-height: 150px;
+            object-fit: cover;
+            border-radius: 4px;
+            margin-right: 15px;
+        }
+        .person-card {
+            border: 1px solid #e5e7eb;
+            padding: 12px;
+            margin: 8px 0;
+            border-radius: 6px;
+            background-color: #f9fafb;
+        }
+    </style>
+</head>
+<body>
+    <button onclick="window.print()" class="print-button no-print">🖨️ Print / Save as PDF</button>
+    
+    <div class="header-logo">
+        <img src="{% static 'forensics/images/kpsm_logo.png' %}" alt="Korps Politie Sint Maarten">
+    </div>
+    
+    <h1>Case Report: {{ case.case_number }}</h1>
+    
+    <div class="info-grid">
+        <div class="info-item">
+            <div class="info-label">Case Number</div>
+            <div class="info-value">{{ case.case_number }}</div>
+        </div>
+        <div class="info-item">
+            <div class="info-label">Case Name</div>
+            <div class="info-value">{{ case.case_name }}</div>
+        </div>
+        <div class="info-item">
+            <div class="info-label">Status</div>
+            <div class="info-value">
+                <span class="badge {% if case.status == 'active' %}badge-green{% elif case.status == 'closed' %}badge-gray{% else %}badge-yellow{% endif %}">
+                    {{ case.get_status_display }}
+                </span>
+            </div>
+        </div>
+        <div class="info-item">
+            <div class="info-label">Priority</div>
+            <div class="info-value">
+                <span class="badge {% if case.priority == 'critical' or case.priority == 'high' %}badge-red{% elif case.priority == 'medium' %}badge-yellow{% else %}badge-gray{% endif %}">
+                    {{ case.get_priority_display }}
+                </span>
+            </div>
+        </div>
+        <div class="info-item">
+            <div class="info-label">Case Type</div>
+            <div class="info-value">{{ case.get_case_type_display }}</div>
+        </div>
+        <div class="info-item">
+            <div class="info-label">Prosecutor</div>
+            <div class="info-value">{{ case.prosecutor|default:"—" }}</div>
+        </div>
+        <div class="info-item">
+            <div class="info-label">Date Opened</div>
+            <div class="info-value">{{ case.date_opened|date:"F d, Y" }}</div>
+        </div>
+        <div class="info-item">
+            <div class="info-label">Last Updated</div>
+            <div class="info-value">{{ case.updated_at|date:"F d, Y" }}</div>
+        </div>
+    </div>
+    
+    {% if case.description %}
+    <h3>Description</h3>
+    <p style="padding: 15px; background-color: #f9fafb; border-left: 3px solid #2563eb; margin: 10px 0;">
+        {{ case.description }}
+    </p>
+    {% endif %}
+    
+    <h2>Associated Persons ({{ persons.count }})</h2>
+    {% if persons %}
+        {% for cp in persons %}
+        <div class="person-card">
+            <strong>{{ cp.person.first_name }} {{ cp.person.last_name }}</strong> 
+            - <span class="badge badge-gray">{{ cp.get_role_display }}</span>
+            {% if cp.involvement_description %}
+            <p style="margin: 8px 0 0 0; color: #6b7280; font-size: 14px;">{{ cp.involvement_description }}</p>
+            {% endif %}
+        </div>
+        {% endfor %}
+    {% else %}
+        <p>No persons associated with this case.</p>
+    {% endif %}
+    
+    <h2>Evidence Items ({{ evidence_items.count }})</h2>
+    {% if evidence_items %}
+    <table>
+        <thead>
+            <tr>
+                <th>Evidence Number</th>
+                <th>IBS Number</th>
+                <th>Item Name</th>
+                <th>Device Type</th>
+                <th>Brand / Model</th>
+                <th>Serial Number</th>
+                <th>Status</th>
+                <th>Department</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for item in evidence_items %}
+            <tr>
+                <td><strong>{{ item.evidence_number }}</strong></td>
+                <td>{{ item.ibs_number|default:"—" }}</td>
+                <td>{{ item.item_name }}</td>
+                <td>{{ item.get_device_type_display }}</td>
+                <td>
+                    {{ item.brand|default:"—" }}
+                    {% if item.model %} / {{ item.model }}{% endif %}
+                </td>
+                <td>{{ item.serial_number|default:"—" }}</td>
+                <td><span class="badge badge-green">{{ item.get_status_display }}</span></td>
+                <td>{{ item.get_current_department_display|default:"—" }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    
+    <h3>Evidence Details</h3>
+    {% for item in evidence_items %}
+    <div class="evidence-card">
+        <div style="display: flex; align-items: start;">
+            {% if item.images.first %}
+            <img src="{{ item.images.first.image.url }}" alt="Evidence image">
+            {% endif %}
+            <div>
+                <h4 style="margin: 0 0 10px 0;">{{ item.evidence_number }} - {{ item.item_name }}</h4>
+                <p><strong>Device Type:</strong> {{ item.get_device_type_display }}</p>
+                {% if item.brand %}<p><strong>Brand:</strong> {{ item.brand }}</p>{% endif %}
+                {% if item.model %}<p><strong>Model:</strong> {{ item.model }}</p>{% endif %}
+                {% if item.serial_number %}<p><strong>Serial Number:</strong> {{ item.serial_number }}</p>{% endif %}
+                {% if item.imei %}<p><strong>IMEI:</strong> {{ item.imei }}</p>{% endif %}
+                {% if item.description %}<p><strong>Description:</strong> {{ item.description }}</p>{% endif %}
+                <p><strong>Collected:</strong> {{ item.collected_date|date:"F d, Y" }}{% if item.collected_by %} by {{ item.collected_by }}{% endif %}</p>
+                {% if item.examiner_name %}<p><strong>Examiner:</strong> {{ item.examiner_name }}</p>{% endif %}
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+    {% else %}
+    <p>No evidence items associated with this case.</p>
+    {% endif %}
+    
+    <div style="margin-top: 50px; padding-top: 20px; border-top: 2px solid #ddd; text-align: center; color: #6b7280; font-size: 12px;">
+        Report generated on {{ "now"|date:"F d, Y \a\t H:i" }} | Digital Forensics KPSM
+    </div>
+</body>
+</html>

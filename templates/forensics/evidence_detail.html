@@ -1,0 +1,395 @@
+{% extends 'base.html' %}
+{% load forensics_filters %}
+
+{% block title %}{{ evidence.evidence_number }} - Diamond Forensics{% endblock %}
+
+{% block content %}
+<div class="space-y-6">
+    <!-- Breadcrumbs -->
+    {% include 'components/breadcrumbs.html' %}
+    
+    <div class="flex justify-between items-start">
+        <div>
+            <div class="flex items-center gap-3">
+                <h2 class="text-3xl font-bold text-foreground">{{ evidence.evidence_number }}</h2>
+                <span class="px-3 py-1 text-sm font-medium rounded-full bg-purple-100 text-purple-700">
+                    {{ evidence.get_device_type_display }}
+                </span>
+                <span class="px-3 py-1 text-sm font-medium rounded-full bg-green-100 text-green-700">
+                    {{ evidence.get_status_display }}
+                </span>
+            </div>
+            <p class="text-xl text-muted-foreground mt-2">{{ evidence.item_name }}</p>
+            {% if evidence.ibs_number %}
+            <p class="text-sm text-muted-foreground mt-1">
+                IBS#: <a href="{% url 'evidence_list' %}?ibs={{ evidence.ibs_number }}" class="text-primary hover:underline font-medium">{{ evidence.ibs_number }}</a>
+                <span class="text-xs text-muted-foreground">(View all items with this IBS#)</span>
+            </p>
+            {% endif %}
+            {% if evidence.case %}
+            <p class="text-sm text-muted-foreground mt-1">
+                Case: <a href="{% url 'case_detail' evidence.case.pk %}" class="text-primary hover:underline font-medium">{{ evidence.case.case_number }}</a>
+            </p>
+            {% endif %}
+        </div>
+        <div class="flex gap-2">
+            <a href="{% url 'evidence_print_label' evidence.pk %}" target="_blank" class="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z"/>
+                </svg>
+                Print Label
+            </a>
+            <a href="{% url 'evidence_detail_export_print' evidence.pk %}" target="_blank" class="inline-flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors font-medium">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/>
+                </svg>
+                Print / PDF
+            </a>
+            <a href="{% url 'evidence_update' evidence.pk %}" class="px-4 py-2 bg-secondary text-secondary-foreground rounded-lg hover:opacity-90 transition-opacity font-medium">
+                Edit
+            </a>
+            <a href="{% url 'evidence_delete' evidence.pk %}" class="px-4 py-2 bg-destructive text-destructive-foreground rounded-lg hover:opacity-90 transition-opacity font-medium">
+                Delete
+            </a>
+        </div>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div class="lg:col-span-2 space-y-6">
+            <!-- Device Information -->
+            <div class="bg-gradient-to-br from-purple-50 to-pink-50 rounded-lg border-2 border-purple-200 p-6 shadow-md">
+                <h3 class="text-lg font-semibold text-purple-900 mb-4">Device Information</h3>
+                <dl class="grid grid-cols-2 gap-4">
+                    <div>
+                        <dt class="text-sm font-medium text-muted-foreground">Device Type</dt>
+                        <dd class="text-sm text-foreground mt-1">{{ evidence.get_device_type_display }}</dd>
+                    </div>
+                    {% if evidence.brand %}
+                    <div>
+                        <dt class="text-sm font-medium text-muted-foreground">Brand</dt>
+                        <dd class="text-sm text-foreground mt-1">{{ evidence.brand }}</dd>
+                    </div>
+                    {% endif %}
+                    {% if evidence.model %}
+                    <div>
+                        <dt class="text-sm font-medium text-muted-foreground">Model</dt>
+                        <dd class="text-sm text-foreground mt-1">{{ evidence.model }}</dd>
+                    </div>
+                    {% endif %}
+                    {% if evidence.serial_number %}
+                    <div>
+                        <dt class="text-sm font-medium text-muted-foreground">Serial Number</dt>
+                        <dd class="text-sm text-foreground mt-1">{{ evidence.serial_number }}</dd>
+                    </div>
+                    {% endif %}
+                    {% if evidence.imei %}
+                    <div>
+                        <dt class="text-sm font-medium text-muted-foreground">IMEI (Primary)</dt>
+                        <dd class="text-sm text-foreground mt-1">{{ evidence.imei }}</dd>
+                    </div>
+                    {% endif %}
+                    {% if evidence.color %}
+                    <div>
+                        <dt class="text-sm font-medium text-muted-foreground">Color</dt>
+                        <dd class="text-sm text-foreground mt-1">{{ evidence.color }}</dd>
+                    </div>
+                    {% endif %}
+                    {% if evidence.state %}
+                    <div>
+                        <dt class="text-sm font-medium text-muted-foreground">State</dt>
+                        <dd class="text-sm text-foreground mt-1">{{ evidence.get_state_display }}</dd>
+                    </div>
+                    {% endif %}
+                </dl>
+                {% if evidence.description %}
+                <div class="mt-4">
+                    <dt class="text-sm font-medium text-muted-foreground mb-2">Description</dt>
+                    <dd class="text-sm text-foreground">{{ evidence.description }}</dd>
+                </div>
+                {% endif %}
+                {% if evidence.imei_numbers %}
+                <div class="mt-4">
+                    <dt class="text-sm font-medium text-muted-foreground mb-2">Additional IMEIs (Multi-SIM)</dt>
+                    <dd class="text-sm text-foreground">
+                        <ul class="list-disc list-inside space-y-1">
+                            {% for imei in evidence.imei_numbers %}
+                            <li>{{ imei }}</li>
+                            {% endfor %}
+                        </ul>
+                    </dd>
+                </div>
+                {% endif %}
+            </div>
+
+            <!-- Device-Specific Information -->
+            {% if evidence.device_specific_data %}
+            <div class="bg-gradient-to-br from-violet-50 to-indigo-50 rounded-lg border-2 border-violet-200 p-6 shadow-md">
+                <h3 class="text-lg font-semibold text-violet-900 mb-4">Device-Specific Information</h3>
+                <dl class="grid grid-cols-2 gap-4">
+                    {% for key, value in evidence.device_specific_data.items %}
+                        {% if value and value != '' and value != 'false' and value != False %}
+                        <div>
+                            <dt class="text-sm font-medium text-muted-foreground">{{ key|format_field_name }}</dt>
+                            <dd class="text-sm text-foreground mt-1">{{ value }}</dd>
+                        </div>
+                        {% endif %}
+                    {% endfor %}
+                </dl>
+            </div>
+            {% endif %}
+
+            <!-- Collection Information -->
+            <div class="bg-gray-50 rounded-lg border border-border p-6">
+                <h3 class="text-lg font-semibold text-foreground mb-4">Collection & Custody</h3>
+                <dl class="grid grid-cols-2 gap-4">
+                    <div>
+                        <dt class="text-sm font-medium text-muted-foreground">Collected Date</dt>
+                        <dd class="text-sm text-foreground mt-1">{{ evidence.collected_date|date:"F d, Y H:i" }}</dd>
+                    </div>
+                    {% if evidence.collected_by %}
+                    <div>
+                        <dt class="text-sm font-medium text-muted-foreground">Collected By</dt>
+                        <dd class="text-sm text-foreground mt-1">{{ evidence.collected_by }}</dd>
+                    </div>
+                    {% endif %}
+                    {% if evidence.location_found %}
+                    <div>
+                        <dt class="text-sm font-medium text-muted-foreground">Location Found</dt>
+                        <dd class="text-sm text-foreground mt-1">{{ evidence.location_found }}</dd>
+                    </div>
+                    {% endif %}
+                    {% if evidence.storage_location %}
+                    <div>
+                        <dt class="text-sm font-medium text-muted-foreground">Storage Location</dt>
+                        <dd class="text-sm text-foreground mt-1">{{ evidence.storage_location }}</dd>
+                    </div>
+                    {% endif %}
+                    {% if evidence.seizure_date %}
+                    <div>
+                        <dt class="text-sm font-medium text-muted-foreground">Seizure Date</dt>
+                        <dd class="text-sm text-foreground mt-1">{{ evidence.seizure_date|date:"F d, Y" }}</dd>
+                    </div>
+                    {% endif %}
+                    {% if evidence.seizure_location %}
+                    <div>
+                        <dt class="text-sm font-medium text-muted-foreground">Seizure Location</dt>
+                        <dd class="text-sm text-foreground mt-1">{{ evidence.seizure_location }}</dd>
+                    </div>
+                    {% endif %}
+                </dl>
+            </div>
+            
+            <!-- Person Relationships -->
+            {% if evidence.owner_person or evidence.seized_from_person or evidence.custodian_person %}
+            <div class="bg-amber-50 rounded-lg border-2 border-amber-200 p-6">
+                <h3 class="text-lg font-semibold text-amber-900 mb-4">Person Relationships</h3>
+                <dl class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    {% if evidence.owner_person %}
+                    <div>
+                        <dt class="text-sm font-medium text-amber-700">Owner</dt>
+                        <dd class="text-sm text-foreground mt-1">
+                            <a href="{% url 'person_detail' evidence.owner_person.pk %}" class="text-primary hover:underline font-medium">
+                                {{ evidence.owner_person.first_name }} {{ evidence.owner_person.last_name }}
+                            </a>
+                            <p class="text-xs text-muted-foreground">{{ evidence.owner_person.get_person_type_display }}</p>
+                            {% if evidence.owner_person.phone %}<p class="text-xs text-muted-foreground">📞 {{ evidence.owner_person.phone }}</p>{% endif %}
+                        </dd>
+                    </div>
+                    {% endif %}
+                    {% if evidence.seized_from_person %}
+                    <div>
+                        <dt class="text-sm font-medium text-amber-700">Seized From</dt>
+                        <dd class="text-sm text-foreground mt-1">
+                            <a href="{% url 'person_detail' evidence.seized_from_person.pk %}" class="text-primary hover:underline font-medium">
+                                {{ evidence.seized_from_person.first_name }} {{ evidence.seized_from_person.last_name }}
+                            </a>
+                            <p class="text-xs text-muted-foreground">{{ evidence.seized_from_person.get_person_type_display }}</p>
+                            {% if evidence.seized_from_person.phone %}<p class="text-xs text-muted-foreground">📞 {{ evidence.seized_from_person.phone }}</p>{% endif %}
+                        </dd>
+                    </div>
+                    {% endif %}
+                    {% if evidence.custodian_person %}
+                    <div>
+                        <dt class="text-sm font-medium text-amber-700">Custodian</dt>
+                        <dd class="text-sm text-foreground mt-1">
+                            <a href="{% url 'person_detail' evidence.custodian_person.pk %}" class="text-primary hover:underline font-medium">
+                                {{ evidence.custodian_person.first_name }} {{ evidence.custodian_person.last_name }}
+                            </a>
+                            <p class="text-xs text-muted-foreground">{{ evidence.custodian_person.get_person_type_display }}</p>
+                            {% if evidence.custodian_person.phone %}<p class="text-xs text-muted-foreground">📞 {{ evidence.custodian_person.phone }}</p>{% endif %}
+                        </dd>
+                    </div>
+                    {% endif %}
+                </dl>
+            </div>
+            {% endif %}
+
+            <!-- Forensic Information -->
+            {% if evidence.examiner_name or evidence.acquisition_date or evidence.acquisition_method or evidence.acquisition_tool %}
+            <div class="bg-gray-50 rounded-lg border border-border p-6">
+                <h3 class="text-lg font-semibold text-foreground mb-4">Forensic Analysis</h3>
+                <dl class="grid grid-cols-2 gap-4">
+                    {% if evidence.examiner_name %}
+                    <div>
+                        <dt class="text-sm font-medium text-muted-foreground">Examiner</dt>
+                        <dd class="text-sm text-foreground mt-1">{{ evidence.examiner_name }}</dd>
+                    </div>
+                    {% endif %}
+                    {% if evidence.acquisition_date %}
+                    <div>
+                        <dt class="text-sm font-medium text-muted-foreground">Acquisition Date</dt>
+                        <dd class="text-sm text-foreground mt-1">{{ evidence.acquisition_date|date:"F d, Y" }}</dd>
+                    </div>
+                    {% endif %}
+                    {% if evidence.acquisition_method %}
+                    <div>
+                        <dt class="text-sm font-medium text-muted-foreground">Acquisition Method</dt>
+                        <dd class="text-sm text-foreground mt-1">{{ evidence.acquisition_method }}</dd>
+                    </div>
+                    {% endif %}
+                    {% if evidence.acquisition_tool %}
+                    <div>
+                        <dt class="text-sm font-medium text-muted-foreground">Acquisition Tool</dt>
+                        <dd class="text-sm text-foreground mt-1">{{ evidence.acquisition_tool }}</dd>
+                    </div>
+                    {% endif %}
+                    {% if evidence.hash_algorithm %}
+                    <div>
+                        <dt class="text-sm font-medium text-muted-foreground">Hash Algorithm</dt>
+                        <dd class="text-sm text-foreground mt-1">{{ evidence.hash_algorithm }}</dd>
+                    </div>
+                    {% endif %}
+                    <div>
+                        <dt class="text-sm font-medium text-muted-foreground">Hash Verified</dt>
+                        <dd class="text-sm text-foreground mt-1">{{ evidence.hash_verified|yesno:"Yes,No" }}</dd>
+                    </div>
+                </dl>
+            </div>
+            {% endif %}
+
+            <!-- Notes -->
+            {% if evidence.notes %}
+            <div class="bg-gray-50 rounded-lg border border-border p-6">
+                <h3 class="text-lg font-semibold text-foreground mb-4">Notes</h3>
+                <p class="text-sm text-foreground whitespace-pre-wrap">{{ evidence.notes }}</p>
+            </div>
+            {% endif %}
+            
+            <!-- Documents -->
+            {% if evidence.documents.all %}
+            <div class="bg-gradient-to-br from-green-50 to-emerald-50 rounded-lg border-2 border-green-200 p-6 shadow-md">
+                <h3 class="text-lg font-semibold text-green-900 mb-4">Documents</h3>
+                <div class="space-y-3">
+                    {% for doc in evidence.documents.all %}
+                    <div class="flex items-center justify-between p-4 bg-white rounded-lg border border-green-200 hover:border-green-400 hover:shadow-md transition-all">
+                        <div class="flex items-center gap-4">
+                            <div class="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
+                                <svg class="w-7 h-7 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"/>
+                                </svg>
+                            </div>
+                            <div>
+                                <p class="font-semibold text-foreground">{{ doc.title }}</p>
+                                <p class="text-sm text-muted-foreground">
+                                    {{ doc.file_type|upper }} • {{ doc.file_size|filesizeformat }} • {{ doc.date_created|date:"M d, Y" }}
+                                </p>
+                            </div>
+                        </div>
+                        <a href="{{ doc.file_path.url }}" target="_blank" download class="inline-flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors font-medium text-sm">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                            </svg>
+                            Download
+                        </a>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endif %}
+            
+            <!-- Evidence Images -->
+            {% if evidence.images.all %}
+            <div class="bg-gradient-to-br from-blue-50 to-cyan-50 rounded-lg border-2 border-blue-200 p-6 shadow-md">
+                <h3 class="text-lg font-semibold text-blue-900 mb-4">Evidence Images</h3>
+                <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                    {% for image in evidence.images.all %}
+                    <div class="relative group">
+                        <a href="{{ image.image.url }}" target="_blank" class="block">
+                            <img src="{{ image.image.url }}" alt="Evidence image" class="w-full h-40 object-cover rounded-lg border-2 border-gray-300 hover:border-blue-400 transition-colors cursor-pointer">
+                            <div class="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-30 transition-all rounded-lg flex items-center justify-center">
+                                <svg class="w-12 h-12 text-white opacity-0 group-hover:opacity-100 transition-opacity" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v3m0 0v3m0-3h3m-3 0H7"/>
+                                </svg>
+                            </div>
+                        </a>
+                        {% if image.caption %}
+                        <p class="text-sm text-gray-700 mt-2">{{ image.caption }}</p>
+                        {% endif %}
+                        <p class="text-xs text-gray-500 mt-1">
+                            Uploaded: {{ image.uploaded_at|date:"M d, Y H:i" }}
+                            {% if image.uploaded_by %} by {{ image.uploaded_by }}{% endif %}
+                        </p>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endif %}
+        </div>
+
+        <div class="space-y-6">
+            <!-- Quick Info -->
+            <div class="bg-gray-50 rounded-lg border border-border p-6">
+                <h3 class="text-lg font-semibold text-foreground mb-4">Quick Info</h3>
+                <div class="space-y-3">
+                    <div class="flex justify-between items-center">
+                        <span class="text-sm text-muted-foreground">Status</span>
+                        <span class="px-2 py-1 text-xs font-medium rounded-full bg-green-100 text-green-700">
+                            {{ evidence.get_status_display }}
+                        </span>
+                    </div>
+                    <div class="flex justify-between items-center">
+                        <span class="text-sm text-muted-foreground">Device Type</span>
+                        <span class="px-2 py-1 text-xs font-medium rounded-full bg-purple-100 text-purple-700">
+                            {{ evidence.get_device_type_display }}
+                        </span>
+                    </div>
+                    {% if evidence.damages %}
+                    <div class="flex justify-between items-center">
+                        <span class="text-sm text-muted-foreground">Damages</span>
+                        <span class="px-2 py-1 text-xs font-medium rounded-full bg-red-100 text-red-700">
+                            Yes
+                        </span>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Timestamps -->
+            <div class="bg-gray-50 rounded-lg border border-border p-6">
+                <h3 class="text-lg font-semibold text-foreground mb-4">Timestamps</h3>
+                <div class="space-y-3">
+                    <div>
+                        <dt class="text-sm font-medium text-muted-foreground">Created</dt>
+                        <dd class="text-sm text-foreground mt-1">{{ evidence.created_at|date:"F d, Y H:i" }}</dd>
+                    </div>
+                    <div>
+                        <dt class="text-sm font-medium text-muted-foreground">Last Updated</dt>
+                        <dd class="text-sm text-foreground mt-1">{{ evidence.updated_at|date:"F d, Y H:i" }}</dd>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Associated Case -->
+            {% if evidence.case %}
+            <div class="bg-gray-50 rounded-lg border border-border p-6">
+                <h3 class="text-lg font-semibold text-foreground mb-4">Associated Case</h3>
+                <a href="{% url 'case_detail' evidence.case.pk %}" class="block p-3 rounded-lg border border-border hover:bg-secondary/50 transition-colors">
+                    <p class="font-medium text-foreground">{{ evidence.case.case_number }}</p>
+                    <p class="text-sm text-muted-foreground">{{ evidence.case.case_name }}</p>
+                </a>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

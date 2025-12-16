@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="en" class="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Digital Forensics KPSM{% endblock %}</title>
+    {% load static %}
+    <link rel="icon" type="image/png" href="{% static 'forensics/images/kpsm_logo.png' %}">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        border: "hsl(220 8% 82%)",
+                        input: "hsl(220 8% 88%)",
+                        ring: "hsl(220 15% 50%)",
+                        background: "hsl(220 10% 95%)",
+                        foreground: "hsl(220 10% 20%)",
+                        primary: {
+                            DEFAULT: "hsl(217 91% 60%)",  // Vibrant blue
+                            foreground: "hsl(0 0% 100%)",
+                        },
+                        secondary: {
+                            DEFAULT: "hsl(220 13% 69%)",  // Muted blue-gray
+                            foreground: "hsl(0 0% 100%)",
+                        },
+                        destructive: {
+                            DEFAULT: "hsl(0 84% 60%)",  // Bright red
+                            foreground: "hsl(0 0% 100%)",
+                        },
+                        success: {
+                            DEFAULT: "hsl(142 76% 36%)",  // Green
+                            foreground: "hsl(0 0% 100%)",
+                        },
+                        warning: {
+                            DEFAULT: "hsl(38 92% 50%)",  // Orange
+                            foreground: "hsl(0 0% 100%)",
+                        },
+                        muted: {
+                            DEFAULT: "hsl(220 8% 90%)",
+                            foreground: "hsl(220 8% 48%)",
+                        },
+                        accent: {
+                            DEFAULT: "hsl(262 83% 58%)",  // Purple accent
+                            foreground: "hsl(0 0% 100%)",
+                        },
+                        card: {
+                            DEFAULT: "hsl(220 15% 97%)",
+                            foreground: "hsl(220 10% 20%)",
+                        },
+                    },
+                    borderRadius: {
+                        lg: "0.65rem",
+                        md: "calc(0.65rem - 2px)",
+                        sm: "calc(0.65rem - 4px)",
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'system-ui', 'sans-serif'],
+                    },
+                }
+            }
+        }
+    </script>
+    <style>
+        * {
+            font-family: 'Inter', sans-serif;
+        }
+        body {
+            font-feature-settings: "rlig" 1, "calt" 1;
+        }
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        .animate-slide-in {
+            animation: slideIn 0.3s ease-out;
+        }
+    </style>
+</head>
+<body class="min-h-screen bg-gradient-to-br from-gray-100 via-slate-100 to-gray-100 antialiased">
+    <div class="min-h-screen">
+        <!-- Header -->
+        <header class="border-b-2 border-indigo-200 bg-gradient-to-r from-indigo-600 via-blue-600 to-indigo-700 shadow-lg sticky top-0 z-50">
+            <div class="w-full px-8">
+                <div class="flex justify-between items-center h-20">
+                    <div class="flex items-center space-x-4">
+                        <div class="h-16 bg-white rounded-xl flex items-center justify-center shadow-lg px-3">
+                            <img src="{% static 'forensics/images/kpsm_logo.png' %}" alt="KPSM" class="h-14 w-auto">
+                        </div>
+                        <h1 class="text-2xl font-bold text-white tracking-tight">Digital Forensics KPSM</h1>
+                    </div>
+                    <nav class="flex items-center space-x-2">
+                        <a href="{% url 'dashboard' %}" class="px-4 py-2.5 text-base font-semibold text-white/90 hover:text-white hover:bg-white/10 rounded-lg transition-all duration-200">Dashboard</a>
+                        <a href="{% url 'case_list' %}" class="px-4 py-2.5 text-base font-semibold text-white/90 hover:text-white hover:bg-white/10 rounded-lg transition-all duration-200">Cases</a>
+                        <a href="{% url 'evidence_list' %}" class="px-4 py-2.5 text-base font-semibold text-white/90 hover:text-white hover:bg-white/10 rounded-lg transition-all duration-200">Evidence</a>
+                        <a href="{% url 'evidence_location_search' %}" class="px-4 py-2.5 text-base font-semibold text-white/90 hover:text-white hover:bg-white/10 rounded-lg transition-all duration-200">Location</a>
+                        <a href="{% url 'person_list' %}" class="px-4 py-2.5 text-base font-semibold text-white/90 hover:text-white hover:bg-white/10 rounded-lg transition-all duration-200">Persons</a>
+                        <a href="{% url 'journal_list' %}" class="px-4 py-2.5 text-base font-semibold text-white/90 hover:text-white hover:bg-white/10 rounded-lg transition-all duration-200">Journals</a>
+                        {% if user.is_staff %}
+                        <a href="/admin/" class="px-4 py-2.5 text-base font-semibold text-white/90 hover:text-white hover:bg-white/10 rounded-lg transition-all duration-200">Admin</a>
+                        {% endif %}
+                        {% if user.is_authenticated %}
+                        <div class="ml-4 border-l border-white/20 pl-4 relative">
+                            <button onclick="toggleUserMenu()" class="flex items-center space-x-2 px-4 py-2.5 text-base font-semibold text-white/90 hover:text-white hover:bg-white/10 rounded-lg transition-all duration-200">
+                                <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd"/>
+                                </svg>
+                                <span>{{ user.username }}</span>
+                                <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd"/>
+                                </svg>
+                            </button>
+                            
+                            <!-- Dropdown Menu -->
+                            <div id="userMenu" class="hidden absolute right-0 mt-2 w-56 bg-white rounded-lg shadow-xl border border-gray-200 z-50">
+                                <div class="py-2">
+                                    <a href="{% url 'password_change' %}" class="flex items-center space-x-3 px-4 py-3 text-sm text-gray-700 hover:bg-gray-100 transition-colors">
+                                        <svg class="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z"/>
+                                        </svg>
+                                        <span>Change Password</span>
+                                    </a>
+                                    <hr class="my-1 border-gray-200">
+                                    <form method="post" action="{% url 'logout' %}" class="block">
+                                        {% csrf_token %}
+                                        <button type="submit" class="flex items-center space-x-3 px-4 py-3 text-sm text-red-600 hover:bg-red-50 transition-colors w-full text-left">
+                                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/>
+                                            </svg>
+                                            <span>Logout</span>
+                                        </button>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                        {% endif %}
+                    </nav>
+                </div>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <main class="w-full px-8 py-8">
+            <!-- Back Button (hidden on dashboard) -->
+            {% if request.path != '/' and request.path != '/dashboard/' %}
+            <button onclick="window.history.back()" class="mb-4 inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-muted-foreground hover:text-foreground bg-gray-50 hover:bg-gray-100 border border-border rounded-lg transition-colors">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
+                </svg>
+                Back
+            </button>
+            {% endif %}
+            <!-- Messages -->
+            {% if messages %}
+                <div class="mb-6 space-y-2">
+                    {% for message in messages %}
+                        <div class="animate-slide-in flex items-center gap-3 rounded-lg border {% if message.tags == 'success' %}bg-green-50 border-green-200 text-green-900{% elif message.tags == 'error' %}bg-red-50 border-red-200 text-red-900{% else %}bg-blue-50 border-blue-200 text-blue-900{% endif %} px-4 py-3 text-sm">
+                            <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                                {% if message.tags == 'success' %}
+                                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+                                {% else %}
+                                <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"/>
+                                {% endif %}
+                            </svg>
+                            <span>{{ message }}</span>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+            
+            {% block content %}
+            {% endblock %}
+        </main>
+    </div>
+    
+    <script>
+    // User menu dropdown toggle
+    function toggleUserMenu() {
+        const menu = document.getElementById('userMenu');
+        menu.classList.toggle('hidden');
+    }
+    
+    // Close dropdown when clicking outside
+    document.addEventListener('click', function(event) {
+        const userMenu = document.getElementById('userMenu');
+        const button = event.target.closest('button[onclick="toggleUserMenu()"]');
+        
+        if (!button && userMenu && !userMenu.contains(event.target)) {
+            userMenu.classList.add('hidden');
+        }
+    });
+    
+    // Keyboard shortcuts
+    document.addEventListener('keydown', function(e) {
+        // Ignore if user is typing in input/textarea
+        if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA' || e.target.tagName === 'SELECT') {
+            return;
+        }
+        
+        // N - New Evidence
+        if (e.key === 'n' || e.key === 'N') {
+            window.location.href = '/evidence/create/';
+        }
+        // C - New Case
+        else if (e.key === 'c' || e.key === 'C') {
+            window.location.href = '/cases/create/';
+        }
+        // / or S - Focus search
+        else if (e.key === '/' || e.key === 's' || e.key === 'S') {
+            e.preventDefault();
+            const searchInput = document.querySelector('input[type="text"][name="search"]');
+            if (searchInput) {
+                searchInput.focus();
+                searchInput.select();
+            }
+        }
+        // L - Location search
+        else if (e.key === 'l' || e.key === 'L') {
+            window.location.href = '/evidence/location-search/';
+        }
+    });
+    
+    // Copy to clipboard function
+    function copyToClipboard(text, button) {
+        navigator.clipboard.writeText(text).then(() => {
+            // Visual feedback
+            const originalHTML = button.innerHTML;
+            button.innerHTML = '<svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path d="M9 2a1 1 0 000 2h2a1 1 0 100-2H9z"/><path d="M4 5a2 2 0 012-2 3 3 0 003 3h2a3 3 0 003-3 2 2 0 012 2v11a2 2 0 01-2 2H6a2 2 0 01-2-2V5zm9.707 5.707a1 1 0 00-1.414-1.414L9 12.586l-1.293-1.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"/></svg>';
+            button.classList.add('text-green-600');
+            setTimeout(() => {
+                button.innerHTML = originalHTML;
+                button.classList.remove('text-green-600');
+            }, 1500);
+        });
+    }
+    </script>
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

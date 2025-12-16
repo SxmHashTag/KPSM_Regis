@@ -1,0 +1,32 @@
+{% extends 'base.html' %}
+{% block title %}Delete Person - Diamond Forensics{% endblock %}
+{% block content %}
+<div class="w-full max-w-2xl">
+    <h2 class="text-3xl font-bold text-foreground">Delete Person</h2>
+    <div class="bg-gray-50 rounded-lg border border-destructive p-6">
+        <div class="flex items-start gap-4">
+            <div class="w-12 h-12 bg-destructive/10 rounded-lg flex items-center justify-center flex-shrink-0">
+                <svg class="w-6 h-6 text-destructive" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+                </svg>
+            </div>
+            <div class="flex-1">
+                <h3 class="text-lg font-semibold text-foreground mb-2">Are you sure?</h3>
+                <p class="text-muted-foreground mb-4">
+                    You are about to delete <strong>{{ person.first_name }} {{ person.last_name }}</strong>. 
+                    This action cannot be undone.
+                </p>
+                <form method="post" class="flex gap-4">
+                    {% csrf_token %}
+                    <button type="submit" class="px-6 py-2 bg-destructive text-destructive-foreground rounded-lg hover:opacity-90 transition-opacity font-medium">
+                        Yes, Delete Person
+                    </button>
+                    <a href="{% url 'person_list' %}" class="px-6 py-2 bg-secondary text-secondary-foreground rounded-lg hover:opacity-90 transition-opacity font-medium">
+                        Cancel
+                    </a>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

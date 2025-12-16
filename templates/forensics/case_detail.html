@@ -1,0 +1,183 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ case.case_number }} - Diamond Forensics{% endblock %}
+
+{% block content %}
+<div class="space-y-6">
+    <!-- Breadcrumbs -->
+    {% include 'components/breadcrumbs.html' %}
+    
+    <div class="flex justify-between items-start">
+        <div>
+            <div class="flex items-center gap-3">
+                <h2 class="text-3xl font-bold text-foreground">{{ case.case_number }}</h2>
+                <span class="px-3 py-1 text-sm font-medium rounded-full
+                    {% if case.status == 'active' %}bg-green-100 text-green-700
+                    {% elif case.status == 'closed' %}bg-gray-100 text-gray-700
+                    {% elif case.status == 'suspended' %}bg-yellow-100 text-yellow-700
+                    {% else %}bg-blue-100 text-blue-700{% endif %}">
+                    {{ case.get_status_display }}
+                </span>
+                <span class="px-3 py-1 text-sm font-medium rounded-full
+                    {% if case.priority == 'critical' %}bg-red-100 text-red-700
+                    {% elif case.priority == 'high' %}bg-orange-100 text-orange-700
+                    {% elif case.priority == 'medium' %}bg-yellow-100 text-yellow-700
+                    {% else %}bg-gray-100 text-gray-700{% endif %}">
+                    {{ case.get_priority_display }}
+                </span>
+            </div>
+            <p class="text-xl text-muted-foreground mt-2">{{ case.case_name }}</p>
+        </div>
+        <div class="flex gap-2">
+            <div class="relative inline-block text-left">
+                <button type="button" onclick="toggleExportMenu()" class="inline-flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors font-medium">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                    </svg>
+                    Export
+                    <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd"/>
+                    </svg>
+                </button>
+                <div id="exportMenu" class="hidden absolute right-0 mt-2 w-48 rounded-lg shadow-lg bg-white ring-1 ring-black ring-opacity-5 z-10">
+                    <div class="py-1">
+                        <a href="{% url 'case_detail_export_csv' case.pk %}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                            <div class="flex items-center gap-2">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                                </svg>
+                                Export as CSV
+                            </div>
+                        </a>
+                        <a href="{% url 'case_detail_export_print' case.pk %}" target="_blank" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                            <div class="flex items-center gap-2">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/>
+                                </svg>
+                                Print / PDF
+                            </div>
+                        </a>
+                    </div>
+                </div>
+            </div>
+            <a href="{% url 'case_update' case.pk %}" class="px-4 py-2 bg-secondary text-secondary-foreground rounded-lg hover:opacity-90 transition-opacity font-medium">
+                Edit
+            </a>
+            <a href="{% url 'case_delete' case.pk %}" class="px-4 py-2 bg-destructive text-destructive-foreground rounded-lg hover:opacity-90 transition-opacity font-medium">
+                Delete
+            </a>
+        </div>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div class="lg:col-span-2 space-y-6">
+            <div class="bg-gradient-to-br from-indigo-50 to-blue-50 rounded-lg border-2 border-indigo-200 p-6 shadow-md">
+                <h3 class="text-lg font-semibold text-indigo-900 mb-4">Case Information</h3>
+                <dl class="grid grid-cols-2 gap-4">
+                    <div>
+                        <dt class="text-sm font-medium text-muted-foreground">Case Type</dt>
+                        <dd class="text-sm text-foreground mt-1">{{ case.get_case_type_display }}</dd>
+                    </div>
+                    <div>
+                        <dt class="text-sm font-medium text-muted-foreground">Prosecutor</dt>
+                        <dd class="text-sm text-foreground mt-1">{{ case.prosecutor|default:"—" }}</dd>
+                    </div>
+                    <div>
+                        <dt class="text-sm font-medium text-muted-foreground">Date Opened</dt>
+                        <dd class="text-sm text-foreground mt-1">{{ case.date_opened|date:"F d, Y" }}</dd>
+                    </div>
+                    <div>
+                        <dt class="text-sm font-medium text-muted-foreground">Last Updated</dt>
+                        <dd class="text-sm text-foreground mt-1">{{ case.updated_at|date:"F d, Y" }}</dd>
+                    </div>
+                </dl>
+                {% if case.description %}
+                <div class="mt-4">
+                    <dt class="text-sm font-medium text-muted-foreground mb-2">Description</dt>
+                    <dd class="text-sm text-foreground">{{ case.description }}</dd>
+                </div>
+                {% endif %}
+            </div>
+
+            <div class="bg-gradient-to-br from-purple-50 to-pink-50 rounded-lg border-2 border-purple-200 p-6 shadow-md">
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="text-lg font-semibold text-purple-900">Evidence ({{ evidence.count }})</h3>
+                    <a href="{% url 'evidence_create' %}?case={{ case.pk }}" class="text-sm px-3 py-1 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors shadow-md">
+                        + Add Evidence
+                    </a>
+                </div>
+                {% if evidence %}
+                <div class="space-y-2">
+                    {% for item in evidence %}
+                    <div class="p-3 rounded-lg border border-border hover:bg-secondary/30 transition-colors">
+                        <div class="flex items-start justify-between">
+                            <div class="flex-1">
+                                <a href="{% url 'evidence_detail' item.pk %}" class="font-medium text-primary hover:underline">{{ item.evidence_number }}</a>
+                                <p class="text-sm text-muted-foreground">{{ item.item_name }}</p>
+                                <p class="text-xs text-muted-foreground mt-1">
+                                    <span class="px-2 py-0.5 bg-purple-100 text-purple-700 rounded">{{ item.get_device_type_display }}</span>
+                                    {% if item.brand %} • {{ item.brand }}{% endif %}
+                                    {% if item.model %} {{ item.model }}{% endif %}
+                                </p>
+                            </div>
+                            <div class="flex gap-2 ml-4">
+                                <a href="{% url 'evidence_update' item.pk %}" class="text-xs px-2 py-1 text-primary hover:bg-primary/10 rounded transition-colors">Edit</a>
+                                <a href="{% url 'evidence_delete' item.pk %}" class="text-xs px-2 py-1 text-destructive hover:bg-destructive/10 rounded transition-colors">Delete</a>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <p class="text-muted-foreground text-sm">No evidence items</p>
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="space-y-6">
+            <div class="bg-gradient-to-br from-teal-50 to-cyan-50 rounded-lg border-2 border-teal-200 p-6 shadow-md">
+                <h3 class="text-lg font-semibold text-teal-900 mb-4">Quick Stats</h3>
+                <div class="space-y-3">
+                    <div class="flex justify-between items-center">
+                        <span class="text-sm text-muted-foreground">Evidence</span>
+                        <span class="text-sm font-medium text-foreground">{{ evidence.count }}</span>
+                    </div>
+                    <div class="flex justify-between items-center">
+                        <span class="text-sm text-muted-foreground">Persons</span>
+                        <span class="text-sm font-medium text-foreground">{{ persons.count }}</span>
+                    </div>
+                    <div class="flex justify-between items-center">
+                        <span class="text-sm text-muted-foreground">Documents</span>
+                        <span class="text-sm font-medium text-foreground">{{ documents.count }}</span>
+                    </div>
+                    <div class="flex justify-between items-center">
+                        <span class="text-sm text-muted-foreground">Tasks</span>
+                        <span class="text-sm font-medium text-foreground">{{ tasks.count }}</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function toggleExportMenu() {
+    const menu = document.getElementById('exportMenu');
+    menu.classList.toggle('hidden');
+}
+
+// Close menu when clicking outside
+document.addEventListener('click', function(event) {
+    const menu = document.getElementById('exportMenu');
+    const button = event.target.closest('button');
+    
+    if (!button || button.getAttribute('onclick') !== 'toggleExportMenu()') {
+        if (!menu.contains(event.target)) {
+            menu.classList.add('hidden');
+        }
+    }
+});
+</script>
+{% endblock %}

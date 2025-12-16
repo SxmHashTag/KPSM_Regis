@@ -1,0 +1,269 @@
+{% extends 'base.html' %}
+
+{% block title %}Cases - Diamond Forensics{% endblock %}
+
+{% block content %}
+<div class="space-y-6">
+    <!-- Breadcrumbs -->
+    {% include 'components/breadcrumbs.html' %}
+    
+    <!-- Page Header -->
+    <div class="flex justify-between items-center">
+        <div>
+            <h2 class="text-3xl font-bold text-foreground">Cases</h2>
+            <p class="text-muted-foreground mt-1">Manage forensic investigation cases</p>
+        </div>
+        <div class="flex gap-2">
+            <a href="{% url 'case_export_csv' %}?{{ request.GET.urlencode }}" class="inline-flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors font-medium">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                </svg>
+                Export CSV
+            </a>
+            <a href="{% url 'case_create' %}" class="inline-flex items-center gap-2 px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:opacity-90 transition-opacity font-medium">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+                </svg>
+                New Case
+            </a>
+        </div>
+    </div>
+
+    <!-- Search and Filters -->
+    <div class="bg-gradient-to-br from-indigo-50 to-blue-50 rounded-lg border-2 border-indigo-200 p-4 shadow-md">
+        <form method="get" class="space-y-4">
+            <div>
+                <input type="text" name="search" value="{{ search|default:'' }}" placeholder="Search cases by number, name, prosecutor, or description..." 
+                    class="w-full px-4 py-2 border border-input rounded-lg focus:outline-none focus:ring-2 focus:ring-ring">
+            </div>
+            <div class="flex flex-wrap gap-4">
+            <div>
+                <label class="block text-sm font-medium text-muted-foreground mb-1">Status</label>
+                <select name="status" class="px-3 py-2 border border-input rounded-lg focus:outline-none focus:ring-2 focus:ring-ring">
+                    <option value="">All</option>
+                    <option value="active" {% if status_filter == 'active' %}selected{% endif %}>Active</option>
+                    <option value="closed" {% if status_filter == 'closed' %}selected{% endif %}>Closed</option>
+                    <option value="suspended" {% if status_filter == 'suspended' %}selected{% endif %}>Suspended</option>
+                    <option value="archived" {% if status_filter == 'archived' %}selected{% endif %}>Archived</option>
+                </select>
+            </div>
+            
+            <div>
+                <label class="block text-sm font-medium text-muted-foreground mb-1">Priority</label>
+                <select name="priority" class="px-3 py-2 border border-input rounded-lg focus:outline-none focus:ring-2 focus:ring-ring">
+                    <option value="">All</option>
+                    <option value="low" {% if priority_filter == 'low' %}selected{% endif %}>Low</option>
+                    <option value="medium" {% if priority_filter == 'medium' %}selected{% endif %}>Medium</option>
+                    <option value="high" {% if priority_filter == 'high' %}selected{% endif %}>High</option>
+                    <option value="critical" {% if priority_filter == 'critical' %}selected{% endif %}>Critical</option>
+                </select>
+            </div>
+            
+            <div>
+                <label class="block text-sm font-medium text-muted-foreground mb-1">Team/Department</label>
+                <select name="department" class="px-3 py-2 border border-input rounded-lg focus:outline-none focus:ring-2 focus:ring-ring">
+                    <option value="">All Teams</option>
+                    {% for value, label in department_choices %}
+                    <option value="{{ value }}" {% if department_filter == value %}selected{% endif %}>{{ label }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            
+            <div class="flex items-end gap-2">
+                <button type="submit" class="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors font-medium shadow-md">
+                    Search & Filter
+                </button>
+                {% if search or status_filter or priority_filter or department_filter %}
+                <a href="{% url 'case_list' %}" class="px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors font-medium shadow-md">
+                    Clear
+                </a>
+                {% endif %}
+            </div>
+            </div>
+        </form>
+    </div>
+
+    <!-- Cases List -->
+    <div class="bg-gradient-to-br from-slate-50 to-gray-50 rounded-lg border-2 border-slate-200 overflow-hidden shadow-md">
+        <div class="overflow-x-auto">
+            <table class="w-full">
+                <thead class="bg-gradient-to-r from-indigo-100 to-blue-100">
+                    <tr>
+                        <th class="px-6 py-4 text-left text-sm font-semibold text-indigo-900 uppercase tracking-wider">
+                            <a href="?{% if request.GET.urlencode %}{{ request.GET.urlencode }}&{% endif %}sort=case_number" class="flex items-center gap-1 hover:text-indigo-600">
+                                Case Number
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4"/>
+                                </svg>
+                            </a>
+                        </th>
+                        <th class="px-6 py-4 text-left text-sm font-semibold text-indigo-900 uppercase tracking-wider">Case Name</th>
+                        <th class="px-6 py-4 text-left text-sm font-semibold text-indigo-900 uppercase tracking-wider">
+                            <div class="flex items-center gap-2">
+                                <span>Status</span>
+                                <div class="relative group">
+                                    <button class="text-indigo-600 hover:text-indigo-800" onclick="toggleDropdown(event, 'status-dropdown')">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"/>
+                                        </svg>
+                                    </button>
+                                    <div id="status-dropdown" class="hidden absolute top-full left-0 mt-1 bg-white border border-gray-300 rounded-lg shadow-lg z-10 min-w-[150px]">
+                                        <a href="?{% if search %}search={{ search }}&{% endif %}{% if priority_filter %}priority={{ priority_filter }}&{% endif %}{% if department_filter %}department={{ department_filter }}&{% endif %}" class="block px-4 py-2 hover:bg-gray-100 text-sm">All</a>
+                                        <a href="?status=active{% if search %}&search={{ search }}{% endif %}{% if priority_filter %}&priority={{ priority_filter }}{% endif %}{% if department_filter %}&department={{ department_filter }}{% endif %}" class="block px-4 py-2 hover:bg-gray-100 text-sm">Active</a>
+                                        <a href="?status=closed{% if search %}&search={{ search }}{% endif %}{% if priority_filter %}&priority={{ priority_filter }}{% endif %}{% if department_filter %}&department={{ department_filter }}{% endif %}" class="block px-4 py-2 hover:bg-gray-100 text-sm">Closed</a>
+                                        <a href="?status=suspended{% if search %}&search={{ search }}{% endif %}{% if priority_filter %}&priority={{ priority_filter }}{% endif %}{% if department_filter %}&department={{ department_filter }}{% endif %}" class="block px-4 py-2 hover:bg-gray-100 text-sm">Suspended</a>
+                                        <a href="?status=archived{% if search %}&search={{ search }}{% endif %}{% if priority_filter %}&priority={{ priority_filter }}{% endif %}{% if department_filter %}&department={{ department_filter }}{% endif %}" class="block px-4 py-2 hover:bg-gray-100 text-sm">Archived</a>
+                                    </div>
+                                </div>
+                            </div>
+                        </th>
+                        <th class="px-6 py-4 text-left text-sm font-semibold text-indigo-900 uppercase tracking-wider">
+                            <div class="flex items-center gap-2">
+                                <span>Priority</span>
+                                <div class="relative group">
+                                    <button class="text-indigo-600 hover:text-indigo-800" onclick="toggleDropdown(event, 'priority-dropdown')">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"/>
+                                        </svg>
+                                    </button>
+                                    <div id="priority-dropdown" class="hidden absolute top-full left-0 mt-1 bg-white border border-gray-300 rounded-lg shadow-lg z-10 min-w-[150px]">
+                                        <a href="?{% if search %}search={{ search }}&{% endif %}{% if status_filter %}status={{ status_filter }}&{% endif %}{% if department_filter %}department={{ department_filter }}&{% endif %}" class="block px-4 py-2 hover:bg-gray-100 text-sm">All</a>
+                                        <a href="?priority=critical{% if search %}&search={{ search }}{% endif %}{% if status_filter %}&status={{ status_filter }}{% endif %}{% if department_filter %}&department={{ department_filter }}{% endif %}" class="block px-4 py-2 hover:bg-gray-100 text-sm">Critical</a>
+                                        <a href="?priority=high{% if search %}&search={{ search }}{% endif %}{% if status_filter %}&status={{ status_filter }}{% endif %}{% if department_filter %}&department={{ department_filter }}{% endif %}" class="block px-4 py-2 hover:bg-gray-100 text-sm">High</a>
+                                        <a href="?priority=medium{% if search %}&search={{ search }}{% endif %}{% if status_filter %}&status={{ status_filter }}{% endif %}{% if department_filter %}&department={{ department_filter }}{% endif %}" class="block px-4 py-2 hover:bg-gray-100 text-sm">Medium</a>
+                                        <a href="?priority=low{% if search %}&search={{ search }}{% endif %}{% if status_filter %}&status={{ status_filter }}{% endif %}{% if department_filter %}&department={{ department_filter }}{% endif %}" class="block px-4 py-2 hover:bg-gray-100 text-sm">Low</a>
+                                    </div>
+                                </div>
+                            </div>
+                        </th>
+                        <th class="px-6 py-4 text-left text-sm font-semibold text-indigo-900 uppercase tracking-wider">
+                            <div class="flex items-center gap-2">
+                                <span>Team</span>
+                                <div class="relative group">
+                                    <button class="text-indigo-600 hover:text-indigo-800" onclick="toggleDropdown(event, 'team-dropdown')">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"/>
+                                        </svg>
+                                    </button>
+                                    <div id="team-dropdown" class="hidden absolute top-full left-0 mt-1 bg-white border border-gray-300 rounded-lg shadow-lg z-10 min-w-[150px] max-h-64 overflow-y-auto">
+                                        <a href="?{% if search %}search={{ search }}&{% endif %}{% if status_filter %}status={{ status_filter }}&{% endif %}{% if priority_filter %}priority={{ priority_filter }}&{% endif %}" class="block px-4 py-2 hover:bg-gray-100 text-sm">All Teams</a>
+                                        {% for value, label in department_choices %}
+                                        <a href="?department={{ value }}{% if search %}&search={{ search }}{% endif %}{% if status_filter %}&status={{ status_filter }}{% endif %}{% if priority_filter %}&priority={{ priority_filter }}{% endif %}" class="block px-4 py-2 hover:bg-gray-100 text-sm">{{ label }}</a>
+                                        {% endfor %}
+                                    </div>
+                                </div>
+                            </div>
+                        </th>
+                        <th class="px-6 py-4 text-left text-sm font-semibold text-indigo-900 uppercase tracking-wider">Type</th>
+                        <th class="px-6 py-4 text-left text-sm font-semibold text-indigo-900 uppercase tracking-wider">Prosecutor</th>
+                        <th class="px-6 py-4 text-left text-sm font-semibold text-indigo-900 uppercase tracking-wider">
+                            <a href="?{% if request.GET.urlencode %}{{ request.GET.urlencode }}&{% endif %}sort=date_opened" class="flex items-center gap-1 hover:text-indigo-600">
+                                Date Opened
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4"/>
+                                </svg>
+                            </a>
+                        </th>
+                        <th class="px-6 py-4 text-right text-sm font-semibold text-indigo-900 uppercase tracking-wider">Actions</th>
+                    </tr>
+                </thead>
+                <tbody class="bg-white divide-y divide-slate-200">
+                    {% for case in cases %}
+                    <tr class="hover:bg-secondary/30 transition-colors">
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <div class="flex items-center gap-2">
+                                <a href="{% url 'case_detail' case.pk %}" class="text-primary hover:underline font-semibold text-base">
+                                    {{ case.case_number }}
+                                </a>
+                                <button onclick="copyToClipboard('{{ case.case_number }}', this)" 
+                                    class="text-gray-400 hover:text-primary transition-colors" title="Copy case number">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/>
+                                    </svg>
+                                </button>
+                            </div>
+                        </td>
+                        <td class="px-6 py-4">
+                            <div class="text-base font-semibold text-foreground">{{ case.case_name }}</div>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <span class="px-3 py-1.5 text-sm font-semibold rounded-full
+                                {% if case.status == 'active' %}bg-green-100 text-green-700
+                                {% elif case.status == 'closed' %}bg-gray-100 text-gray-700
+                                {% elif case.status == 'suspended' %}bg-yellow-100 text-yellow-700
+                                {% else %}bg-blue-100 text-blue-700{% endif %}">
+                                {{ case.get_status_display }}
+                            </span>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <span class="px-3 py-1.5 text-sm font-semibold rounded-full
+                                {% if case.priority == 'critical' %}bg-red-100 text-red-700
+                                {% elif case.priority == 'high' %}bg-orange-100 text-orange-700
+                                {% elif case.priority == 'medium' %}bg-yellow-100 text-yellow-700
+                                {% else %}bg-gray-100 text-gray-700{% endif %}">
+                                {{ case.get_priority_display }}
+                            </span>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            {% if case.department %}
+                            <span class="px-3 py-1 text-sm font-semibold rounded-full bg-purple-100 text-purple-700">
+                                {{ case.get_department_display }}
+                            </span>
+                            {% else %}
+                            <span class="text-muted-foreground">—</span>
+                            {% endif %}
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-base text-muted-foreground">
+                            {{ case.get_case_type_display }}
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-base text-muted-foreground">
+                            {{ case.prosecutor|default:"—" }}
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-base text-muted-foreground">
+                            {{ case.date_opened|date:"M d, Y" }}
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-right text-base font-semibold space-x-2">
+                            <a href="{% url 'case_update' case.pk %}" class="text-primary hover:underline">Edit</a>
+                            <a href="{% url 'case_delete' case.pk %}" class="text-destructive hover:underline">Delete</a>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="9" class="px-6 py-8 text-center text-muted-foreground">
+                            No cases found. <a href="{% url 'case_create' %}" class="text-primary hover:underline">Create your first case</a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        
+        <!-- Pagination -->
+        {% include 'components/pagination.html' with page_obj=cases %}
+    </div>
+</div>
+
+<script>
+function toggleDropdown(event, dropdownId) {
+    event.stopPropagation();
+    const dropdown = document.getElementById(dropdownId);
+    const allDropdowns = document.querySelectorAll('[id$="-dropdown"]');
+    
+    // Close all other dropdowns
+    allDropdowns.forEach(d => {
+        if (d.id !== dropdownId) {
+            d.classList.add('hidden');
+        }
+    });
+    
+    // Toggle current dropdown
+    dropdown.classList.toggle('hidden');
+}
+
+// Close dropdowns when clicking outside
+document.addEventListener('click', function() {
+    const allDropdowns = document.querySelectorAll('[id$="-dropdown"]');
+    allDropdowns.forEach(d => d.classList.add('hidden'));
+});
+</script>
+{% endblock %}

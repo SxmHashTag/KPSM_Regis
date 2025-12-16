@@ -1,0 +1,315 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ person.first_name }} {{ person.last_name }} - Diamond Forensics{% endblock %}
+
+{% block content %}
+<div class="space-y-6">
+    <!-- Breadcrumbs -->
+    {% include 'components/breadcrumbs.html' %}
+    
+    <div class="flex justify-between items-start">
+        <div>
+            <div class="flex items-center gap-3">
+                <h2 class="text-3xl font-bold text-foreground">{{ person.first_name }} {{ person.last_name }}</h2>
+                <span class="px-3 py-1 text-sm font-medium rounded-full bg-blue-100 text-blue-700">
+                    {{ person.get_person_type_display }}
+                </span>
+            </div>
+            {% if person.email %}
+            <p class="text-sm text-muted-foreground mt-2">{{ person.email }}</p>
+            {% endif %}
+            {% if person.phone %}
+            <p class="text-sm text-muted-foreground">{{ person.phone }}</p>
+            {% endif %}
+        </div>
+        <div class="flex gap-2">
+            <a href="{% url 'person_update' person.pk %}" class="px-4 py-2 bg-secondary text-secondary-foreground rounded-lg hover:opacity-90 transition-opacity font-medium">
+                Edit
+            </a>
+            <a href="{% url 'person_delete' person.pk %}" class="px-4 py-2 bg-destructive text-destructive-foreground rounded-lg hover:opacity-90 transition-opacity font-medium">
+                Delete
+            </a>
+        </div>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div class="lg:col-span-2 space-y-6">
+            <!-- Cases Section -->
+            <div class="bg-gradient-to-br from-purple-50 to-pink-50 rounded-lg border-2 border-purple-200 p-6 shadow-md">
+                <h3 class="text-lg font-semibold text-purple-900 mb-4">Associated Cases ({{ case_persons.count }})</h3>
+                {% if case_persons %}
+                <div class="space-y-3">
+                    {% for cp in case_persons %}
+                    <div class="bg-white rounded-lg border border-purple-200 p-4 hover:border-purple-400 transition-colors">
+                        <div class="flex justify-between items-start">
+                            <div>
+                                <a href="{% url 'case_detail' cp.case.pk %}" class="text-lg font-semibold text-foreground hover:text-primary">
+                                    {{ cp.case.case_number }}
+                                </a>
+                                <p class="text-sm text-muted-foreground">{{ cp.case.case_name }}</p>
+                                <div class="flex gap-2 mt-2">
+                                    <span class="px-2 py-1 text-xs font-medium rounded-full bg-blue-100 text-blue-700">
+                                        {{ cp.get_role_display }}
+                                    </span>
+                                    <span class="px-2 py-1 text-xs font-medium rounded-full bg-green-100 text-green-700">
+                                        {{ cp.case.get_status_display }}
+                                    </span>
+                                </div>
+                                {% if cp.involvement_description %}
+                                <p class="text-sm text-muted-foreground mt-2">{{ cp.involvement_description }}</p>
+                                {% endif %}
+                            </div>
+                            <span class="text-xs text-muted-foreground">{{ cp.date_added|date:"M d, Y" }}</span>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <p class="text-sm text-muted-foreground">Not associated with any cases.</p>
+                {% endif %}
+            </div>
+
+            <!-- Owned Evidence Section -->
+            {% if owned_by_case %}
+            <div class="bg-gradient-to-br from-blue-50 to-cyan-50 rounded-lg border-2 border-blue-200 p-6 shadow-md">
+                <h3 class="text-lg font-semibold text-blue-900 mb-4">Owned Evidence ({{ owned_evidence.count }})</h3>
+                {% for case_key, data in owned_by_case.items %}
+                <div class="mb-6 last:mb-0">
+                    <div class="flex items-center gap-2 mb-3">
+                        {% if data.case %}
+                        <a href="{% url 'case_detail' data.case.pk %}" class="text-sm font-semibold text-primary hover:underline">
+                            {{ data.case.case_number }}
+                        </a>
+                        {% else %}
+                        <span class="text-sm font-semibold text-muted-foreground">{{ case_key }}</span>
+                        {% endif %}
+                        <span class="text-xs text-muted-foreground">({{ data.evidence|length }} item{{ data.evidence|length|pluralize }})</span>
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                        {% for evidence in data.evidence %}
+                        <a href="{% url 'evidence_detail' evidence.pk %}" class="block bg-white rounded-lg border border-blue-200 p-4 hover:border-blue-400 hover:shadow-md transition-all">
+                            <div class="flex gap-3">
+                                {% if evidence.images.first %}
+                                <img src="{{ evidence.images.first.image.url }}" alt="Evidence" class="w-16 h-16 object-cover rounded border border-gray-200">
+                                {% else %}
+                                <div class="w-16 h-16 bg-gray-100 rounded border border-gray-200 flex items-center justify-center">
+                                    <svg class="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                                    </svg>
+                                </div>
+                                {% endif %}
+                                <div class="flex-1 min-w-0">
+                                    <p class="font-semibold text-sm text-foreground truncate">{{ evidence.evidence_number }}</p>
+                                    <p class="text-xs text-muted-foreground truncate">{{ evidence.item_name }}</p>
+                                    <div class="flex gap-1 mt-1">
+                                        <span class="px-2 py-0.5 text-xs rounded-full bg-purple-100 text-purple-700">
+                                            {{ evidence.get_device_type_display }}
+                                        </span>
+                                        <span class="px-2 py-0.5 text-xs rounded-full bg-green-100 text-green-700">
+                                            {{ evidence.get_status_display }}
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                        </a>
+                        {% endfor %}
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            {% endif %}
+
+            <!-- Seized Evidence Section -->
+            {% if seized_by_case %}
+            <div class="bg-gradient-to-br from-red-50 to-orange-50 rounded-lg border-2 border-red-200 p-6 shadow-md">
+                <h3 class="text-lg font-semibold text-red-900 mb-4">Seized Evidence ({{ seized_evidence.count }})</h3>
+                {% for case_key, data in seized_by_case.items %}
+                <div class="mb-6 last:mb-0">
+                    <div class="flex items-center gap-2 mb-3">
+                        {% if data.case %}
+                        <a href="{% url 'case_detail' data.case.pk %}" class="text-sm font-semibold text-primary hover:underline">
+                            {{ data.case.case_number }}
+                        </a>
+                        {% else %}
+                        <span class="text-sm font-semibold text-muted-foreground">{{ case_key }}</span>
+                        {% endif %}
+                        <span class="text-xs text-muted-foreground">({{ data.evidence|length }} item{{ data.evidence|length|pluralize }})</span>
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                        {% for evidence in data.evidence %}
+                        <a href="{% url 'evidence_detail' evidence.pk %}" class="block bg-white rounded-lg border border-red-200 p-4 hover:border-red-400 hover:shadow-md transition-all">
+                            <div class="flex gap-3">
+                                {% if evidence.images.first %}
+                                <img src="{{ evidence.images.first.image.url }}" alt="Evidence" class="w-16 h-16 object-cover rounded border border-gray-200">
+                                {% else %}
+                                <div class="w-16 h-16 bg-gray-100 rounded border border-gray-200 flex items-center justify-center">
+                                    <svg class="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                                    </svg>
+                                </div>
+                                {% endif %}
+                                <div class="flex-1 min-w-0">
+                                    <p class="font-semibold text-sm text-foreground truncate">{{ evidence.evidence_number }}</p>
+                                    <p class="text-xs text-muted-foreground truncate">{{ evidence.item_name }}</p>
+                                    <div class="flex gap-1 mt-1">
+                                        <span class="px-2 py-0.5 text-xs rounded-full bg-purple-100 text-purple-700">
+                                            {{ evidence.get_device_type_display }}
+                                        </span>
+                                        <span class="px-2 py-0.5 text-xs rounded-full bg-green-100 text-green-700">
+                                            {{ evidence.get_status_display }}
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                        </a>
+                        {% endfor %}
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            {% endif %}
+
+            <!-- Custody Evidence Section -->
+            {% if custody_by_case %}
+            <div class="bg-gradient-to-br from-yellow-50 to-amber-50 rounded-lg border-2 border-yellow-200 p-6 shadow-md">
+                <h3 class="text-lg font-semibold text-yellow-900 mb-4">Evidence in Custody ({{ custody_evidence.count }})</h3>
+                {% for case_key, data in custody_by_case.items %}
+                <div class="mb-6 last:mb-0">
+                    <div class="flex items-center gap-2 mb-3">
+                        {% if data.case %}
+                        <a href="{% url 'case_detail' data.case.pk %}" class="text-sm font-semibold text-primary hover:underline">
+                            {{ data.case.case_number }}
+                        </a>
+                        {% else %}
+                        <span class="text-sm font-semibold text-muted-foreground">{{ case_key }}</span>
+                        {% endif %}
+                        <span class="text-xs text-muted-foreground">({{ data.evidence|length }} item{{ data.evidence|length|pluralize }})</span>
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                        {% for evidence in data.evidence %}
+                        <a href="{% url 'evidence_detail' evidence.pk %}" class="block bg-white rounded-lg border border-yellow-200 p-4 hover:border-yellow-400 hover:shadow-md transition-all">
+                            <div class="flex gap-3">
+                                {% if evidence.images.first %}
+                                <img src="{{ evidence.images.first.image.url }}" alt="Evidence" class="w-16 h-16 object-cover rounded border border-gray-200">
+                                {% else %}
+                                <div class="w-16 h-16 bg-gray-100 rounded border border-gray-200 flex items-center justify-center">
+                                    <svg class="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                                    </svg>
+                                </div>
+                                {% endif %}
+                                <div class="flex-1 min-w-0">
+                                    <p class="font-semibold text-sm text-foreground truncate">{{ evidence.evidence_number }}</p>
+                                    <p class="text-xs text-muted-foreground truncate">{{ evidence.item_name }}</p>
+                                    <div class="flex gap-1 mt-1">
+                                        <span class="px-2 py-0.5 text-xs rounded-full bg-purple-100 text-purple-700">
+                                            {{ evidence.get_device_type_display }}
+                                        </span>
+                                        <span class="px-2 py-0.5 text-xs rounded-full bg-green-100 text-green-700">
+                                            {{ evidence.get_status_display }}
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                        </a>
+                        {% endfor %}
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            {% endif %}
+        </div>
+
+        <div class="space-y-6">
+            <!-- Quick Info -->
+            <div class="bg-gray-50 rounded-lg border border-border p-6">
+                <h3 class="text-lg font-semibold text-foreground mb-4">Quick Info</h3>
+                <div class="space-y-3">
+                    <div>
+                        <dt class="text-sm font-medium text-muted-foreground">Person Type</dt>
+                        <dd class="text-sm text-foreground mt-1">{{ person.get_person_type_display }}</dd>
+                    </div>
+                    {% if person.email %}
+                    <div>
+                        <dt class="text-sm font-medium text-muted-foreground">Email</dt>
+                        <dd class="text-sm text-foreground mt-1">{{ person.email }}</dd>
+                    </div>
+                    {% endif %}
+                    {% if person.phone %}
+                    <div>
+                        <dt class="text-sm font-medium text-muted-foreground">Phone</dt>
+                        <dd class="text-sm text-foreground mt-1">{{ person.phone }}</dd>
+                    </div>
+                    {% endif %}
+                    {% if person.address %}
+                    <div>
+                        <dt class="text-sm font-medium text-muted-foreground">Address</dt>
+                        <dd class="text-sm text-foreground mt-1">{{ person.address }}</dd>
+                    </div>
+                    {% endif %}
+                    {% if person.date_of_birth %}
+                    <div>
+                        <dt class="text-sm font-medium text-muted-foreground">Date of Birth</dt>
+                        <dd class="text-sm text-foreground mt-1">{{ person.date_of_birth|date:"F d, Y" }}</dd>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Statistics -->
+            <div class="bg-gray-50 rounded-lg border border-border p-6">
+                <h3 class="text-lg font-semibold text-foreground mb-4">Statistics</h3>
+                <div class="space-y-3">
+                    <div class="flex justify-between items-center">
+                        <span class="text-sm text-muted-foreground">Cases</span>
+                        <span class="px-2 py-1 text-xs font-medium rounded-full bg-purple-100 text-purple-700">
+                            {{ case_persons.count }}
+                        </span>
+                    </div>
+                    <div class="flex justify-between items-center">
+                        <span class="text-sm text-muted-foreground">Owned Evidence</span>
+                        <span class="px-2 py-1 text-xs font-medium rounded-full bg-blue-100 text-blue-700">
+                            {{ owned_evidence.count }}
+                        </span>
+                    </div>
+                    <div class="flex justify-between items-center">
+                        <span class="text-sm text-muted-foreground">Seized Evidence</span>
+                        <span class="px-2 py-1 text-xs font-medium rounded-full bg-red-100 text-red-700">
+                            {{ seized_evidence.count }}
+                        </span>
+                    </div>
+                    <div class="flex justify-between items-center">
+                        <span class="text-sm text-muted-foreground">Custody Evidence</span>
+                        <span class="px-2 py-1 text-xs font-medium rounded-full bg-yellow-100 text-yellow-700">
+                            {{ custody_evidence.count }}
+                        </span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Notes -->
+            {% if person.notes %}
+            <div class="bg-gray-50 rounded-lg border border-border p-6">
+                <h3 class="text-lg font-semibold text-foreground mb-4">Notes</h3>
+                <p class="text-sm text-foreground whitespace-pre-wrap">{{ person.notes }}</p>
+            </div>
+            {% endif %}
+
+            <!-- Timestamps -->
+            <div class="bg-gray-50 rounded-lg border border-border p-6">
+                <h3 class="text-lg font-semibold text-foreground mb-4">Timestamps</h3>
+                <div class="space-y-3">
+                    <div>
+                        <dt class="text-sm font-medium text-muted-foreground">Created</dt>
+                        <dd class="text-sm text-foreground mt-1">{{ person.created_at|date:"F d, Y H:i" }}</dd>
+                    </div>
+                    <div>
+                        <dt class="text-sm font-medium text-muted-foreground">Last Updated</dt>
+                        <dd class="text-sm text-foreground mt-1">{{ person.updated_at|date:"F d, Y H:i" }}</dd>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

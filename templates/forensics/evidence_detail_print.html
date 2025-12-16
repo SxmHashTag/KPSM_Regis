@@ -1,0 +1,393 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ evidence.evidence_number }} - Evidence Report</title>
+    {% load static %}
+    <style>
+        @media print {
+            .no-print { display: none; }
+            @page { margin: 1.5cm; }
+        }
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .header-logo {
+            text-align: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 3px solid #2563eb;
+        }
+        .header-logo img {
+            height: 80px;
+            width: auto;
+        }
+        h1 { color: #2563eb; border-bottom: 3px solid #2563eb; padding-bottom: 10px; }
+        h2 { color: #1e40af; margin-top: 30px; border-bottom: 2px solid #ddd; padding-bottom: 5px; }
+        h3 { color: #1e3a8a; margin-top: 20px; }
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+            margin: 20px 0;
+        }
+        .info-item {
+            padding: 10px;
+            background-color: #f9fafb;
+            border-left: 3px solid #2563eb;
+        }
+        .info-label {
+            font-weight: bold;
+            color: #6b7280;
+            font-size: 12px;
+            text-transform: uppercase;
+        }
+        .info-value {
+            margin-top: 5px;
+            color: #111827;
+        }
+        .badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+        .badge-purple { background-color: #ede9fe; color: #5b21b6; }
+        .badge-green { background-color: #d1fae5; color: #065f46; }
+        .print-button {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 12px 24px;
+            background-color: #2563eb;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+        }
+        .print-button:hover {
+            background-color: #1e40af;
+        }
+        .image-gallery {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 15px;
+            margin: 20px 0;
+        }
+        .image-gallery img {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+            border-radius: 8px;
+            border: 2px solid #e5e7eb;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+        table, th, td {
+            border: 1px solid #ddd;
+        }
+        th {
+            background-color: #f3f4f6;
+            padding: 12px;
+            text-align: left;
+            font-weight: bold;
+        }
+        td {
+            padding: 10px;
+        }
+        .section {
+            margin: 30px 0;
+            padding: 20px;
+            background-color: #f9fafb;
+            border-radius: 8px;
+            border: 1px solid #e5e7eb;
+        }
+    </style>
+</head>
+<body>
+    <button onclick="window.print()" class="print-button no-print">🖨️ Print / Save as PDF</button>
+    
+    <div class="header-logo">
+        <img src="{% static 'forensics/images/kpsm_logo.png' %}" alt="Korps Politie Sint Maarten">
+    </div>
+    
+    <h1>Evidence Report: {{ evidence.evidence_number }}</h1>
+    
+    <div style="margin: 20px 0;">
+        <span class="badge badge-purple">{{ evidence.get_device_type_display }}</span>
+        <span class="badge badge-green">{{ evidence.get_status_display }}</span>
+    </div>
+    
+    <h2>Basic Information</h2>
+    <div class="info-grid">
+        <div class="info-item">
+            <div class="info-label">Evidence Number</div>
+            <div class="info-value">{{ evidence.evidence_number }}</div>
+        </div>
+        <div class="info-item">
+            <div class="info-label">IBS Number</div>
+            <div class="info-value">{{ evidence.ibs_number|default:"—" }}</div>
+        </div>
+        <div class="info-item">
+            <div class="info-label">Item Name</div>
+            <div class="info-value">{{ evidence.item_name }}</div>
+        </div>
+        <div class="info-item">
+            <div class="info-label">Device Type</div>
+            <div class="info-value">{{ evidence.get_device_type_display }}</div>
+        </div>
+        {% if evidence.case %}
+        <div class="info-item">
+            <div class="info-label">Associated Case</div>
+            <div class="info-value">{{ evidence.case.case_number }} - {{ evidence.case.case_name }}</div>
+        </div>
+        {% endif %}
+        <div class="info-item">
+            <div class="info-label">Status</div>
+            <div class="info-value">{{ evidence.get_status_display }}</div>
+        </div>
+    </div>
+    
+    {% if evidence.description %}
+    <div class="section">
+        <h3 style="margin-top: 0;">Description</h3>
+        <p>{{ evidence.description }}</p>
+    </div>
+    {% endif %}
+    
+    <h2>Device Details</h2>
+    <div class="info-grid">
+        {% if evidence.brand %}
+        <div class="info-item">
+            <div class="info-label">Brand</div>
+            <div class="info-value">{{ evidence.brand }}</div>
+        </div>
+        {% endif %}
+        {% if evidence.model %}
+        <div class="info-item">
+            <div class="info-label">Model</div>
+            <div class="info-value">{{ evidence.model }}</div>
+        </div>
+        {% endif %}
+        {% if evidence.serial_number %}
+        <div class="info-item">
+            <div class="info-label">Serial Number</div>
+            <div class="info-value">{{ evidence.serial_number }}</div>
+        </div>
+        {% endif %}
+        {% if evidence.imei %}
+        <div class="info-item">
+            <div class="info-label">IMEI</div>
+            <div class="info-value">{{ evidence.imei }}</div>
+        </div>
+        {% endif %}
+        {% if evidence.color %}
+        <div class="info-item">
+            <div class="info-label">Color</div>
+            <div class="info-value">{{ evidence.color }}</div>
+        </div>
+        {% endif %}
+        {% if evidence.state %}
+        <div class="info-item">
+            <div class="info-label">State</div>
+            <div class="info-value">{{ evidence.get_state_display }}</div>
+        </div>
+        {% endif %}
+    </div>
+    
+    <h2>Collection & Custody</h2>
+    <div class="info-grid">
+        <div class="info-item">
+            <div class="info-label">Collected Date</div>
+            <div class="info-value">{{ evidence.collected_date|date:"F d, Y H:i" }}</div>
+        </div>
+        {% if evidence.collected_by %}
+        <div class="info-item">
+            <div class="info-label">Collected By</div>
+            <div class="info-value">{{ evidence.collected_by }}</div>
+        </div>
+        {% endif %}
+        {% if evidence.current_department %}
+        <div class="info-item">
+            <div class="info-label">Current Department</div>
+            <div class="info-value">{{ evidence.get_current_department_display }}</div>
+        </div>
+        {% endif %}
+        {% if evidence.received_by %}
+        <div class="info-item">
+            <div class="info-label">Received By</div>
+            <div class="info-value">{{ evidence.received_by }}</div>
+        </div>
+        {% endif %}
+        {% if evidence.received_date %}
+        <div class="info-item">
+            <div class="info-label">Received Date</div>
+            <div class="info-value">{{ evidence.received_date|date:"F d, Y H:i" }}</div>
+        </div>
+        {% endif %}
+    </div>
+    
+    {% if evidence.examiner_name or evidence.acquisition_date %}
+    <h2>Forensic Information</h2>
+    <div class="info-grid">
+        {% if evidence.examiner_name %}
+        <div class="info-item">
+            <div class="info-label">Examiner</div>
+            <div class="info-value">{{ evidence.examiner_name }}</div>
+        </div>
+        {% endif %}
+        {% if evidence.acquisition_date %}
+        <div class="info-item">
+            <div class="info-label">Acquisition Date</div>
+            <div class="info-value">{{ evidence.acquisition_date|date:"F d, Y" }}</div>
+        </div>
+        {% endif %}
+        {% if evidence.acquisition_method %}
+        <div class="info-item">
+            <div class="info-label">Acquisition Method</div>
+            <div class="info-value">{{ evidence.acquisition_method }}</div>
+        </div>
+        {% endif %}
+        {% if evidence.acquisition_tool %}
+        <div class="info-item">
+            <div class="info-label">Acquisition Tool</div>
+            <div class="info-value">{{ evidence.acquisition_tool }}</div>
+        </div>
+        {% endif %}
+    </div>
+    {% endif %}
+    
+    {% if evidence.device_type == 'video' and evidence.device_specific_data %}
+    {% if evidence.device_specific_data.date_diff_value or evidence.device_specific_data.time_diff_value %}
+    <h2>DVR/NVR Time Difference</h2>
+    <div class="section" style="background-color: #eff6ff; border-left: 4px solid #2563eb;">
+        <p style="margin: 0 0 15px 0; color: #1e40af; font-weight: 600;">Correction needed to convert DVR/NVR timestamps to actual time:</p>
+        
+        {% if evidence.device_specific_data.dvr_datetime or evidence.device_specific_data.actual_datetime %}
+        <div class="info-grid" style="margin-bottom: 20px;">
+            {% if evidence.device_specific_data.dvr_datetime %}
+            <div class="info-item" style="background-color: #f1f5f9; border-left-color: #64748b;">
+                <div class="info-label" style="color: #475569;">DVR/NVR Date/Time</div>
+                <div class="info-value" style="font-family: 'Courier New', monospace; font-size: 16px; font-weight: 600; color: #1e293b;">{{ evidence.device_specific_data.dvr_datetime }}</div>
+            </div>
+            {% endif %}
+            {% if evidence.device_specific_data.actual_datetime %}
+            <div class="info-item" style="background-color: #f1f5f9; border-left-color: #64748b;">
+                <div class="info-label" style="color: #475569;">Actual Date/Time</div>
+                <div class="info-value" style="font-family: 'Courier New', monospace; font-size: 16px; font-weight: 600; color: #1e293b;">{{ evidence.device_specific_data.actual_datetime }}</div>
+            </div>
+            {% endif %}
+        </div>
+        {% endif %}
+        
+        <div class="info-grid">
+            {% if evidence.device_specific_data.date_diff_value %}
+            <div class="info-item" style="background-color: #dbeafe; border-left-color: #2563eb;">
+                <div class="info-label" style="color: #1e40af;">Date Difference</div>
+                <div class="info-value" style="font-family: 'Courier New', monospace; font-size: 18px; font-weight: bold; color: #1e3a8a;">{{ evidence.device_specific_data.date_diff_value }}</div>
+            </div>
+            {% endif %}
+            {% if evidence.device_specific_data.time_diff_value %}
+            <div class="info-item" style="background-color: #dbeafe; border-left-color: #2563eb;">
+                <div class="info-label" style="color: #1e40af;">Time Difference</div>
+                <div class="info-value" style="font-family: 'Courier New', monospace; font-size: 18px; font-weight: bold; color: #1e3a8a;">{{ evidence.device_specific_data.time_diff_value }}</div>
+            </div>
+            {% endif %}
+        </div>
+        <div style="margin-top: 15px; padding: 12px; background-color: #fef3c7; border: 1px solid #f59e0b; border-radius: 4px;">
+            <strong style="color: #92400e;">Note:</strong> <span style="color: #78350f;">Apply this correction to DVR/NVR timestamps to get the actual date/time.</span>
+        </div>
+    </div>
+    {% endif %}
+    {% endif %}
+    
+    {% if transfers %}
+    <h2>Chain of Custody</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>Date</th>
+                <th>From Department</th>
+                <th>To Department</th>
+                <th>Transferred By</th>
+                <th>Received By</th>
+                <th>Notes</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for transfer in transfers %}
+            <tr>
+                <td>{{ transfer.transfer_date|date:"M d, Y H:i" }}</td>
+                <td>{{ transfer.from_department|upper|default:"Unassigned" }}</td>
+                <td>{{ transfer.to_department|upper|default:"Unassigned" }}</td>
+                <td>{{ transfer.transferred_by|default:"—" }}</td>
+                <td>{{ transfer.received_by|default:"—" }}</td>
+                <td>{{ transfer.notes|default:"—" }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% endif %}
+    
+    {% if images %}
+    <h2>Evidence Images ({{ images.count }})</h2>
+    <div class="image-gallery">
+        {% for image in images %}
+        <div>
+            <img src="{{ image.image.url }}" alt="Evidence image">
+            {% if image.caption %}
+            <p style="margin-top: 5px; font-size: 12px; color: #6b7280;">{{ image.caption }}</p>
+            {% endif %}
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+    
+    {% if documents %}
+    <h2>Associated Documents ({{ documents.count }})</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>Document Title</th>
+                <th>File Type</th>
+                <th>File Size</th>
+                <th>Date Created</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for doc in documents %}
+            <tr>
+                <td>{{ doc.title }}</td>
+                <td>{{ doc.file_type|upper }}</td>
+                <td>{{ doc.file_size|filesizeformat }}</td>
+                <td>{{ doc.date_created|date:"M d, Y" }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% endif %}
+    
+    {% if evidence.notes %}
+    <h2>Notes</h2>
+    <div class="section">
+        <pre style="white-space: pre-wrap; font-family: Arial, sans-serif; margin: 0;">{{ evidence.notes }}</pre>
+    </div>
+    {% endif %}
+    
+    <div style="margin-top: 50px; padding-top: 20px; border-top: 2px solid #ddd; text-align: center; color: #6b7280; font-size: 12px;">
+        Report generated on {{ "now"|date:"F d, Y \a\t H:i" }} | Digital Forensics KPSM
+    </div>
+</body>
+</html>

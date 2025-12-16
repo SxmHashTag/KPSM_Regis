@@ -1,0 +1,1393 @@
+{% extends 'base.html' %}
+
+{% block title %}{% if evidence %}Edit Evidence{% else %}Add Evidence{% endif %} - Diamond Forensics{% endblock %}
+
+{% block content %}
+<div class="w-full space-y-6">
+    <!-- Breadcrumbs -->
+    {% include 'components/breadcrumbs.html' %}
+    
+    <style>
+        /* Override base template width constraint for this page */
+        main { max-width: none !important; }
+    </style>
+    <div>
+        <h2 class="text-3xl font-bold text-foreground">{% if evidence %}Edit Evidence{% else %}Add Evidence{% endif %}</h2>
+        <p class="text-muted-foreground mt-1">{% if evidence %}Update evidence information{% else %}Register new evidence item{% endif %}</p>
+    </div>
+
+    <div class="bg-gradient-to-br from-purple-50 to-pink-50 rounded-lg border-2 border-purple-200 p-6 shadow-md">
+        <form method="post" enctype="multipart/form-data" class="space-y-6">
+            {% csrf_token %}
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {% if not evidence %}
+                <div>
+                    <label for="evidence_number" class="block text-sm font-medium text-foreground mb-2">Evidence Number</label>
+                    <input type="text" id="evidence_number" name="evidence_number"
+                        class="w-full px-3 py-2 border border-input rounded-lg focus:outline-none focus:ring-2 focus:ring-ring"
+                        placeholder="Leave empty to auto-generate">
+                    <p class="text-xs text-muted-foreground mt-1">Leave blank to auto-generate (e.g., 25-0001-001)</p>
+                </div>
+                {% endif %}
+                
+                <div>
+                    <label for="ibs_number" class="block text-sm font-medium text-foreground mb-2">IBS#</label>
+                    <input type="text" id="ibs_number" name="ibs_number" value="{{ evidence.ibs_number|default:'' }}"
+                        class="w-full px-3 py-2 border border-input rounded-lg focus:outline-none focus:ring-2 focus:ring-ring"
+                        placeholder="e.g., 24/46/123">
+                    <p class="text-xs text-muted-foreground mt-1">IBS tracking number (optional)</p>
+                </div>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                    <label for="case" class="block text-sm font-medium text-foreground mb-2">Case</label>
+                    <div class="relative">
+                        <!-- Search input -->
+                        <input type="text" id="case-search" 
+                            class="w-full px-3 py-2 border border-input rounded-lg focus:outline-none focus:ring-2 focus:ring-ring"
+                            placeholder="Type to search cases..."
+                            autocomplete="off">
+                        
+                        <!-- Hidden actual select that gets submitted -->
+                        <select id="case" name="case" class="hidden">
+                            <option value="">-- Select Case (Optional) --</option>
+                            {% for case in cases %}
+                            <option value="{{ case.id }}" 
+                                data-number="{{ case.case_number }}" 
+                                data-name="{{ case.case_name }}"
+                                {% if evidence.case.id == case.id or selected_case_id == case.id|stringformat:"s" %}selected{% endif %}>
+                                {{ case.case_number }} - {{ case.case_name }}
+                            </option>
+                            {% endfor %}
+                        </select>
+                        
+                        <!-- Dropdown results -->
+                        <div id="case-dropdown" class="hidden absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-lg shadow-lg max-h-60 overflow-y-auto">
+                            <div class="p-2 text-sm text-gray-500 text-center">Start typing to search...</div>
+                        </div>
+                    </div>
+                    <p class="text-xs text-muted-foreground mt-1" id="selected-case-display"></p>
+                </div>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                    <label for="device_type" class="block text-sm font-medium text-foreground mb-2">Device Type *</label>
+                    <select id="device_type" name="device_type" required
+                        class="w-full px-3 py-2 border border-input rounded-lg focus:outline-none focus:ring-2 focus:ring-ring">
+                        <option value="computer" {% if evidence.device_type == 'computer' %}selected{% endif %}>Computer</option>
+                        <option value="mobile" {% if evidence.device_type == 'mobile' %}selected{% endif %}>Mobile Device</option>
+                        <option value="storage" {% if evidence.device_type == 'storage' %}selected{% endif %}>Storage Device</option>
+                        <option value="network" {% if evidence.device_type == 'network' %}selected{% endif %}>Network Device</option>
+                        <option value="cloud" {% if evidence.device_type == 'cloud' %}selected{% endif %}>Cloud/Online Account</option>
+                        <option value="drone" {% if evidence.device_type == 'drone' %}selected{% endif %}>Drone/UAV</option>
+                        <option value="gaming" {% if evidence.device_type == 'gaming' %}selected{% endif %}>Gaming Console</option>
+                        <option value="car" {% if evidence.device_type == 'car' %}selected{% endif %}>Vehicle/Automotive</option>
+                        <option value="iot" {% if evidence.device_type == 'iot' %}selected{% endif %}>IoT Device</option>
+                        <option value="memory" {% if evidence.device_type == 'memory' %}selected{% endif %}>Memory/RAM</option>
+                        <option value="video" {% if evidence.device_type == 'video' %}selected{% endif %}>Video Evidence</option>
+                        <option value="other" {% if evidence.device_type == 'other' %}selected{% endif %}>Other</option>
+                    </select>
+                </div>
+                
+                <div>
+                    <label for="status" class="block text-sm font-medium text-foreground mb-2">Status *</label>
+                    <select id="status" name="status" required
+                        class="w-full px-3 py-2 border border-input rounded-lg focus:outline-none focus:ring-2 focus:ring-ring">
+                        <option value="collected" {% if evidence.status == 'collected' or not evidence %}selected{% endif %}>Collected</option>
+                        <option value="analyzed" {% if evidence.status == 'analyzed' %}selected{% endif %}>Analyzed</option>
+                        <option value="returned" {% if evidence.status == 'returned' %}selected{% endif %}>Returned</option>
+                        <option value="destroyed" {% if evidence.status == 'destroyed' %}selected{% endif %}>Destroyed</option>
+                        <option value="archived" {% if evidence.status == 'archived' %}selected{% endif %}>Archived</option>
+                    </select>
+                </div>
+            </div>
+            
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                <div>
+                    <label for="brand" class="block text-sm font-medium text-foreground mb-2">Brand</label>
+                    <input type="text" id="brand" name="brand" value="{{ evidence.brand|default:'' }}"
+                        class="w-full px-3 py-2 border border-input rounded-lg focus:outline-none focus:ring-2 focus:ring-ring"
+                        placeholder="Manufacturer/Brand">
+                </div>
+                <div>
+                    <label for="model" class="block text-sm font-medium text-foreground mb-2">Model</label>
+                    <input type="text" id="model" name="model" value="{{ evidence.model|default:'' }}"
+                        class="w-full px-3 py-2 border border-input rounded-lg focus:outline-none focus:ring-2 focus:ring-ring"
+                        placeholder="Model number/name">
+                </div>
+                <div>
+                    <label for="serial_number" class="block text-sm font-medium text-foreground mb-2">Serial Number</label>
+                    <input type="text" id="serial_number" name="serial_number" value="{{ evidence.serial_number|default:'' }}"
+                        class="w-full px-3 py-2 border border-input rounded-lg focus:outline-none focus:ring-2 focus:ring-ring"
+                        placeholder="Device serial number">
+                </div>
+                <div>
+                    <label for="color" class="block text-sm font-medium text-foreground mb-2">Color</label>
+                    <input type="text" id="color" name="color" value="{{ evidence.color|default:'' }}"
+                        class="w-full px-3 py-2 border border-input rounded-lg focus:outline-none focus:ring-2 focus:ring-ring"
+                        placeholder="Device color">
+                </div>
+            </div>
+            
+            <!-- Device-Specific Sections -->
+            <div class="mt-6 p-6 bg-gray-100 rounded-lg border-2 border-gray-300">
+                <h3 class="text-lg font-semibold text-foreground mb-4">Device-Specific Information</h3>
+                <p class="text-sm text-muted-foreground mb-4">Fields below will change based on the device type selected above.</p>
+                
+                <!-- Computer Device Fields -->
+                <div id="computer-fields" class="device-section hidden space-y-6">
+                    <h4 class="font-medium text-foreground">Computer Information</h4>
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                        <div>
+                            <label for="computer_type" class="block text-sm font-medium text-foreground mb-2">Computer Type</label>
+                            <select id="computer_type" name="computer_type" class="w-full px-3 py-2 border border-input rounded-lg focus:outline-none focus:ring-2 focus:ring-ring">
+                                <option value="">-- Select --</option>
+                                <option value="desktop" {% if evidence.device_specific_data.computer_type == 'desktop' %}selected{% endif %}>Desktop</option>
+                                <option value="laptop" {% if evidence.device_specific_data.computer_type == 'laptop' %}selected{% endif %}>Laptop</option>
+                                <option value="server" {% if evidence.device_specific_data.computer_type == 'server' %}selected{% endif %}>Server</option>
+                                <option value="aio" {% if evidence.device_specific_data.computer_type == 'aio' %}selected{% endif %}>All-in-One</option>
+                                <option value="other" {% if evidence.device_specific_data.computer_type == 'other' %}selected{% endif %}>Other</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label for="os_type" class="block text-sm font-medium text-foreground mb-2">OS Type</label>
+                            <select id="os_type" name="os_type" class="w-full px-3 py-2 border border-input rounded-lg focus:outline-none focus:ring-2 focus:ring-ring">
+                                <option value="">-- Select --</option>
+                                <option value="windows" {% if evidence.device_specific_data.os_type == 'windows' %}selected{% endif %}>Windows</option>
+                                <option value="macos" {% if evidence.device_specific_data.os_type == 'macos' %}selected{% endif %}>macOS</option>
+                                <option value="linux" {% if evidence.device_specific_data.os_type == 'linux' %}selected{% endif %}>Linux</option>
+                                <option value="unix" {% if evidence.device_specific_data.os_type == 'unix' %}selected{% endif %}>Unix</option>
+                                <option value="other" {% if evidence.device_specific_data.os_type == 'other' %}selected{% endif %}>Other</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label for="os_version" class="block text-sm font-medium text-foreground mb-2">OS Version</label>
+                            <input type="text" id="os_version" name="os_version" value="{{ evidence.device_specific_data.os_version|default:'' }}"
+                                class="w-full px-3 py-2 border border-input rounded-lg focus:outline-none focus:ring-2 focus:ring-ring"
+                                placeholder="E.g. Windows 11, macOS Sonoma">
+                        </div>
+                        <div>
+                            <label for="cpu" class="block text-sm font-medium text-foreground mb-2">CPU</label>
+                            <input type="text" id="cpu" name="cpu" value="{{ evidence.device_specific_data.cpu|default:'' }}"
+                                class="w-full px-3 py-2 border border-input rounded-lg focus:outline-none focus:ring-2 focus:ring-ring"
+                                placeholder="E.g. Intel i7, M2">
+                        </div>
+                        <div>
+                            <label for="ram" class="block text-sm font-medium text-foreground mb-2">RAM</label>
+                            <input type="text" id="ram" name="ram" value="{{ evidence.device_specific_data.ram|default:'' }}"
+                                class="w-full px-3 py-2 border border-input rounded-lg focus:outline-none focus:ring-2 focus:ring-ring"
+                                placeholder="E.g. 16GB">
+                        </div>
+                        <div>
+                            <label for="storage_type" class="block text-sm font-medium text-foreground mb-2">Storage Type</label>
+                            <select id="storage_type" name="storage_type" class="w-full px-3 py-2 border border-input rounded-lg focus:outline-none focus:ring-2 focus:ring-ring">
+                                <option value="">-- Select --</option>
+                                <option value="hdd" {% if evidence.device_specific_data.storage_type == 'hdd' %}selected{% endif %}>HDD</option>
+                                <option value="ssd" {% if evidence.device_specific_data.storage_type == 'ssd' %}selected{% endif %}>SSD</option>
+                                <option value="nvme" {% if evidence.device_specific_data.storage_type == 'nvme' %}selected{% endif %}>NVMe</option>
+                                <option value="other" {% if evidence.device_specific_data.storage_type == 'other' %}selected{% endif %}>Other</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label for="storage_capacity" class="block text-sm font-medium text-foreground mb-2">Storage Capacity</label>
+                            <input type="text" id="storage_capacity" name="storage_capacity" value="{{ evidence.device_specific_data.storage_capacity|default:'' }}"
+                                class="w-full px-3 py-2 border border-input rounded-lg focus:outline-none focus:ring-2 focus:ring-ring"
+                                placeholder="E.g. 512GB, 1TB">
+                        </div>
+                        <div>
+                            <label for="encryption_status" class="block text-sm font-medium text-foreground mb-2">Encryption Status</label>
+                            <select id="encryption_status" name="encryption_status" class="w-full px-3 py-2 border border-input rounded-lg focus:outline-none focus:ring-2 focus:ring-ring">
+                                <option value="">-- Select --</option>
+                                <option value="none" {% if evidence.device_specific_data.encryption_status == 'none' %}selected{% endif %}>None</option>
+                                <option value="bitlocker" {% if evidence.device_specific_data.encryption_status == 'bitlocker' %}selected{% endif %}>BitLocker</option>
+                                <option value="filevault" {% if evidence.device_specific_data.encryption_status == 'filevault' %}selected{% endif %}>FileVault</option>
+                                <option value="veracrypt" {% if evidence.device_specific_data.encryption_status == 'veracrypt' %}selected{% endif %}>VeraCrypt</option>
+                                <option value="luks" {% if evidence.device_specific_data.encryption_status == 'luks' %}selected{% endif %}>LUKS</option>
+                                <option value="other" {% if evidence.device_specific_data.encryption_status == 'other' %}selected{% endif %}>Other</option>
+                                <option value="unknown" {% if evidence.device_specific_data.encryption_status == 'unknown' %}selected{% endif %}>Unknown</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="flex items-center space-x-2">
+                        <input type="checkbox" id="write_blocker_used" name="write_blocker_used" value="true"
+                            {% if evidence.device_specific_data.write_blocker_used %}checked{% endif %}
+                            class="w-4 h-4 border-gray-300 rounded">
+                        <label for="write_blocker_used" class="text-sm font-medium text-foreground">Write Blocker Used</label>
+                    </div>
+                </div>
+
+                <!-- Mobile Device Fields -->
+                <div id="mobile-fields" class="device-section hidden space-y-6">
+                    <h4 class="font-medium text-foreground">Mobile Device Information</h4>
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                        <div>
+                            <label for="mobile_os_type" class="block text-sm font-medium text-foreground mb-2">OS Type</label>
+                            <select id="mobile_os_type" name="mobile_os_type" class="w-full px-3 py-2 border border-input rounded-lg focus:outline-none focus:ring-2 focus:ring-ring">
+                                <option value="">-- Select --</option>
+                                <option value="ios" {% if evidence.device_specific_data.mobile_os_type == 'ios' %}selected{% endif %}>iOS</option>
+                                <option value="android" {% if evidence.device_specific_data.mobile_os_type == 'android' %}selected{% endif %}>Android</option>
+                                <option value="windows_mobile" {% if evidence.device_specific_data.mobile_os_type == 'windows_mobile' %}selected{% endif %}>Windows Mobile</option>
+                                <option value="other" {% if evidence.device_specific_data.mobile_os_type == 'other' %}selected{% endif %}>Other</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label for="mobile_os_version" class="block text-sm font-medium text-foreground mb-2">OS Version</label>
+                            <input type="text" id="mobile_os_version" name="mobile_os_version" value="{{ evidence.device_specific_data.mobile_os_version|default:'' }}"
+                                class="w-full px-3 py-2 border border-input rounded-lg focus:outline-none focus:ring-2 focus:ring-ring"
+                                placeholder="E.g. iOS 17, Android 14">
+                        </div>
+                        <div>
+                            <label for="imei" class="block text-sm font-medium text-foreground mb-2">IMEI (Primary)</label>
+                            <input type="text" id="imei" name="imei" value="{{ evidence.imei|default:'' }}"
+                                class="w-full px-3 py-2 border border-input rounded-lg focus:outline-none focus:ring-2 focus:ring-ring"
+                                placeholder="Primary IMEI">
+                        </div>
+                        <div>
+                            <label for="sim_status" class="block text-sm font-medium text-foreground mb-2">SIM Status</label>
+                            <select id="sim_status" name="sim_status" class="w-full px-3 py-2 border border-input rounded-lg focus:outline-none focus:ring-2 focus:ring-ring">
+                                <option value="">-- Select --</option>
+                                <option value="present" {% if evidence.device_specific_data.sim_status == 'present' %}selected{% endif %}>Present</option>
+                                <option value="absent" {% if evidence.device_specific_data.sim_status == 'absent' %}selected{% endif %}>Absent</option>
+                                <option value="multiple" {% if evidence.device_specific_data.sim_status == 'multiple' %}selected{% endif %}>Multiple</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label for="lock_status" class="block text-sm font-medium text-foreground mb-2">Lock Status</label>
+                            <select id="lock_status" name="lock_status" class="w-full px-3 py-2 border border-input rounded-lg focus:outline-none focus:ring-2 focus:ring-ring">
+                                <option value="">-- Select --</option>
+                                <option value="unlocked" {% if evidence.device_specific_data.lock_status == 'unlocked' %}selected{% endif %}>Unlocked</option>
+                                <option value="locked" {% if evidence.device_specific_data.lock_status == 'locked' %}selected{% endif %}>Locked</option>
+                                <option value="bypassed" {% if evidence.device_specific_data.lock_status == 'bypassed' %}selected{% endif %}>Bypassed</option>
+                                <option value="unknown" {% if evidence.device_specific_data.lock_status == 'unknown' %}selected{% endif %}>Unknown</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label for="battery_level" class="block text-sm font-medium text-foreground mb-2">Battery Level (%)</label>
+                            <input type="number" id="battery_level" name="battery_level" min="0" max="100" value="{{ evidence.device_specific_data.battery_level|default:'' }}"
+                                class="w-full px-3 py-2 border border-input rounded-lg focus:outline-none focus:ring-2 focus:ring-ring"
+                                placeholder="0-100">
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-foreground mb-2">Additional IMEIs (Dual/Multi-SIM)</label>
+                        <div id="additional-imeis" class="space-y-2">
+                            {% if evidence.imei_numbers %}
+                                {% for imei in evidence.imei_numbers %}
+                                <div class="flex gap-2">
+                                    <input type="text" name="additional_imei" value="{{ imei }}"
+                                        class="flex-1 px-3 py-2 border border-input rounded-lg focus:outline-none focus:ring-2 focus:ring-ring"
+                                        placeholder="Additional IMEI">
+                                    <button type="button" onclick="this.parentElement.remove()" 
+                                        class="px-3 py-2 bg-destructive text-destructive-foreground rounded-lg hover:opacity-90">
+                                        Remove
+                                    </button>
+                                </div>
+                                {% endfor %}
+                            {% endif %}
+                        </div>
+                        <button type="button" onclick="addIMEIField()" 
+                            class="mt-2 px-3 py-1 text-sm bg-secondary text-secondary-foreground rounded-lg hover:opacity-90">
+                            + Add Another IMEI
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Storage Device Fields -->
+                <div id="storage-fields" class="device-section hidden space-y-6">
+                    <h4 class="font-medium text-foreground">Storage Device Information</h4>
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                        <div>
+                            <label for="storage_device_type" class="block text-sm font-medium text-foreground mb-2">Storage Type</label>
+                            <select id="storage_device_type" name="storage_device_type" class="w-full px-3 py-2 border border-input rounded-lg focus:outline-none focus:ring-2 focus:ring-ring">
+                                <option value="">-- Select --</option>
+                                <option value="hdd_external" {% if evidence.device_specific_data.storage_device_type == 'hdd_external' %}selected{% endif %}>HDD External</option>
+                                <option value="ssd_external" {% if evidence.device_specific_data.storage_device_type == 'ssd_external' %}selected{% endif %}>SSD External</option>
+                                <option value="usb_flash" {% if evidence.device_specific_data.storage_device_type == 'usb_flash' %}selected{% endif %}>USB Flash</option>
+                                <option value="sd_card" {% if evidence.device_specific_data.storage_device_type == 'sd_card' %}selected{% endif %}>SD Card</option>
+                                <option value="microsd_card" {% if evidence.device_specific_data.storage_device_type == 'microsd_card' %}selected{% endif %}>MicroSD Card</option>
+                                <option value="optical" {% if evidence.device_specific_data.storage_device_type == 'optical' %}selected{% endif %}>Optical</option>
+                                <option value="other" {% if evidence.device_specific_data.storage_device_type == 'other' %}selected{% endif %}>Other</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label for="capacity" class="block text-sm font-medium text-foreground mb-2">Capacity</label>
+                            <input type="text" id="capacity" name="capacity" value="{{ evidence.device_specific_data.capacity|default:'' }}"
+                                class="w-full px-3 py-2 border border-input rounded-lg focus:outline-none focus:ring-2 focus:ring-ring"
+                                placeholder="E.g. 500GB, 1TB">
+                        </div>
+                        <div>
+                            <label for="connection_interface" class="block text-sm font-medium text-foreground mb-2">Connection Interface</label>
+                            <select id="connection_interface" name="connection_interface" class="w-full px-3 py-2 border border-input rounded-lg focus:outline-none focus:ring-2 focus:ring-ring">
+                                <option value="">-- Select --</option>
+                                <option value="usb" {% if evidence.device_specific_data.connection_interface == 'usb' %}selected{% endif %}>USB</option>
+                                <option value="usb_c" {% if evidence.device_specific_data.connection_interface == 'usb_c' %}selected{% endif %}>USB-C</option>
+                                <option value="thunderbolt" {% if evidence.device_specific_data.connection_interface == 'thunderbolt' %}selected{% endif %}>Thunderbolt</option>
+                                <option value="firewire" {% if evidence.device_specific_data.connection_interface == 'firewire' %}selected{% endif %}>FireWire</option>
+                                <option value="esata" {% if evidence.device_specific_data.connection_interface == 'esata' %}selected{% endif %}>eSATA</option>
+                                <option value="other" {% if evidence.device_specific_data.connection_interface == 'other' %}selected{% endif %}>Other</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label for="filesystem" class="block text-sm font-medium text-foreground mb-2">Filesystem</label>
+                            <select id="filesystem" name="filesystem" class="w-full px-3 py-2 border border-input rounded-lg focus:outline-none focus:ring-2 focus:ring-ring">
+                                <option value="">-- Select --</option>
+                                <option value="ntfs" {% if evidence.device_specific_data.filesystem == 'ntfs' %}selected{% endif %}>NTFS</option>
+                                <option value="fat32" {% if evidence.device_specific_data.filesystem == 'fat32' %}selected{% endif %}>FAT32</option>
+                                <option value="exfat" {% if evidence.device_specific_data.filesystem == 'exfat' %}selected{% endif %}>exFAT</option>
+                                <option value="apfs" {% if evidence.device_specific_data.filesystem == 'apfs' %}selected{% endif %}>APFS</option>
+                                <option value="hfs+" {% if evidence.device_specific_data.filesystem == 'hfs+' %}selected{% endif %}>HFS+</option>
+                                <option value="ext4" {% if evidence.device_specific_data.filesystem == 'ext4' %}selected{% endif %}>ext4</option>
+                                <option value="multiple" {% if evidence.device_specific_data.filesystem == 'multiple' %}selected{% endif %}>Multiple</option>
+                                <option value="other" {% if evidence.device_specific_data.filesystem == 'other' %}selected{% endif %}>Other</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Network Device Fields -->
+                <div id="network-fields" class="device-section hidden space-y-6">
+                    <h4 class="font-medium text-foreground">Network Device Information</h4>
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                        <div>
+                            <label for="network_device_type" class="block text-sm font-medium text-foreground mb-2">Network Device Type</label>
+                            <select id="network_device_type" name="network_device_type" class="w-full px-3 py-2 border border-input rounded-lg focus:outline-none focus:ring-2 focus:ring-ring">
+                                <option value="">-- Select --</option>
+                                <option value="router" {% if evidence.device_specific_data.network_device_type == 'router' %}selected{% endif %}>Router</option>
+                                <option value="switch" {% if evidence.device_specific_data.network_device_type == 'switch' %}selected{% endif %}>Switch</option>
+                                <option value="firewall" {% if evidence.device_specific_data.network_device_type == 'firewall' %}selected{% endif %}>Firewall</option>
+                                <option value="wireless_ap" {% if evidence.device_specific_data.network_device_type == 'wireless_ap' %}selected{% endif %}>Wireless AP</option>
+                                <option value="network_storage" {% if evidence.device_specific_data.network_device_type == 'network_storage' %}selected{% endif %}>Network Storage</option>
+                                <option value="other" {% if evidence.device_specific_data.network_device_type == 'other' %}selected{% endif %}>Other</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label for="network_ip_address" class="block text-sm font-medium text-foreground mb-2">IP Address</label>
+                            <input type="text" id="network_ip_address" name="network_ip_address" value="{{ evidence.device_specific_data.network_ip_address|default:'' }}"
+                                class="w-full px-3 py-2 border border-input rounded-lg focus:outline-none focus:ring-2 focus:ring-ring"
+                                placeholder="E.g. 192.168.1.1">
+                        </div>
+                        <div>
+                            <label for="subnet_mask" class="block text-sm font-medium text-foreground mb-2">Subnet Mask</label>
+                            <input type="text" id="subnet_mask" name="subnet_mask" value="{{ evidence.device_specific_data.subnet_mask|default:'' }}"
+                                class="w-full px-3 py-2 border border-input rounded-lg focus:outline-none focus:ring-2 focus:ring-ring"
+                                placeholder="E.g. 255.255.255.0">
+                        </div>
+                        <div>
+                            <label for="admin_access_method" class="block text-sm font-medium text-foreground mb-2">Admin Access Method</label>
+                            <select id="admin_access_method" name="admin_access_method" class="w-full px-3 py-2 border border-input rounded-lg focus:outline-none focus:ring-2 focus:ring-ring">
+                                <option value="">-- Select --</option>
+                                <option value="ssh" {% if evidence.device_specific_data.admin_access_method == 'ssh' %}selected{% endif %}>SSH</option>
+                                <option value="telnet" {% if evidence.device_specific_data.admin_access_method == 'telnet' %}selected{% endif %}>Telnet</option>
+                                <option value="https" {% if evidence.device_specific_data.admin_access_method == 'https' %}selected{% endif %}>HTTPS</option>
+                                <option value="http" {% if evidence.device_specific_data.admin_access_method == 'http' %}selected{% endif %}>HTTP</option>
+                                <option value="console" {% if evidence.device_specific_data.admin_access_method == 'console' %}selected{% endif %}>Console</option>
+                                <option value="other" {% if evidence.device_specific_data.admin_access_method == 'other' %}selected{% endif %}>Other</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Cloud/Online Account Fields -->
+                <div id="cloud-fields" class="device-section hidden space-y-6">
+                    <h4 class="font-medium text-foreground">Cloud/Online Account Information</h4>
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                        <div>
+                            <label for="service_provider" class="block text-sm font-medium text-foreground mb-2">Service Provider</label>
+                            <select id="service_provider" name="service_provider" class="w-full px-3 py-2 border border-input rounded-lg focus:outline-none focus:ring-2 focus:ring-ring">
+                                <option value="">-- Select --</option>
+                                <option value="google" {% if evidence.device_specific_data.service_provider == 'google' %}selected{% endif %}>Google</option>
+                                <option value="microsoft" {% if evidence.device_specific_data.service_provider == 'microsoft' %}selected{% endif %}>Microsoft</option>
+                                <option value="apple" {% if evidence.device_specific_data.service_provider == 'apple' %}selected{% endif %}>Apple</option>
+                                <option value="dropbox" {% if evidence.device_specific_data.service_provider == 'dropbox' %}selected{% endif %}>Dropbox</option>
+                                <option value="amazon" {% if evidence.device_specific_data.service_provider == 'amazon' %}selected{% endif %}>Amazon</option>
+                                <option value="facebook" {% if evidence.device_specific_data.service_provider == 'facebook' %}selected{% endif %}>Facebook/Meta</option>
+                                <option value="other" {% if evidence.device_specific_data.service_provider == 'other' %}selected{% endif %}>Other</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label for="account_identifier" class="block text-sm font-medium text-foreground mb-2">Account Identifier</label>
+                            <input type="text" id="account_identifier" name="account_identifier" value="{{ evidence.device_specific_data.account_identifier|default:'' }}"
+                                class="w-full px-3 py-2 border border-input rounded-lg focus:outline-none focus:ring-2 focus:ring-ring"
+                                placeholder="Email, username, or ID">
+                        </div>
+                        <div>
+                            <label for="legal_authority" class="block text-sm font-medium text-foreground mb-2">Legal Authority</label>
+                            <select id="legal_authority" name="legal_authority" class="w-full px-3 py-2 border border-input rounded-lg focus:outline-none focus:ring-2 focus:ring-ring">
+                                <option value="">-- Select --</option>
+                                <option value="search_warrant" {% if evidence.device_specific_data.legal_authority == 'search_warrant' %}selected{% endif %}>Search Warrant</option>
+                                <option value="court_order" {% if evidence.device_specific_data.legal_authority == 'court_order' %}selected{% endif %}>Court Order</option>
+                                <option value="subpoena" {% if evidence.device_specific_data.legal_authority == 'subpoena' %}selected{% endif %}>Subpoena</option>
+                                <option value="consent" {% if evidence.device_specific_data.legal_authority == 'consent' %}selected{% endif %}>Consent</option>
+                                <option value="other" {% if evidence.device_specific_data.legal_authority == 'other' %}selected{% endif %}>Other</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label for="access_method" class="block text-sm font-medium text-foreground mb-2">Access Method</label>
+                            <select id="access_method" name="access_method" class="w-full px-3 py-2 border border-input rounded-lg focus:outline-none focus:ring-2 focus:ring-ring">
+                                <option value="">-- Select --</option>
+                                <option value="direct_login" {% if evidence.device_specific_data.access_method == 'direct_login' %}selected{% endif %}>Direct Login</option>
+                                <option value="api_tokens" {% if evidence.device_specific_data.access_method == 'api_tokens' %}selected{% endif %}>API Tokens</option>
+                                <option value="legal_process" {% if evidence.device_specific_data.access_method == 'legal_process' %}selected{% endif %}>Legal Process</option>
+                                <option value="downloaded_backup" {% if evidence.device_specific_data.access_method == 'downloaded_backup' %}selected{% endif %}>Downloaded Backup</option>
+                                <option value="other" {% if evidence.device_specific_data.access_method == 'other' %}selected{% endif %}>Other</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Car/Vehicle Fields -->
+                <div id="car-fields" class="device-section hidden space-y-6">
+                    <h4 class="font-medium text-foreground">Vehicle Information</h4>
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                        <div>
+                            <label for="vehicle_make" class="block text-sm font-medium text-foreground mb-2">Vehicle Make</label>
+                            <input type="text" id="vehicle_make" name="vehicle_make" value="{{ evidence.device_specific_data.vehicle_make|default:'' }}"
+                                class="w-full px-3 py-2 border border-input rounded-lg focus:outline-none focus:ring-2 focus:ring-ring"
+                                placeholder="E.g. Toyota, Ford">
+                        </div>
+                        <div>
+                            <label for="vehicle_model" class="block text-sm font-medium text-foreground mb-2">Vehicle Model</label>
+                            <input type="text" id="vehicle_model" name="vehicle_model" value="{{ evidence.device_specific_data.vehicle_model|default:'' }}"
+                                class="w-full px-3 py-2 border border-input rounded-lg focus:outline-none focus:ring-2 focus:ring-ring"
+                                placeholder="E.g. Camry, F-150">
+                        </div>
+                        <div>
+                            <label for="vehicle_year" class="block text-sm font-medium text-foreground mb-2">Vehicle Year</label>
+                            <input type="text" id="vehicle_year" name="vehicle_year" value="{{ evidence.device_specific_data.vehicle_year|default:'' }}"
+                                class="w-full px-3 py-2 border border-input rounded-lg focus:outline-none focus:ring-2 focus:ring-ring"
+                                placeholder="E.g. 2020">
+                        </div>
+                        <div>
+                            <label for="vin_number" class="block text-sm font-medium text-foreground mb-2">VIN Number</label>
+                            <input type="text" id="vin_number" name="vin_number" value="{{ evidence.device_specific_data.vin_number|default:'' }}"
+                                class="w-full px-3 py-2 border border-input rounded-lg focus:outline-none focus:ring-2 focus:ring-ring"
+                                placeholder="Vehicle Identification Number">
+                        </div>
+                        <div>
+                            <label for="license_plate" class="block text-sm font-medium text-foreground mb-2">License Plate</label>
+                            <input type="text" id="license_plate" name="license_plate" value="{{ evidence.device_specific_data.license_plate|default:'' }}"
+                                class="w-full px-3 py-2 border border-input rounded-lg focus:outline-none focus:ring-2 focus:ring-ring"
+                                placeholder="License plate number">
+                        </div>
+                        <div>
+                            <label for="odometer" class="block text-sm font-medium text-foreground mb-2">Odometer</label>
+                            <input type="text" id="odometer" name="odometer" value="{{ evidence.device_specific_data.odometer|default:'' }}"
+                                class="w-full px-3 py-2 border border-input rounded-lg focus:outline-none focus:ring-2 focus:ring-ring"
+                                placeholder="Mileage">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Video Evidence Fields -->
+                <div id="video-fields" class="device-section hidden space-y-6">
+                    <h4 class="font-medium text-foreground">Video Evidence Information</h4>
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                        <div>
+                            <label for="video_source_type" class="block text-sm font-medium text-foreground mb-2">Video Source Type</label>
+                            <select id="video_source_type" name="video_source_type" class="w-full px-3 py-2 border border-input rounded-lg focus:outline-none focus:ring-2 focus:ring-ring">
+                                <option value="">-- Select --</option>
+                                <option value="cctv_system" {% if evidence.device_specific_data.video_source_type == 'cctv_system' %}selected{% endif %}>CCTV System</option>
+                                <option value="security_camera" {% if evidence.device_specific_data.video_source_type == 'security_camera' %}selected{% endif %}>Security Camera</option>
+                                <option value="body_camera" {% if evidence.device_specific_data.video_source_type == 'body_camera' %}selected{% endif %}>Body Camera</option>
+                                <option value="dashcam" {% if evidence.device_specific_data.video_source_type == 'dashcam' %}selected{% endif %}>Dashcam</option>
+                                <option value="mobile_phone" {% if evidence.device_specific_data.video_source_type == 'mobile_phone' %}selected{% endif %}>Mobile Phone</option>
+                                <option value="drone" {% if evidence.device_specific_data.video_source_type == 'drone' %}selected{% endif %}>Drone</option>
+                                <option value="other" {% if evidence.device_specific_data.video_source_type == 'other' %}selected{% endif %}>Other</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label for="camera_location" class="block text-sm font-medium text-foreground mb-2">Camera Location</label>
+                            <input type="text" id="camera_location" name="camera_location" value="{{ evidence.device_specific_data.camera_location|default:'' }}"
+                                class="w-full px-3 py-2 border border-input rounded-lg focus:outline-none focus:ring-2 focus:ring-ring"
+                                placeholder="Physical location of camera">
+                        </div>
+                        <div>
+                            <label for="video_format" class="block text-sm font-medium text-foreground mb-2">Video Format</label>
+                            <select id="video_format" name="video_format" class="w-full px-3 py-2 border border-input rounded-lg focus:outline-none focus:ring-2 focus:ring-ring">
+                                <option value="">-- Select --</option>
+                                <option value="mp4" {% if evidence.device_specific_data.video_format == 'mp4' %}selected{% endif %}>MP4</option>
+                                <option value="avi" {% if evidence.device_specific_data.video_format == 'avi' %}selected{% endif %}>AVI</option>
+                                <option value="mov" {% if evidence.device_specific_data.video_format == 'mov' %}selected{% endif %}>MOV</option>
+                                <option value="mkv" {% if evidence.device_specific_data.video_format == 'mkv' %}selected{% endif %}>MKV</option>
+                                <option value="proprietary" {% if evidence.device_specific_data.video_format == 'proprietary' %}selected{% endif %}>Proprietary</option>
+                                <option value="other" {% if evidence.device_specific_data.video_format == 'other' %}selected{% endif %}>Other</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label for="resolution" class="block text-sm font-medium text-foreground mb-2">Resolution</label>
+                            <input type="text" id="resolution" name="resolution" value="{{ evidence.device_specific_data.resolution|default:'' }}"
+                                class="w-full px-3 py-2 border border-input rounded-lg focus:outline-none focus:ring-2 focus:ring-ring"
+                                placeholder="E.g. 1920x1080, 4K">
+                        </div>
+                        <div>
+                            <label for="duration" class="block text-sm font-medium text-foreground mb-2">Duration</label>
+                            <input type="text" id="duration" name="duration" value="{{ evidence.device_specific_data.duration|default:'' }}"
+                                class="w-full px-3 py-2 border border-input rounded-lg focus:outline-none focus:ring-2 focus:ring-ring"
+                                placeholder="E.g. 01:23:45">
+                        </div>
+                        <div>
+                            <label for="frame_rate" class="block text-sm font-medium text-foreground mb-2">Frame Rate</label>
+                            <input type="text" id="frame_rate" name="frame_rate" value="{{ evidence.device_specific_data.frame_rate|default:'' }}"
+                                class="w-full px-3 py-2 border border-input rounded-lg focus:outline-none focus:ring-2 focus:ring-ring"
+                                placeholder="E.g. 30fps, 60fps">
+                        </div>
+                    </div>
+                    
+                    <!-- Time Difference Calculator -->
+                    <div class="mt-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                        <h5 class="font-medium text-foreground mb-3 flex items-center gap-2">
+                            <svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                            </svg>
+                            Time Difference Calculator
+                        </h5>
+                        <p class="text-sm text-muted-foreground mb-3">Calculate the time difference between DVR/NVR time and actual time</p>
+                        
+                        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                            <div>
+                                <label for="dvr_date" class="block text-sm font-medium text-foreground mb-2">DVR/NVR Date</label>
+                                <input type="date" id="dvr_date"
+                                    class="w-full px-3 py-2 border border-input rounded-lg focus:outline-none focus:ring-2 focus:ring-ring">
+                                <p class="text-xs text-muted-foreground mt-1">Date shown on device</p>
+                            </div>
+                            <div>
+                                <label for="dvr_time" class="block text-sm font-medium text-foreground mb-2">DVR/NVR Time</label>
+                                <input type="time" id="dvr_time" step="1"
+                                    class="w-full px-3 py-2 border border-input rounded-lg focus:outline-none focus:ring-2 focus:ring-ring"
+                                    placeholder="HH:MM:SS">
+                                <p class="text-xs text-muted-foreground mt-1">Time shown on device</p>
+                            </div>
+                            <div>
+                                <label for="real_date" class="block text-sm font-medium text-foreground mb-2">Actual Date</label>
+                                <input type="date" id="real_date"
+                                    class="w-full px-3 py-2 border border-input rounded-lg focus:outline-none focus:ring-2 focus:ring-ring">
+                                <p class="text-xs text-muted-foreground mt-1">Verified actual date</p>
+                            </div>
+                            <div>
+                                <label for="real_time" class="block text-sm font-medium text-foreground mb-2">Actual Time</label>
+                                <input type="time" id="real_time" step="1"
+                                    class="w-full px-3 py-2 border border-input rounded-lg focus:outline-none focus:ring-2 focus:ring-ring"
+                                    placeholder="HH:MM:SS">
+                                <p class="text-xs text-muted-foreground mt-1">Verified actual time</p>
+                            </div>
+                        </div>
+                        
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+                            <div>
+                                <label class="block text-sm font-medium text-foreground mb-2">Date Difference</label>
+                                <div id="date_difference" class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-center font-mono text-lg font-semibold text-gray-700">
+                                    -- days
+                                </div>
+                                <p class="text-xs text-muted-foreground mt-1">Days to add/subtract</p>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-foreground mb-2">Time Difference</label>
+                                <div id="time_difference" class="w-full px-3 py-2 bg-green-50 border border-green-300 rounded-lg text-center font-mono text-lg font-semibold text-green-700">
+                                    --:--:--
+                                </div>
+                                <p class="text-xs text-muted-foreground mt-1">Time to add/subtract</p>
+                            </div>
+                        </div>
+                        
+                        <!-- Hidden fields to store the differences and original values -->
+                        <input type="hidden" id="date_diff_value" name="date_diff_value" value="{{ evidence.device_specific_data.date_diff_value|default:'' }}">
+                        <input type="hidden" id="time_diff_value" name="time_diff_value" value="{{ evidence.device_specific_data.time_diff_value|default:'' }}">
+                        <input type="hidden" id="dvr_datetime" name="dvr_datetime" value="{{ evidence.device_specific_data.dvr_datetime|default:'' }}">
+                        <input type="hidden" id="actual_datetime" name="actual_datetime" value="{{ evidence.device_specific_data.actual_datetime|default:'' }}">
+                        
+                        <div class="mt-3 p-3 bg-yellow-50 border border-yellow-200 rounded text-sm text-yellow-800">
+                            <strong>Note:</strong> This difference will be saved with the evidence. When reviewing footage, <span id="adjustment_text" class="font-semibold"></span> to get the actual date/time.
+                        </div>
+                    </div>
+                    
+                    <script>
+                    function calculateDateTimeDifference() {
+                        const dvrDateInput = document.getElementById('dvr_date');
+                        const dvrTimeInput = document.getElementById('dvr_time');
+                        const realDateInput = document.getElementById('real_date');
+                        const realTimeInput = document.getElementById('real_time');
+                        const dateDiffDisplay = document.getElementById('date_difference');
+                        const timeDiffDisplay = document.getElementById('time_difference');
+                        const adjustmentText = document.getElementById('adjustment_text');
+                        const dateHiddenField = document.getElementById('date_diff_value');
+                        const timeHiddenField = document.getElementById('time_diff_value');
+                        
+                        // Check if all required fields have values
+                        if (!dvrDateInput.value || !dvrTimeInput.value || !realDateInput.value || !realTimeInput.value) {
+                            dateDiffDisplay.textContent = '-- days';
+                            timeDiffDisplay.textContent = '--:--:--';
+                            adjustmentText.textContent = '';
+                            dateHiddenField.value = '';
+                            timeHiddenField.value = '';
+                            return;
+                        }
+                        
+                        // Create full datetime objects
+                        const dvrDateTime = new Date(dvrDateInput.value + 'T' + dvrTimeInput.value);
+                        const realDateTime = new Date(realDateInput.value + 'T' + realTimeInput.value);
+                        
+                        // Calculate total difference in milliseconds
+                        const diffMs = realDateTime - dvrDateTime;
+                        const diffSeconds = Math.floor(diffMs / 1000);
+                        
+                        // Calculate days
+                        const daysDiff = Math.floor(diffSeconds / 86400);
+                        const remainingSeconds = Math.abs(diffSeconds % 86400);
+                        
+                        // Calculate time components
+                        const hours = Math.floor(remainingSeconds / 3600);
+                        const minutes = Math.floor((remainingSeconds % 3600) / 60);
+                        const seconds = remainingSeconds % 60;
+                        
+                        // Format date difference
+                        const dateSign = daysDiff < 0 ? '-' : '+';
+                        const absDays = Math.abs(daysDiff);
+                        const formattedDateDiff = `${dateSign}${absDays} day${absDays !== 1 ? 's' : ''}`;
+                        
+                        // Format time difference
+                        const timeSign = (diffSeconds % 86400) < 0 ? '-' : '+';
+                        const formattedTimeDiff = `${timeSign}${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+                        
+                        // Update date difference display
+                        dateDiffDisplay.textContent = formattedDateDiff;
+                        dateDiffDisplay.className = `w-full px-3 py-2 border rounded-lg text-center font-mono text-lg font-semibold ${
+                            daysDiff < 0 ? 'bg-red-50 border-red-300 text-red-700' : 
+                            daysDiff > 0 ? 'bg-green-50 border-green-300 text-green-700' : 
+                            'bg-gray-100 border-gray-300 text-gray-700'
+                        }`;
+                        
+                        // Update time difference display
+                        timeDiffDisplay.textContent = formattedTimeDiff;
+                        timeDiffDisplay.className = `w-full px-3 py-2 border rounded-lg text-center font-mono text-lg font-semibold ${
+                            (diffSeconds % 86400) < 0 ? 'bg-red-50 border-red-300 text-red-700' : 'bg-green-50 border-green-300 text-green-700'
+                        }`;
+                        
+                        // Build instruction text
+                        let instruction = '';
+                        if (daysDiff !== 0) {
+                            const dayAction = daysDiff < 0 ? 'subtract' : 'add';
+                            instruction += `${dayAction} ${absDays} day${absDays !== 1 ? 's' : ''}`;
+                        }
+                        if (hours !== 0 || minutes !== 0 || seconds !== 0) {
+                            if (instruction) instruction += ' and ';
+                            const timeAction = (diffSeconds % 86400) < 0 ? 'subtract' : 'add';
+                            instruction += `${timeAction} ${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+                        }
+                        if (!instruction) instruction = 'times are synchronized';
+                        instruction += ' to DVR date/time';
+                        
+                        adjustmentText.textContent = instruction;
+                        
+                        // Store in hidden fields
+                        dateHiddenField.value = formattedDateDiff;
+                        timeHiddenField.value = formattedTimeDiff;
+                        
+                        // Store original datetime values
+                        document.getElementById('dvr_datetime').value = dvrDateInput.value + ' ' + dvrTimeInput.value;
+                        document.getElementById('actual_datetime').value = realDateInput.value + ' ' + realTimeInput.value;
+                    }
+                    
+                    // Add event listeners when page loads
+                    document.addEventListener('DOMContentLoaded', function() {
+                        const dvrDateInput = document.getElementById('dvr_date');
+                        const dvrTimeInput = document.getElementById('dvr_time');
+                        const realDateInput = document.getElementById('real_date');
+                        const realTimeInput = document.getElementById('real_time');
+                        
+                        if (dvrDateInput && dvrTimeInput && realDateInput && realTimeInput) {
+                            dvrDateInput.addEventListener('input', calculateDateTimeDifference);
+                            dvrTimeInput.addEventListener('input', calculateDateTimeDifference);
+                            realDateInput.addEventListener('input', calculateDateTimeDifference);
+                            realTimeInput.addEventListener('input', calculateDateTimeDifference);
+                        }
+                    });
+                    </script>
+                </div>
+
+                <!-- Gaming Console Fields -->
+                <div id="gaming-fields" class="device-section hidden space-y-6">
+                    <h4 class="font-medium text-foreground">Gaming Console Information</h4>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label for="console_type" class="block text-sm font-medium text-foreground mb-2">Console Type</label>
+                            <select id="console_type" name="console_type" class="w-full px-3 py-2 border border-input rounded-lg focus:outline-none focus:ring-2 focus:ring-ring">
+                                <option value="">-- Select --</option>
+                                <option value="playstation" {% if evidence.device_specific_data.console_type == 'playstation' %}selected{% endif %}>PlayStation</option>
+                                <option value="xbox" {% if evidence.device_specific_data.console_type == 'xbox' %}selected{% endif %}>Xbox</option>
+                                <option value="nintendo" {% if evidence.device_specific_data.console_type == 'nintendo' %}selected{% endif %}>Nintendo</option>
+                                <option value="pc" {% if evidence.device_specific_data.console_type == 'pc' %}selected{% endif %}>PC Gaming</option>
+                                <option value="handheld" {% if evidence.device_specific_data.console_type == 'handheld' %}selected{% endif %}>Handheld</option>
+                                <option value="other" {% if evidence.device_specific_data.console_type == 'other' %}selected{% endif %}>Other</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label for="account_username" class="block text-sm font-medium text-foreground mb-2">Account Username</label>
+                            <input type="text" id="account_username" name="account_username" value="{{ evidence.device_specific_data.account_username|default:'' }}"
+                                class="w-full px-3 py-2 border border-input rounded-lg focus:outline-none focus:ring-2 focus:ring-ring"
+                                placeholder="Gaming account username">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Drone Fields -->
+                <div id="drone-fields" class="device-section hidden space-y-6">
+                    <h4 class="font-medium text-foreground">Drone/UAV Information</h4>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label for="drone_storage_type" class="block text-sm font-medium text-foreground mb-2">Storage Type</label>
+                            <select id="drone_storage_type" name="drone_storage_type" class="w-full px-3 py-2 border border-input rounded-lg focus:outline-none focus:ring-2 focus:ring-ring">
+                                <option value="">-- Select --</option>
+                                <option value="internal" {% if evidence.device_specific_data.drone_storage_type == 'internal' %}selected{% endif %}>Internal</option>
+                                <option value="sd_card" {% if evidence.device_specific_data.drone_storage_type == 'sd_card' %}selected{% endif %}>SD Card</option>
+                                <option value="both" {% if evidence.device_specific_data.drone_storage_type == 'both' %}selected{% endif %}>Both</option>
+                                <option value="other" {% if evidence.device_specific_data.drone_storage_type == 'other' %}selected{% endif %}>Other</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label for="controller_serial" class="block text-sm font-medium text-foreground mb-2">Controller Serial</label>
+                            <input type="text" id="controller_serial" name="controller_serial" value="{{ evidence.device_specific_data.controller_serial|default:'' }}"
+                                class="w-full px-3 py-2 border border-input rounded-lg focus:outline-none focus:ring-2 focus:ring-ring"
+                                placeholder="Controller serial number">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- IoT Device Fields -->
+                <div id="iot-fields" class="device-section hidden space-y-6">
+                    <h4 class="font-medium text-foreground">IoT Device Information</h4>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label for="iot_device_type" class="block text-sm font-medium text-foreground mb-2">IoT Device Type</label>
+                            <select id="iot_device_type" name="iot_device_type" class="w-full px-3 py-2 border border-input rounded-lg focus:outline-none focus:ring-2 focus:ring-ring">
+                                <option value="">-- Select --</option>
+                                <option value="smart_speaker" {% if evidence.device_specific_data.iot_device_type == 'smart_speaker' %}selected{% endif %}>Smart Speaker</option>
+                                <option value="smart_tv" {% if evidence.device_specific_data.iot_device_type == 'smart_tv' %}selected{% endif %}>Smart TV</option>
+                                <option value="security_camera" {% if evidence.device_specific_data.iot_device_type == 'security_camera' %}selected{% endif %}>Security Camera</option>
+                                <option value="smart_lock" {% if evidence.device_specific_data.iot_device_type == 'smart_lock' %}selected{% endif %}>Smart Lock</option>
+                                <option value="thermostat" {% if evidence.device_specific_data.iot_device_type == 'thermostat' %}selected{% endif %}>Thermostat</option>
+                                <option value="other" {% if evidence.device_specific_data.iot_device_type == 'other' %}selected{% endif %}>Other</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label for="network_type" class="block text-sm font-medium text-foreground mb-2">Network Type</label>
+                            <select id="network_type" name="network_type" class="w-full px-3 py-2 border border-input rounded-lg focus:outline-none focus:ring-2 focus:ring-ring">
+                                <option value="">-- Select --</option>
+                                <option value="wifi" {% if evidence.device_specific_data.network_type == 'wifi' %}selected{% endif %}>WiFi</option>
+                                <option value="ethernet" {% if evidence.device_specific_data.network_type == 'ethernet' %}selected{% endif %}>Ethernet</option>
+                                <option value="zigbee" {% if evidence.device_specific_data.network_type == 'zigbee' %}selected{% endif %}>Zigbee</option>
+                                <option value="zwave" {% if evidence.device_specific_data.network_type == 'zwave' %}selected{% endif %}>Z-Wave</option>
+                                <option value="bluetooth" {% if evidence.device_specific_data.network_type == 'bluetooth' %}selected{% endif %}>Bluetooth</option>
+                                <option value="other" {% if evidence.device_specific_data.network_type == 'other' %}selected{% endif %}>Other</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Memory/RAM Fields -->
+                <div id="memory-fields" class="device-section hidden space-y-6">
+                    <h4 class="font-medium text-foreground">Memory Acquisition Information</h4>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label for="memory_type" class="block text-sm font-medium text-foreground mb-2">Memory Type</label>
+                            <select id="memory_type" name="memory_type" class="w-full px-3 py-2 border border-input rounded-lg focus:outline-none focus:ring-2 focus:ring-ring">
+                                <option value="">-- Select --</option>
+                                <option value="volatile" {% if evidence.device_specific_data.memory_type == 'volatile' %}selected{% endif %}>Volatile (RAM)</option>
+                                <option value="non_volatile" {% if evidence.device_specific_data.memory_type == 'non_volatile' %}selected{% endif %}>Non-Volatile</option>
+                                <option value="both" {% if evidence.device_specific_data.memory_type == 'both' %}selected{% endif %}>Both</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label for="system_state" class="block text-sm font-medium text-foreground mb-2">System State</label>
+                            <select id="system_state" name="system_state" class="w-full px-3 py-2 border border-input rounded-lg focus:outline-none focus:ring-2 focus:ring-ring">
+                                <option value="">-- Select --</option>
+                                <option value="running" {% if evidence.device_specific_data.system_state == 'running' %}selected{% endif %}>Running</option>
+                                <option value="hibernated" {% if evidence.device_specific_data.system_state == 'hibernated' %}selected{% endif %}>Hibernated</option>
+                                <option value="suspended" {% if evidence.device_specific_data.system_state == 'suspended' %}selected{% endif %}>Suspended</option>
+                                <option value="crashed" {% if evidence.device_specific_data.system_state == 'crashed' %}selected{% endif %}>Crashed</option>
+                                <option value="unknown" {% if evidence.device_specific_data.system_state == 'unknown' %}selected{% endif %}>Unknown</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label for="memory_size" class="block text-sm font-medium text-foreground mb-2">Memory Size</label>
+                            <input type="text" id="memory_size" name="memory_size" value="{{ evidence.device_specific_data.memory_size|default:'' }}"
+                                class="w-full px-3 py-2 border border-input rounded-lg focus:outline-none focus:ring-2 focus:ring-ring"
+                                placeholder="E.g. 16GB">
+                        </div>
+                        <div>
+                            <label for="acquisition_duration" class="block text-sm font-medium text-foreground mb-2">Acquisition Duration</label>
+                            <input type="text" id="acquisition_duration" name="acquisition_duration" value="{{ evidence.device_specific_data.acquisition_duration|default:'' }}"
+                                class="w-full px-3 py-2 border border-input rounded-lg focus:outline-none focus:ring-2 focus:ring-ring"
+                                placeholder="E.g. 15 minutes">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Other Device Type (No specific fields, shows message) -->
+                <div id="other-fields" class="device-section hidden">
+                    <p class="text-sm text-muted-foreground">For 'Other' device types, use the common fields above and the notes section to describe the evidence.</p>
+                </div>
+            </div>
+            
+            <script>
+            function addIMEIField() {
+                const container = document.getElementById('additional-imeis');
+                const div = document.createElement('div');
+                div.className = 'flex gap-2';
+                div.innerHTML = `
+                    <input type="text" name="additional_imei" 
+                        class="flex-1 px-3 py-2 border border-input rounded-lg focus:outline-none focus:ring-2 focus:ring-ring"
+                        placeholder="Additional IMEI">
+                    <button type="button" onclick="this.parentElement.remove()" 
+                        class="px-3 py-2 bg-destructive text-destructive-foreground rounded-lg hover:opacity-90">
+                        Remove
+                    </button>
+                `;
+                container.appendChild(div);
+            }
+            
+            // Show/hide device-specific sections based on device type
+            function toggleDeviceFields() {
+                const deviceType = document.getElementById('device_type').value;
+                const sections = document.querySelectorAll('.device-section');
+                
+                // Hide all sections
+                sections.forEach(section => {
+                    section.classList.add('hidden');
+                });
+                
+                // Show the relevant section
+                const sectionMap = {
+                    'computer': 'computer-fields',
+                    'mobile': 'mobile-fields',
+                    'storage': 'storage-fields',
+                    'network': 'network-fields',
+                    'cloud': 'cloud-fields',
+                    'drone': 'drone-fields',
+                    'gaming': 'gaming-fields',
+                    'car': 'car-fields',
+                    'iot': 'iot-fields',
+                    'memory': 'memory-fields',
+                    'video': 'video-fields',
+                    'other': 'other-fields'
+                };
+                
+                const targetSection = sectionMap[deviceType];
+                if (targetSection) {
+                    document.getElementById(targetSection).classList.remove('hidden');
+                }
+            }
+            
+            // Searchable case dropdown
+            function initializeCaseSearch() {
+                const searchInput = document.getElementById('case-search');
+                const caseSelect = document.getElementById('case');
+                const dropdown = document.getElementById('case-dropdown');
+                const displayText = document.getElementById('selected-case-display');
+                
+                // Build search data from select options
+                const cases = [];
+                Array.from(caseSelect.options).forEach(option => {
+                    if (option.value) {
+                        cases.push({
+                            id: option.value,
+                            number: option.dataset.number,
+                            name: option.dataset.name,
+                            text: option.text
+                        });
+                    }
+                });
+                
+                // Initialize with pre-selected case if any
+                if (caseSelect.value) {
+                    const selectedOption = caseSelect.options[caseSelect.selectedIndex];
+                    searchInput.value = selectedOption.text;
+                    displayText.textContent = `Selected: ${selectedOption.text}`;
+                    displayText.classList.add('text-green-600', 'font-medium');
+                }
+                
+                // Show dropdown on focus
+                searchInput.addEventListener('focus', function() {
+                    if (!searchInput.value) {
+                        showAllCases();
+                    }
+                });
+                
+                // Search as user types
+                searchInput.addEventListener('input', function() {
+                    const query = searchInput.value.toLowerCase().trim();
+                    
+                    if (!query) {
+                        showAllCases();
+                        return;
+                    }
+                    
+                    // Filter cases
+                    const filtered = cases.filter(c => 
+                        c.number.toLowerCase().includes(query) || 
+                        c.name.toLowerCase().includes(query)
+                    );
+                    
+                    displayResults(filtered);
+                });
+                
+                // Close dropdown when clicking outside
+                document.addEventListener('click', function(e) {
+                    if (!searchInput.contains(e.target) && !dropdown.contains(e.target)) {
+                        dropdown.classList.add('hidden');
+                    }
+                });
+                
+                function showAllCases() {
+                    displayResults(cases);
+                }
+                
+                function displayResults(results) {
+                    dropdown.innerHTML = '';
+                    
+                    if (results.length === 0) {
+                        dropdown.innerHTML = '<div class="p-3 text-sm text-gray-500 text-center">No cases found</div>';
+                        dropdown.classList.remove('hidden');
+                        return;
+                    }
+                    
+                    // Add "Clear Selection" option at top if something is selected
+                    if (caseSelect.value) {
+                        const clearDiv = document.createElement('div');
+                        clearDiv.className = 'p-3 hover:bg-red-50 cursor-pointer border-b border-gray-200 text-red-600 font-medium';
+                        clearDiv.textContent = '✕ Clear Selection';
+                        clearDiv.onclick = function() {
+                            caseSelect.value = '';
+                            searchInput.value = '';
+                            displayText.textContent = '';
+                            displayText.classList.remove('text-green-600', 'font-medium');
+                            dropdown.classList.add('hidden');
+                        };
+                        dropdown.appendChild(clearDiv);
+                    }
+                    
+                    results.forEach(result => {
+                        const div = document.createElement('div');
+                        div.className = 'p-3 hover:bg-gray-100 cursor-pointer border-b border-gray-100';
+                        div.innerHTML = `
+                            <div class="font-medium text-gray-900">${result.number}</div>
+                            <div class="text-sm text-gray-600">${result.name}</div>
+                        `;
+                        div.onclick = function() {
+                            caseSelect.value = result.id;
+                            searchInput.value = result.text;
+                            displayText.textContent = `Selected: ${result.text}`;
+                            displayText.classList.add('text-green-600', 'font-medium');
+                            dropdown.classList.add('hidden');
+                        };
+                        dropdown.appendChild(div);
+                    });
+                    
+                    dropdown.classList.remove('hidden');
+                }
+            }
+            
+            // Initialize on page load
+            document.addEventListener('DOMContentLoaded', function() {
+                toggleDeviceFields();
+                document.getElementById('device_type').addEventListener('change', toggleDeviceFields);
+                initializeCaseSearch();
+            });
+            </script>
+            
+            <!-- Department and Custody Tracking -->
+            <div class="p-6 bg-purple-50 rounded-lg border-2 border-purple-200">
+                <h3 class="text-lg font-semibold text-foreground mb-4">Department & Custody Tracking</h3>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div>
+                        <label for="current_department" class="block text-sm font-medium text-foreground mb-2">Current Department</label>
+                        <select id="current_department" name="current_department"
+                            class="w-full px-3 py-2 border border-input rounded-lg focus:outline-none focus:ring-2 focus:ring-ring">
+                            <option value="">Not Assigned</option>
+                            <option value="ibs" {% if evidence.current_department == 'ibs' %}selected{% endif %}>IBS</option>
+                            <option value="team" {% if evidence.current_department == 'team' %}selected{% endif %}>Team</option>
+                            <option value="digi" {% if evidence.current_department == 'digi' %}selected{% endif %}>DIGI</option>
+                        </select>
+                    </div>
+                    
+                    <div>
+                        <label for="received_by" class="block text-sm font-medium text-foreground mb-2">Received By</label>
+                        <input type="text" id="received_by" name="received_by" value="{{ evidence.received_by|default:'' }}"
+                            class="w-full px-3 py-2 border border-input rounded-lg focus:outline-none focus:ring-2 focus:ring-ring"
+                            placeholder="Person who received the device">
+                    </div>
+                    
+                    <div>
+                        <label for="received_date" class="block text-sm font-medium text-foreground mb-2">Received Date</label>
+                        <input type="datetime-local" id="received_date" name="received_date" 
+                            value="{% if evidence.received_date %}{{ evidence.received_date|date:'Y-m-d\TH:i' }}{% endif %}"
+                            class="w-full px-3 py-2 border border-input rounded-lg focus:outline-none focus:ring-2 focus:ring-ring">
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Person Relationships -->
+            <div class="p-6 bg-amber-50 rounded-lg border-2 border-amber-200">
+                <div class="flex justify-between items-center mb-4">
+                    <div>
+                        <h3 class="text-lg font-semibold text-foreground">Person Relationships</h3>
+                        <p class="text-sm text-muted-foreground">Link this evidence to persons in the system</p>
+                    </div>
+                    <button type="button" onclick="openPersonModal()" 
+                        class="px-4 py-2 bg-amber-600 text-white rounded-lg hover:bg-amber-700 transition-colors font-medium shadow-md flex items-center gap-2">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+                        </svg>
+                        Add Person
+                    </button>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div>
+                        <label for="owner_person" class="block text-sm font-medium text-foreground mb-2">Owner</label>
+                        <select id="owner_person" name="owner_person"
+                            class="w-full px-3 py-2 border border-input rounded-lg focus:outline-none focus:ring-2 focus:ring-ring">
+                            <option value="">-- Select Owner (Optional) --</option>
+                            {% for person in persons %}
+                            <option value="{{ person.id }}" {% if evidence.owner_person.id == person.id %}selected{% endif %}>
+                                {{ person.first_name }} {{ person.last_name }} ({{ person.get_person_type_display }})
+                            </option>
+                            {% endfor %}
+                        </select>
+                        <p class="text-xs text-muted-foreground mt-1">Person who owns this evidence</p>
+                    </div>
+                    
+                    <div>
+                        <label for="seized_from_person" class="block text-sm font-medium text-foreground mb-2">Seized From</label>
+                        <select id="seized_from_person" name="seized_from_person"
+                            class="w-full px-3 py-2 border border-input rounded-lg focus:outline-none focus:ring-2 focus:ring-ring">
+                            <option value="">-- Select Person (Optional) --</option>
+                            {% for person in persons %}
+                            <option value="{{ person.id }}" {% if evidence.seized_from_person.id == person.id %}selected{% endif %}>
+                                {{ person.first_name }} {{ person.last_name }} ({{ person.get_person_type_display }})
+                            </option>
+                            {% endfor %}
+                        </select>
+                        <p class="text-xs text-muted-foreground mt-1">Person from whom evidence was seized</p>
+                    </div>
+                    
+                    <div>
+                        <label for="custodian_person" class="block text-sm font-medium text-foreground mb-2">Custodian</label>
+                        <select id="custodian_person" name="custodian_person"
+                            class="w-full px-3 py-2 border border-input rounded-lg focus:outline-none focus:ring-2 focus:ring-ring">
+                            <option value="">-- Select Custodian (Optional) --</option>
+                            {% for person in persons %}
+                            <option value="{{ person.id }}" {% if evidence.custodian_person.id == person.id %}selected{% endif %}>
+                                {{ person.first_name }} {{ person.last_name }} ({{ person.get_person_type_display }})
+                            </option>
+                            {% endfor %}
+                        </select>
+                        <p class="text-xs text-muted-foreground mt-1">Person who has custody of evidence</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                    <label for="description" class="block text-sm font-medium text-foreground mb-2">Description</label>
+                    <textarea id="description" name="description" rows="3"
+                        class="w-full px-3 py-2 border border-input rounded-lg focus:outline-none focus:ring-2 focus:ring-ring"
+                        placeholder="Detailed description of the evidence">{{ evidence.description|default:'' }}</textarea>
+                </div>
+                
+                <div>
+                    <label for="notes" class="block text-sm font-medium text-foreground mb-2">Notes</label>
+                    <textarea id="notes" name="notes" rows="3"
+                        class="w-full px-3 py-2 border border-input rounded-lg focus:outline-none focus:ring-2 focus:ring-ring"
+                        placeholder="Additional notes">{{ evidence.notes|default:'' }}</textarea>
+                </div>
+            </div>
+            
+            <!-- Documents -->
+            <div class="mt-6 p-6 bg-green-50 rounded-lg border-2 border-green-200">
+                <h3 class="text-lg font-semibold text-foreground mb-4">Documents</h3>
+                <p class="text-sm text-muted-foreground mb-4">Upload related documents (PDFs, Word docs, etc.)</p>
+                
+                {% if evidence and evidence.documents.all %}
+                <div class="mb-4">
+                    <h4 class="text-sm font-medium text-foreground mb-2">Current Documents</h4>
+                    <div class="space-y-2">
+                        {% for doc in evidence.documents.all %}
+                        <div class="flex items-center justify-between p-3 bg-white rounded-lg border border-green-200">
+                            <div class="flex items-center gap-3">
+                                <svg class="w-8 h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"/>
+                                </svg>
+                                <div>
+                                    <p class="font-medium text-sm">{{ doc.title }}</p>
+                                    <p class="text-xs text-muted-foreground">{{ doc.file_type|upper }} • {{ doc.file_size|filesizeformat }}</p>
+                                </div>
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <a href="{{ doc.file_path.url }}" target="_blank" class="text-primary hover:underline text-sm">Download</a>
+                                <label class="flex items-center space-x-1 bg-red-500 text-white px-2 py-1 rounded text-xs cursor-pointer hover:bg-red-600">
+                                    <input type="checkbox" name="delete_document" value="{{ doc.id }}" class="w-3 h-3">
+                                    <span>Delete</span>
+                                </label>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+                {% endif %}
+                
+                <div>
+                    <label for="evidence_documents" class="block text-sm font-medium text-foreground mb-2">Upload Documents</label>
+                    <input type="file" id="evidence_documents" name="evidence_documents" multiple 
+                        accept=".pdf,.doc,.docx,.xls,.xlsx,.txt,.csv"
+                        class="w-full px-3 py-2 border border-input rounded-lg focus:outline-none focus:ring-2 focus:ring-ring file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-green-50 file:text-green-700 hover:file:bg-green-100">
+                    <p class="text-xs text-muted-foreground mt-1">Supported: PDF, Word, Excel, Text, CSV</p>
+                </div>
+            </div>
+            
+            <!-- Evidence Images -->
+            <div class="mt-6 p-6 bg-blue-50 rounded-lg border-2 border-blue-200">
+                <h3 class="text-lg font-semibold text-foreground mb-4">Evidence Images</h3>
+                <p class="text-sm text-muted-foreground mb-4">Upload photos of the evidence item. You can upload multiple images.</p>
+                
+                {% if evidence and evidence.images.all %}
+                <div class="mb-4">
+                    <h4 class="text-sm font-medium text-foreground mb-2">Current Images</h4>
+                    <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                        {% for image in evidence.images.all %}
+                        <div class="relative group">
+                            <img src="{{ image.image.url }}" alt="{{ image.caption }}" class="w-full h-32 object-cover rounded-lg border border-gray-300">
+                            <div class="absolute top-2 right-2">
+                                <label class="flex items-center space-x-1 bg-red-500 text-white px-2 py-1 rounded text-xs cursor-pointer hover:bg-red-600">
+                                    <input type="checkbox" name="delete_image" value="{{ image.id }}" class="w-3 h-3">
+                                    <span>Delete</span>
+                                </label>
+                            </div>
+                            {% if image.caption %}
+                            <p class="text-xs text-gray-600 mt-1 truncate">{{ image.caption }}</p>
+                            {% endif %}
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+                {% endif %}
+                
+                <div>
+                    <label for="evidence_images" class="block text-sm font-medium text-foreground mb-2">Upload New Images</label>
+                    <input type="file" id="evidence_images" name="evidence_images" multiple accept="image/*"
+                        class="w-full px-3 py-2 border border-input rounded-lg focus:outline-none focus:ring-2 focus:ring-ring file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-purple-50 file:text-purple-700 hover:file:bg-purple-100">
+                    <p class="text-xs text-muted-foreground mt-1">Supported formats: JPG, PNG, GIF. You can select multiple files.</p>
+                </div>
+                
+                <div id="image-preview" class="mt-4 grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 hidden">
+                    <!-- Preview thumbnails will appear here -->
+                </div>
+            </div>
+            
+            <script>
+            // Image preview functionality
+            document.getElementById('evidence_images').addEventListener('change', function(e) {
+                const previewContainer = document.getElementById('image-preview');
+                previewContainer.innerHTML = '';
+                
+                if (this.files.length > 0) {
+                    previewContainer.classList.remove('hidden');
+                    
+                    Array.from(this.files).forEach((file, index) => {
+                        const reader = new FileReader();
+                        reader.onload = function(e) {
+                            const div = document.createElement('div');
+                            div.className = 'relative';
+                            div.innerHTML = `
+                                <img src="${e.target.result}" class="w-full h-32 object-cover rounded-lg border border-gray-300">
+                                <p class="text-xs text-gray-600 mt-1 truncate">${file.name}</p>
+                            `;
+                            previewContainer.appendChild(div);
+                        };
+                        reader.readAsDataURL(file);
+                    });
+                } else {
+                    previewContainer.classList.add('hidden');
+                }
+            });
+            </script>
+            
+            <div class="flex gap-4 pt-4">
+                <button type="submit" 
+                    class="px-6 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors font-medium shadow-md">
+                    {% if evidence %}Update Evidence{% else %}Add Evidence{% endif %}
+                </button>
+                <button type="button" onclick="window.history.back();"
+                    class="px-6 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors font-medium shadow-md">
+                    Cancel
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <!-- Add Person Modal -->
+    <div id="personModal" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50 flex items-center justify-center p-4">
+        <div class="bg-white rounded-lg shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+            <div class="p-6">
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="text-xl font-bold text-gray-900">Add New Person</h3>
+                    <button type="button" onclick="closePersonModal()" class="text-gray-400 hover:text-gray-600">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                        </svg>
+                    </button>
+                </div>
+
+                <form id="personForm" class="space-y-4">
+                    {% csrf_token %}
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">First Name *</label>
+                            <input type="text" id="modal_first_name" required
+                                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Last Name *</label>
+                            <input type="text" id="modal_last_name" required
+                                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500">
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Middle Name</label>
+                            <input type="text" id="modal_middle_name"
+                                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Person Type *</label>
+                            <select id="modal_person_type" required
+                                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500">
+                                <option value="suspect">Suspect</option>
+                                <option value="victim">Victim</option>
+                                <option value="witness">Witness</option>
+                                <option value="investigator">Investigator</option>
+                                <option value="expert">Expert</option>
+                                <option value="other">Other</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Date of Birth</label>
+                        <input type="date" id="modal_date_of_birth"
+                            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500">
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Email</label>
+                            <input type="email" id="modal_email"
+                                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Phone</label>
+                            <input type="tel" id="modal_phone"
+                                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500">
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Address</label>
+                        <input type="text" id="modal_address"
+                            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500">
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Notes</label>
+                        <textarea id="modal_notes" rows="3"
+                            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500"></textarea>
+                    </div>
+
+                    <div class="flex gap-3 pt-4">
+                        <button type="submit"
+                            class="flex-1 px-4 py-2 bg-amber-600 text-white rounded-lg hover:bg-amber-700 transition-colors font-medium">
+                            Create Person
+                        </button>
+                        <button type="button" onclick="closePersonModal()"
+                            class="px-4 py-2 bg-gray-300 text-gray-700 rounded-lg hover:bg-gray-400 transition-colors font-medium">
+                            Cancel
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script>
+    function openPersonModal() {
+        document.getElementById('personModal').classList.remove('hidden');
+    }
+
+    function closePersonModal() {
+        document.getElementById('personModal').classList.add('hidden');
+        document.getElementById('personForm').reset();
+    }
+
+    // Handle person form submission
+    document.getElementById('personForm').addEventListener('submit', async function(e) {
+        e.preventDefault();
+        
+        const formData = new FormData();
+        formData.append('first_name', document.getElementById('modal_first_name').value);
+        formData.append('last_name', document.getElementById('modal_last_name').value);
+        formData.append('middle_name', document.getElementById('modal_middle_name').value);
+        formData.append('person_type', document.getElementById('modal_person_type').value);
+        formData.append('date_of_birth', document.getElementById('modal_date_of_birth').value);
+        formData.append('email', document.getElementById('modal_email').value);
+        formData.append('phone', document.getElementById('modal_phone').value);
+        formData.append('address', document.getElementById('modal_address').value);
+        formData.append('notes', document.getElementById('modal_notes').value);
+        formData.append('csrfmiddlewaretoken', document.querySelector('[name=csrfmiddlewaretoken]').value);
+        
+        try {
+            const response = await fetch('/persons/create/', {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            });
+            
+            if (response.ok) {
+                const data = await response.json();
+                
+                // Add new person to all three dropdowns
+                const personText = `${data.first_name} ${data.last_name} (${data.person_type})`;
+                const option1 = new Option(personText, data.id, false, false);
+                const option2 = new Option(personText, data.id, false, false);
+                const option3 = new Option(personText, data.id, false, false);
+                
+                document.getElementById('owner_person').add(option1);
+                document.getElementById('seized_from_person').add(option2);
+                document.getElementById('custodian_person').add(option3);
+                
+                // Close modal and show success message
+                closePersonModal();
+                alert(`Person "${personText}" created successfully!`);
+            } else {
+                const error = await response.json();
+                alert('Error creating person: ' + (error.message || 'Unknown error'));
+            }
+        } catch (error) {
+            console.error('Error:', error);
+            alert('Error creating person. Please try again.');
+        }
+    });
+
+    // Close modal when clicking outside
+    document.getElementById('personModal').addEventListener('click', function(e) {
+        if (e.target === this) {
+            closePersonModal();
+        }
+    });
+    </script>
+</div>
+{% endblock %}

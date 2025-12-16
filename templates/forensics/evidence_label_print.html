@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ evidence.evidence_number }} - Label</title>
+    {% load static %}
+    <style>
+        @media print {
+            .no-print { display: none; }
+            @page {
+                size: 55mm 31mm;
+                margin: 0;
+            }
+            body {
+                margin: 0;
+                padding: 0;
+            }
+        }
+        
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background-color: #f0f0f0;
+        }
+        
+        .label-container {
+            width: 55mm;
+            height: 31mm;
+            background: white;
+            border: 2px dashed #ccc;
+            display: flex;
+            flex-direction: column;
+            padding: 2mm;
+            box-sizing: border-box;
+            position: relative;
+        }
+        
+        .content-section {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex: 1;
+        }
+        
+        .qr-section {
+            flex-shrink: 0;
+            margin-right: 3mm;
+        }
+        
+        .qr-section img {
+            width: 25mm;
+            height: 25mm;
+            display: block;
+        }
+        
+        .info-section {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            min-width: 0;
+        }
+        
+        .evidence-number {
+            font-size: 12px;
+            font-weight: bold;
+            margin: 0 0 2px 0;
+            color: #000;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        
+        .item-name {
+            font-size: 9px;
+            font-weight: 600;
+            margin: 0 0 3px 0;
+            color: #333;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        
+        .detail-line {
+            font-size: 7px;
+            margin: 1px 0;
+            color: #555;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        
+        .detail-label {
+            font-weight: bold;
+            color: #000;
+        }
+        
+        .print-button {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 12px 24px;
+            background-color: #2563eb;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+        }
+        
+        .print-button:hover {
+            background-color: #1e40af;
+        }
+        
+        .instructions {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: white;
+            padding: 15px 25px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+            text-align: center;
+        }
+        
+        .instructions h3 {
+            margin: 0 0 10px 0;
+            font-size: 16px;
+            color: #2563eb;
+        }
+        
+        .instructions p {
+            margin: 5px 0;
+            font-size: 13px;
+            color: #666;
+        }
+        
+        .badge {
+            display: inline-block;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 9px;
+            font-weight: bold;
+            margin-top: 4px;
+            background-color: #dbeafe;
+            color: #1e40af;
+        }
+    </style>
+</head>
+<body>
+    <button onclick="window.print()" class="print-button no-print">🖨️ Print Label</button>
+    
+    <div class="instructions no-print">
+        <h3>Label Printing Instructions</h3>
+        <p><strong>Label Size:</strong> 55mm × 31mm</p>
+        <p>Compatible with Dymo, Brother, and Zebra label printers</p>
+        <p><strong>QR Code Type:</strong> 
+            {% if label_type == 'offline' %}
+                <span style="color: #059669; font-weight: bold;">✓ Offline Data (works without internet)</span>
+            {% else %}
+                <span style="color: #2563eb; font-weight: bold;">→ Online Link (requires internet)</span>
+            {% endif %}
+        </p>
+        <p style="margin-top: 10px;">
+            {% if label_type == 'offline' %}
+                <a href="?type=online" style="color: #2563eb; text-decoration: underline;">Switch to Online Link</a>
+            {% else %}
+                <a href="?type=offline" style="color: #059669; text-decoration: underline;">Switch to Offline Data</a>
+            {% endif %}
+        </p>
+        <p style="margin-top: 5px; font-size: 11px; color: #888;">
+            {% if label_type == 'offline' %}
+                Offline: QR contains all evidence details in JSON format
+            {% else %}
+                Online: QR links to full evidence page ({{ evidence_url }})
+            {% endif %}
+        </p>
+    </div>
+    
+    <div class="label-container">
+        <div class="content-section">
+            <div class="qr-section">
+                <img src="{{ qr_code_data }}" alt="QR Code">
+            </div>
+            <div class="info-section">
+                <div class="evidence-number">{{ evidence.evidence_number }}</div>
+                
+                {% if evidence.case %}
+                <div class="item-name">{{ evidence.case.case_number }}</div>
+                {% else %}
+                <div class="item-name" style="color: #999;">No Case Assigned</div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</body>
+</html>
