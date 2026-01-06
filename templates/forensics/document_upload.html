@@ -1,0 +1,144 @@
+{% extends "base.html" %}
+
+{% block title %}Upload Document - Diamond Forensics{% endblock %}
+
+{% block content %}
+<style>
+    /* Django form widget styling */
+    select, input[type="text"], textarea {
+        width: 100%;
+        padding: 0.625rem 0.875rem;
+        font-size: 0.875rem;
+        line-height: 1.5;
+        color: #EEEEEE;
+        background-color: #2e3239;
+        border: 1.5px solid #00ADB5;
+        border-radius: 0.5rem;
+        transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        box-shadow: inset 0 1px 2px 0 rgb(0 0 0 / 0.2);
+    }
+    select:focus, input[type="text"]:focus, textarea:focus {
+        outline: none;
+        border-color: #00ADB5;
+        box-shadow: 0 0 0 3px rgba(0, 173, 181, 0.3);
+        background-color: #393E46;
+    }
+    input[type="checkbox"] {
+        width: 1rem;
+        height: 1rem;
+        border: 1.5px solid #00ADB5;
+        border-radius: 0.25rem;
+        background-color: #2e3239;
+    }
+</style>
+<div class="container mx-auto px-4 py-6">
+    {% include "components/breadcrumbs.html" %}
+
+    <div class="max-w-3xl mx-auto">
+        <div class="card rounded-lg border border-border p-8 shadow-lg">
+            <h2 class="text-2xl font-bold text-white mb-6">Upload Document to Case {{ case.case_number }}</h2>
+
+            <form method="post" enctype="multipart/form-data" class="space-y-6">
+                {% csrf_token %}
+                
+                {% if form.non_field_errors %}
+                <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
+                    {{ form.non_field_errors }}
+                </div>
+                {% endif %}
+
+                <div>
+                    <label for="{{ form.document_type.id_for_label }}" class="block text-sm font-medium form-label">
+                        {{ form.document_type.label }} <span class="text-destructive">*</span>
+                    </label>
+                    {{ form.document_type }}
+                    {% if form.document_type.errors %}
+                    <p class="mt-1 text-sm text-destructive">{{ form.document_type.errors.0 }}</p>
+                    {% endif %}
+                </div>
+
+                <div>
+                    <label for="{{ form.title.id_for_label }}" class="block text-sm font-medium form-label">
+                        {{ form.title.label }} <span class="text-destructive">*</span>
+                    </label>
+                    {{ form.title }}
+                    {% if form.title.errors %}
+                    <p class="mt-1 text-sm text-destructive">{{ form.title.errors.0 }}</p>
+                    {% endif %}
+                </div>
+
+                <div>
+                    <label for="{{ form.description.id_for_label }}" class="block text-sm font-medium form-label">
+                        {{ form.description.label }}
+                    </label>
+                    {{ form.description }}
+                    {% if form.description.errors %}
+                    <p class="mt-1 text-sm text-destructive">{{ form.description.errors.0 }}</p>
+                    {% endif %}
+                </div>
+
+                <div>
+                    <label for="{{ form.file_path.id_for_label }}" class="block text-sm font-medium form-label">
+                        {{ form.file_path.label }}
+                    </label>
+                    {{ form.file_path }}
+                    {% if form.file_path.errors %}
+                    <p class="mt-1 text-sm text-destructive">{{ form.file_path.errors.0 }}</p>
+                    {% endif %}
+                    <p class="mt-1 text-xs text-muted-foreground">Supported formats: PDF, Word, Excel, Images, etc.</p>
+                </div>
+
+                <div>
+                    <label for="{{ form.evidence.id_for_label }}" class="block text-sm font-medium form-label">
+                        {{ form.evidence.label }}
+                    </label>
+                    {{ form.evidence }}
+                    {% if form.evidence.errors %}
+                    <p class="mt-1 text-sm text-destructive">{{ form.evidence.errors.0 }}</p>
+                    {% endif %}
+                    <p class="mt-1 text-xs text-muted-foreground">Link this document to a specific evidence item (optional)</p>
+                </div>
+
+                <div>
+                    <label for="{{ form.author.id_for_label }}" class="block text-sm font-medium form-label">
+                        {{ form.author.label }}
+                    </label>
+                    {{ form.author }}
+                    {% if form.author.errors %}
+                    <p class="mt-1 text-sm text-destructive">{{ form.author.errors.0 }}</p>
+                    {% endif %}
+                </div>
+
+                <div>
+                    <label for="{{ form.access_level.id_for_label }}" class="block text-sm font-medium form-label">
+                        {{ form.access_level.label }}
+                    </label>
+                    {{ form.access_level }}
+                    {% if form.access_level.errors %}
+                    <p class="mt-1 text-sm text-destructive">{{ form.access_level.errors.0 }}</p>
+                    {% endif %}
+                </div>
+
+                <div class="flex items-center">
+                    {{ form.is_confidential }}
+                    <label for="{{ form.is_confidential.id_for_label }}" class="ml-2 text-sm form-label">
+                        {{ form.is_confidential.label }}
+                    </label>
+                    {% if form.is_confidential.errors %}
+                    <p class="mt-1 text-sm text-destructive">{{ form.is_confidential.errors.0 }}</p>
+                    {% endif %}
+                </div>
+
+                <div class="flex gap-4 pt-4">
+                    <button type="submit" class="btn btn-primary">
+                        Upload Document
+                    </button>
+                    <a href="{% url 'case_detail' case.pk %}" class="btn btn-secondary">
+                        Cancel
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

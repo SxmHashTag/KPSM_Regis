@@ -1,0 +1,133 @@
+{% extends 'base.html' %}
+
+{% block title %}Access Requests - Diamond Forensics{% endblock %}
+
+{% block content %}
+<div class="space-y-6">
+    <!-- Breadcrumbs -->
+    {% include 'components/breadcrumbs.html' %}
+    
+    <!-- Page Header -->
+    <div class="flex justify-between items-center">
+        <div>
+            <h2 class="text-3xl font-bold text-foreground">Access Requests</h2>
+            <p class="text-muted-foreground mt-1">Review and manage user access requests</p>
+        </div>
+        <div class="flex gap-2 items-center">
+            {% if pending_count > 0 %}
+            <span class="badge badge-warning text-base px-4 py-2">
+                {{ pending_count }} Pending Request{{ pending_count|pluralize }}
+            </span>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Status Filter -->
+    <div class="card rounded-lg border border-border p-4 shadow-md">
+        <form method="get" class="flex gap-4 items-end">
+            <div class="w-64">
+                <label class="block text-sm font-medium text-muted-foreground mb-1">Filter by Status</label>
+                <select name="status" class="form-input" onchange="this.form.submit()">
+                    <option value="">All Requests</option>
+                    <option value="pending" {% if status_filter == 'pending' %}selected{% endif %}>Pending</option>
+                    <option value="approved" {% if status_filter == 'approved' %}selected{% endif %}>Approved</option>
+                    <option value="rejected" {% if status_filter == 'rejected' %}selected{% endif %}>Rejected</option>
+                </select>
+            </div>
+            {% if status_filter %}
+            <a href="{% url 'access_request_list' %}" class="btn btn-secondary">
+                Clear Filter
+            </a>
+            {% endif %}
+        </form>
+    </div>
+
+    <!-- Requests List -->
+    <div class="table-container rounded-lg border border-border overflow-hidden shadow-md">
+        {% if access_requests %}
+        <div class="overflow-x-auto">
+            <table class="w-full">
+                <thead class="card">
+                    <tr>
+                        <th class="px-6 py-4 text-left text-sm font-semibold text-white uppercase tracking-wider">
+                            Full Name
+                        </th>
+                        <th class="px-6 py-4 text-left text-sm font-semibold text-white uppercase tracking-wider">
+                            Badge Number
+                        </th>
+                        <th class="px-6 py-4 text-left text-sm font-semibold text-white uppercase tracking-wider">
+                            Department
+                        </th>
+                        <th class="px-6 py-4 text-left text-sm font-semibold text-white uppercase tracking-wider">
+                            Requested Username
+                        </th>
+                        <th class="px-6 py-4 text-left text-sm font-semibold text-white uppercase tracking-wider">
+                            Status
+                        </th>
+                        <th class="px-6 py-4 text-left text-sm font-semibold text-white uppercase tracking-wider">
+                            Requested Date
+                        </th>
+                        <th class="px-6 py-4 text-right text-sm font-semibold text-white uppercase tracking-wider">
+                            Actions
+                        </th>
+                    </tr>
+                </thead>
+                <tbody class="card divide-y divide-border">
+                    {% for request in access_requests %}
+                    <tr class="hover:bg-muted transition-colors">
+                        <td class="px-6 py-4 text-sm text-foreground font-medium">
+                            {{ request.full_name }}
+                        </td>
+                        <td class="px-6 py-4 text-sm text-foreground">
+                            {{ request.badge_number }}
+                        </td>
+                        <td class="px-6 py-4 text-sm text-foreground">
+                            {{ request.department }}
+                        </td>
+                        <td class="px-6 py-4 text-sm text-foreground font-mono">
+                            {{ request.requested_username }}
+                        </td>
+                        <td class="px-6 py-4 text-sm">
+                            {% if request.status == 'pending' %}
+                                <span class="badge badge-warning">Pending</span>
+                            {% elif request.status == 'approved' %}
+                                <span class="badge badge-success">Approved</span>
+                            {% elif request.status == 'rejected' %}
+                                <span class="badge badge-danger">Rejected</span>
+                            {% endif %}
+                        </td>
+                        <td class="px-6 py-4 text-sm text-muted-foreground">
+                            {{ request.requested_at|date:"M d, Y g:i A" }}
+                        </td>
+                        <td class="px-6 py-4 text-right text-sm">
+                            <a href="{% url 'access_request_review' request.pk %}" 
+                               class="btn btn-sm {% if request.status == 'pending' %}btn-primary{% else %}btn-secondary{% endif %}">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+                                </svg>
+                                {% if request.status == 'pending' %}Review{% else %}View{% endif %}
+                            </a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div class="card p-12 text-center">
+            <svg class="w-16 h-16 mx-auto text-muted-foreground mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4"/>
+            </svg>
+            <p class="text-lg text-muted-foreground">
+                {% if status_filter %}
+                    No {{ status_filter }} access requests found.
+                {% else %}
+                    No access requests found.
+                {% endif %}
+            </p>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

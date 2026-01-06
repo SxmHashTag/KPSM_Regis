@@ -272,7 +272,6 @@ class Evidence(models.Model):
         ('iot', 'IoT Device'),
         ('memory', 'Memory/RAM'),
         ('video', 'Video Evidence'),
-        ('dvr_nvr', 'DVR/NVR'),
         ('other', 'Other'),
     ]
     
@@ -309,6 +308,14 @@ class Evidence(models.Model):
         ('other', 'Other'),
     ]
     
+    # Location choices for current_department field (where evidence is physically located)
+    LOCATION_CHOICES = [
+        ('ibs', 'IBS'),
+        ('team', 'Team'),
+        ('digi', 'DIGI'),
+        ('other', 'Other'),
+    ]
+    
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     evidence_number = models.CharField(max_length=100, unique=True, blank=True)
     ibs_number = models.CharField(max_length=50, blank=True, help_text='IBS tracking number (e.g., 24/46/123)')
@@ -327,7 +334,7 @@ class Evidence(models.Model):
     location = models.CharField(max_length=500, blank=True)
     
     # Department and custody tracking
-    current_department = models.CharField(max_length=20, choices=DEPARTMENT_CHOICES, blank=True, help_text='Current department holding the device')
+    current_department = models.CharField(max_length=20, choices=LOCATION_CHOICES, blank=True, help_text='Current location holding the device')
     received_by = models.CharField(max_length=200, blank=True, help_text='Person who received the device')
     received_date = models.DateTimeField(null=True, blank=True, help_text='Date device was received by current department')
     
@@ -414,14 +421,19 @@ class Evidence(models.Model):
 class Document(models.Model):
     """Case-related documents and reports"""
     TYPE_CHOICES = [
-        ('report', 'Report'),
-        ('warrant', 'Warrant'),
-        ('subpoena', 'Subpoena'),
-        ('affidavit', 'Affidavit'),
-        ('memo', 'Memo'),
-        ('photo', 'Photo'),
-        ('other', 'Other'),
+        ('ontvangstbewijs', 'Ontvangstbewijs'),
+        ('intake', 'Intake'),
+        ('kvi', 'KVI'),
+        ('na-sporing', 'Na-sporing'),
+        ('procesverbaal', 'Proces-Verbaal'),
+        ('rapport', 'Rapport'),
+        ('onderzoeksverslag', 'Onderzoeksverslag'),
+        ('foto', 'Foto'),
+        ('bewijs', 'Bewijs'),
+        ('verklaring', 'Verklaring'),
+        ('andere', 'Andere'),
     ]
+
     
     ACCESS_CHOICES = [
         ('public', 'Public'),

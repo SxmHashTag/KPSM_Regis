@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" class="light">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -9,57 +9,64 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <script>
         tailwind.config = {
             theme: {
                 extend: {
                     colors: {
-                        border: "hsl(220 8% 82%)",
-                        input: "hsl(220 8% 88%)",
-                        ring: "hsl(220 15% 50%)",
-                        background: "hsl(220 10% 95%)",
-                        foreground: "hsl(220 10% 20%)",
+                        // Modern Cyan/Dark Theme
+                        border: "#00ADB5",
+                        input: "#393E46",
+                        ring: "#00ADB5",
+                        background: "#222831",
+                        foreground: "#EEEEEE",
                         primary: {
-                            DEFAULT: "hsl(217 91% 60%)",  // Vibrant blue
-                            foreground: "hsl(0 0% 100%)",
+                            DEFAULT: "#00ADB5",
+                            hover: "#019fa6",
+                            foreground: "#ffffff",
                         },
                         secondary: {
-                            DEFAULT: "hsl(220 13% 69%)",  // Muted blue-gray
-                            foreground: "hsl(0 0% 100%)",
+                            DEFAULT: "#393E46",
+                            hover: "#2e3239",
+                            foreground: "#EEEEEE",
                         },
                         destructive: {
-                            DEFAULT: "hsl(0 84% 60%)",  // Bright red
-                            foreground: "hsl(0 0% 100%)",
+                            DEFAULT: "#E63946",
+                            hover: "#d62836",
+                            foreground: "#ffffff",
                         },
                         success: {
-                            DEFAULT: "hsl(142 76% 36%)",  // Green
-                            foreground: "hsl(0 0% 100%)",
+                            DEFAULT: "#06D6A0",
+                            hover: "#05c090",
+                            foreground: "#ffffff",
                         },
                         warning: {
-                            DEFAULT: "hsl(38 92% 50%)",  // Orange
-                            foreground: "hsl(0 0% 100%)",
+                            DEFAULT: "#FFB703",
+                            hover: "#e5a503",
+                            foreground: "#222831",
                         },
                         muted: {
-                            DEFAULT: "hsl(220 8% 90%)",
-                            foreground: "hsl(220 8% 48%)",
+                            DEFAULT: "#2e3239",
+                            foreground: "#9CA3AF",
                         },
                         accent: {
-                            DEFAULT: "hsl(262 83% 58%)",  // Purple accent
-                            foreground: "hsl(0 0% 100%)",
+                            DEFAULT: "#00ADB5",
+                            hover: "#019fa6",
+                            foreground: "#ffffff",
                         },
                         card: {
-                            DEFAULT: "hsl(220 15% 97%)",
-                            foreground: "hsl(220 10% 20%)",
+                            DEFAULT: "#393E46",
+                            foreground: "#EEEEEE",
                         },
                     },
                     borderRadius: {
-                        lg: "0.65rem",
-                        md: "calc(0.65rem - 2px)",
-                        sm: "calc(0.65rem - 4px)",
+                        lg: "0.5rem",
+                        md: "0.375rem",
+                        sm: "0.25rem",
                     },
                     fontFamily: {
-                        sans: ['Inter', 'system-ui', 'sans-serif'],
+                        sans: ['Inter', 'system-ui', '-apple-system', 'sans-serif'],
                     },
                 }
             }
@@ -67,10 +74,12 @@
     </script>
     <style>
         * {
-            font-family: 'Inter', sans-serif;
+            font-family: 'Inter', system-ui, -apple-system, sans-serif;
         }
         body {
             font-feature-settings: "rlig" 1, "calt" 1;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
         }
         @keyframes slideIn {
             from {
@@ -85,56 +94,313 @@
         .animate-slide-in {
             animation: slideIn 0.3s ease-out;
         }
+        
+        /* Uniform Button Styles */
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            font-weight: 600;
+            font-size: 0.875rem;
+            line-height: 1.25rem;
+            padding: 0.625rem 1.25rem;
+            border-radius: 0.5rem;
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            cursor: pointer;
+            border: none;
+            white-space: nowrap;
+            text-decoration: none;
+        }
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        .btn-primary {
+            background: linear-gradient(180deg, hsl(217 89% 61%) 0%, hsl(217 89% 56%) 100%);
+            color: white;
+            box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05), inset 0 1px 0 0 rgb(255 255 255 / 0.1);
+        }
+        .btn-primary:hover:not(:disabled) {
+            background: linear-gradient(180deg, hsl(217 89% 54%) 0%, hsl(217 89% 49%) 100%);
+            box-shadow: 0 2px 4px 0 rgb(0 0 0 / 0.1), inset 0 1px 0 0 rgb(255 255 255 / 0.1);
+            transform: translateY(-1px);
+        }
+        .btn-secondary {
+            background-color: white;
+            color: hsl(222 47% 11%);
+            border: 1px solid hsl(214 15% 91%);
+            box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.03);
+        }
+        .btn-secondary:hover:not(:disabled) {
+            background-color: hsl(214 13% 97%);
+            border-color: hsl(214 20% 85%);
+            box-shadow: 0 2px 4px 0 rgb(0 0 0 / 0.05);
+        }
+        .btn-success {
+            background: linear-gradient(180deg, hsl(142 71% 45%) 0%, hsl(142 71% 41%) 100%);
+            color: white;
+            box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05), inset 0 1px 0 0 rgb(255 255 255 / 0.1);
+        }
+        .btn-success:hover:not(:disabled) {
+            background: linear-gradient(180deg, hsl(142 71% 39%) 0%, hsl(142 71% 35%) 100%);
+            box-shadow: 0 2px 4px 0 rgb(0 0 0 / 0.1), inset 0 1px 0 0 rgb(255 255 255 / 0.1);
+            transform: translateY(-1px);
+        }
+        .btn-danger {
+            background: linear-gradient(180deg, hsl(0 72% 51%) 0%, hsl(0 72% 47%) 100%);
+            color: white;
+            box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05), inset 0 1px 0 0 rgb(255 255 255 / 0.1);
+        }
+        .btn-danger:hover:not(:disabled) {
+            background: linear-gradient(180deg, hsl(0 72% 45%) 0%, hsl(0 72% 41%) 100%);
+            box-shadow: 0 2px 4px 0 rgb(0 0 0 / 0.1), inset 0 1px 0 0 rgb(255 255 255 / 0.1);
+            transform: translateY(-1px);
+        }
+        .btn-warning {
+            background: linear-gradient(180deg, hsl(38 92% 50%) 0%, hsl(38 92% 46%) 100%);
+            color: white;
+            box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05), inset 0 1px 0 0 rgb(255 255 255 / 0.1);
+        }
+        .btn-warning:hover:not(:disabled) {
+            background: linear-gradient(180deg, hsl(38 92% 44%) 0%, hsl(38 92% 40%) 100%);
+            box-shadow: 0 2px 4px 0 rgb(0 0 0 / 0.1), inset 0 1px 0 0 rgb(255 255 255 / 0.1);
+            transform: translateY(-1px);
+        }
+        .btn-ghost {
+            background-color: transparent;
+            color: hsl(215 13% 52%);
+        }
+        .btn-ghost:hover:not(:disabled) {
+            background-color: hsl(210 17% 95%);
+            color: hsl(222 47% 11%);
+        }
+        .btn-sm {
+            padding: 0.375rem 0.875rem;
+            font-size: 0.8125rem;
+        }
+        .btn-lg {
+            padding: 0.75rem 1.5rem;
+            font-size: 1rem;
+        }
+        
+        /* Uniform Input/Form Styles */
+        .form-input, .form-select, .form-textarea {
+            display: block;
+            width: 100%;
+            padding: 0.625rem 0.875rem;
+            font-size: 0.875rem;
+            line-height: 1.5;
+            color: #EEEEEE;
+            background-color: #2e3239;
+            border: 1.5px solid #00ADB5;
+            border-radius: 0.5rem;
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: inset 0 1px 2px 0 rgb(0 0 0 / 0.2);
+        }
+        .form-input:focus, .form-select:focus, .form-textarea:focus {
+            outline: none;
+            border-color: #00ADB5;
+            box-shadow: 0 0 0 3px rgba(0, 173, 181, 0.3);
+            background-color: #393E46;
+        }
+        .form-input::placeholder, .form-textarea::placeholder {
+            color: #9CA3AF;
+        }
+        .form-label {
+            display: block;
+            font-size: 0.875rem;
+            font-weight: 600;
+            color: #EEEEEE;
+            margin-bottom: 0.5rem;
+        }
+        .form-error {
+            font-size: 0.8125rem;
+            color: #E63946;
+            margin-top: 0.375rem;
+            font-weight: 500;
+        }
+        .form-help {
+            font-size: 0.8125rem;
+            color: #9CA3AF;
+            margin-top: 0.375rem;
+        }
+        
+        /* Card Styles */
+        .card {
+            background-color: #393E46;
+            border: 1px solid #00ADB5;
+            border-radius: 0.5rem;
+            box-shadow: 0 2px 8px 0 rgb(0 0 0 / 0.3);
+        }
+        .card-header {
+            padding: 1.25rem 1.5rem;
+            border-bottom: 2px solid #00ADB5;
+            background-color: #2e3239;
+            font-weight: 600;
+            color: #EEEEEE;
+        }
+        .card-body {
+            padding: 1.5rem;
+            color: #EEEEEE;
+        }
+        
+        /* Badge Styles */
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            padding: 0.25rem 0.75rem;
+            font-size: 0.75rem;
+            font-weight: 600;
+            border-radius: 0.375rem;
+            white-space: nowrap;
+        }
+        .badge-primary {
+            background-color: rgba(0, 173, 181, 0.2);
+            color: #00ADB5;
+            border: 1px solid #00ADB5;
+        }
+        .badge-success {
+            background-color: rgba(6, 214, 160, 0.2);
+            color: #06D6A0;
+            border: 1px solid #06D6A0;
+        }
+        .badge-warning {
+            background-color: rgba(255, 183, 3, 0.2);
+            color: #FFB703;
+            border: 1px solid #FFB703;
+        }
+        .badge-danger {
+            background-color: rgba(230, 57, 70, 0.2);
+            color: #E63946;
+            border: 1px solid #E63946;
+        }
+        .badge-gray {
+            background-color: #2e3239;
+            color: #9CA3AF;
+            border: 1px solid #393E46;
+        }
+        
+        /* File input styling */
+        input[type="file"] {
+            display: block;
+            width: 100%;
+            padding: 0.625rem 0.875rem;
+            font-size: 0.875rem;
+            color: #EEEEEE;
+            background-color: #2e3239;
+            border: 1.5px solid #00ADB5;
+            border-radius: 0.5rem;
+            cursor: pointer;
+            box-shadow: inset 0 1px 2px 0 rgb(0 0 0 / 0.2);
+        }
+        input[type="file"]::file-selector-button {
+            background-color: #393E46;
+            color: #EEEEEE;
+            border: 1px solid #00ADB5;
+            padding: 0.375rem 0.875rem;
+            border-radius: 0.375rem;
+            cursor: pointer;
+            margin-right: 0.875rem;
+            font-weight: 600;
+            font-size: 0.8125rem;
+            transition: all 0.15s ease-in-out;
+        }
+        input[type="file"]::file-selector-button:hover {
+            background-color: #00ADB5;
+            color: #ffffff;
+            border-color: #00ADB5;
+        }
+        
+        /* Table Styles */
+        .table-container {
+            overflow-x: auto;
+            border: 1px solid #00ADB5;
+            border-radius: 0.5rem;
+            background-color: #393E46;
+            box-shadow: 0 2px 8px 0 rgb(0 0 0 / 0.3);
+        }
+        .table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        .table thead {
+            background: linear-gradient(180deg, #00ADB5 0%, #019fa6 100%);
+            border-bottom: 2px solid #00ADB5;
+        }
+        .table th {
+            padding: 1rem 1.25rem;
+            text-align: left;
+            font-size: 0.75rem;
+            font-weight: 700;
+            color: #ffffff;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+        .table td {
+            padding: 1rem 1.25rem;
+            font-size: 0.875rem;
+            color: #EEEEEE;
+            border-bottom: 1px solid #2e3239;
+            background-color: #393E46;
+        }
+        .table tbody tr:last-child td {
+            border-bottom: none;
+        }
+        .table tbody tr:hover {
+            background-color: #2e3239;
+            transition: background-color 0.15s ease-in-out;
+        }
     </style>
 </head>
-<body class="min-h-screen bg-gradient-to-br from-gray-100 via-slate-100 to-gray-100 antialiased">
+<body class="min-h-screen bg-background antialiased">
     <div class="min-h-screen">
         <!-- Header -->
-        <header class="border-b-2 border-indigo-200 bg-gradient-to-r from-indigo-600 via-blue-600 to-indigo-700 shadow-lg sticky top-0 z-50">
+        <header class="border-b-2 sticky top-0 z-50" style="background-color: #393E46; border-bottom-color: #00ADB5; box-shadow: 0 2px 8px 0 rgb(0 0 0 / 0.4);">
             <div class="w-full px-8">
-                <div class="flex justify-between items-center h-20">
-                    <div class="flex items-center space-x-4">
-                        <div class="h-16 bg-white rounded-xl flex items-center justify-center shadow-lg px-3">
-                            <img src="{% static 'forensics/images/kpsm_logo.png' %}" alt="KPSM" class="h-14 w-auto">
+                <div class="flex justify-between items-center h-16">
+                    <div class="flex items-center space-x-3">
+                        <div class="h-12 w-12 bg-primary/5 rounded-lg flex items-center justify-center">
+                            <img src="{% static 'forensics/images/kpsm_logo.png' %}" alt="KPSM" class="h-10 w-auto">
                         </div>
-                        <h1 class="text-2xl font-bold text-white tracking-tight">Digital Forensics KPSM</h1>
+                        <h1 class="text-xl font-bold text-foreground">Digital Forensics KPSM</h1>
                     </div>
-                    <nav class="flex items-center space-x-2">
-                        <a href="{% url 'dashboard' %}" class="px-4 py-2.5 text-base font-semibold text-white/90 hover:text-white hover:bg-white/10 rounded-lg transition-all duration-200">Dashboard</a>
-                        <a href="{% url 'case_list' %}" class="px-4 py-2.5 text-base font-semibold text-white/90 hover:text-white hover:bg-white/10 rounded-lg transition-all duration-200">Cases</a>
-                        <a href="{% url 'evidence_list' %}" class="px-4 py-2.5 text-base font-semibold text-white/90 hover:text-white hover:bg-white/10 rounded-lg transition-all duration-200">Evidence</a>
-                        <a href="{% url 'evidence_location_search' %}" class="px-4 py-2.5 text-base font-semibold text-white/90 hover:text-white hover:bg-white/10 rounded-lg transition-all duration-200">Location</a>
-                        <a href="{% url 'person_list' %}" class="px-4 py-2.5 text-base font-semibold text-white/90 hover:text-white hover:bg-white/10 rounded-lg transition-all duration-200">Persons</a>
-                        <a href="{% url 'journal_list' %}" class="px-4 py-2.5 text-base font-semibold text-white/90 hover:text-white hover:bg-white/10 rounded-lg transition-all duration-200">Journals</a>
+                    <nav class="flex items-center space-x-1">
+                        <a href="{% url 'dashboard' %}" class="px-3 py-2 text-sm font-semibold text-foreground/80 hover:text-foreground hover:bg-secondary rounded-lg transition-colors">Dashboard</a>
+                        <a href="{% url 'case_list' %}" class="px-3 py-2 text-sm font-semibold text-foreground/80 hover:text-foreground hover:bg-secondary rounded-lg transition-colors">Cases</a>
+                        <a href="{% url 'evidence_list' %}" class="px-3 py-2 text-sm font-semibold text-foreground/80 hover:text-foreground hover:bg-secondary rounded-lg transition-colors">Evidence</a>
+                        <a href="{% url 'evidence_location_search' %}" class="px-3 py-2 text-sm font-semibold text-foreground/80 hover:text-foreground hover:bg-secondary rounded-lg transition-colors">Location</a>
+                        <a href="{% url 'person_list' %}" class="px-3 py-2 text-sm font-semibold text-foreground/80 hover:text-foreground hover:bg-secondary rounded-lg transition-colors">Persons</a>
+                        <a href="{% url 'journal_list' %}" class="px-3 py-2 text-sm font-semibold text-foreground/80 hover:text-foreground hover:bg-secondary rounded-lg transition-colors">Journals</a>
                         {% if user.is_staff %}
-                        <a href="/admin/" class="px-4 py-2.5 text-base font-semibold text-white/90 hover:text-white hover:bg-white/10 rounded-lg transition-all duration-200">Admin</a>
+                        <a href="/admin/" class="px-3 py-2 text-sm font-semibold text-foreground/80 hover:text-foreground hover:bg-secondary rounded-lg transition-colors">Admin</a>
                         {% endif %}
                         {% if user.is_authenticated %}
-                        <div class="ml-4 border-l border-white/20 pl-4 relative">
-                            <button onclick="toggleUserMenu()" class="flex items-center space-x-2 px-4 py-2.5 text-base font-semibold text-white/90 hover:text-white hover:bg-white/10 rounded-lg transition-all duration-200">
-                                <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                        <div class="ml-3 border-l border-border pl-3 relative">
+                            <button onclick="toggleUserMenu()" class="flex items-center space-x-2 px-3 py-2 text-sm font-semibold text-foreground/80 hover:text-foreground hover:bg-secondary rounded-lg transition-colors">
+                                <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
                                     <path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd"/>
                                 </svg>
                                 <span>{{ user.username }}</span>
-                                <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                                <svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20">
                                     <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd"/>
                                 </svg>
                             </button>
                             
                             <!-- Dropdown Menu -->
-                            <div id="userMenu" class="hidden absolute right-0 mt-2 w-56 bg-white rounded-lg shadow-xl border border-gray-200 z-50">
-                                <div class="py-2">
-                                    <a href="{% url 'password_change' %}" class="flex items-center space-x-3 px-4 py-3 text-sm text-gray-700 hover:bg-gray-100 transition-colors">
-                                        <svg class="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <div id="userMenu" class="hidden absolute right-0 mt-2 w-56 bg-card rounded-lg shadow-lg border border-border z-50">
+                                <div class="py-1">
+                                    <a href="{% url 'password_change' %}" class="flex items-center space-x-3 px-4 py-2.5 text-sm text-foreground hover:bg-muted transition-colors">
+                                        <svg class="w-4 h-4 text-muted-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z"/>
                                         </svg>
                                         <span>Change Password</span>
                                     </a>
-                                    <hr class="my-1 border-gray-200">
+                                    <hr class="my-1 border-border">
                                     <form method="post" action="{% url 'logout' %}" class="block">
                                         {% csrf_token %}
-                                        <button type="submit" class="flex items-center space-x-3 px-4 py-3 text-sm text-red-600 hover:bg-red-50 transition-colors w-full text-left">
-                                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <button type="submit" class="flex items-center space-x-3 px-4 py-2.5 text-sm text-destructive hover:bg-destructive/10 transition-colors w-full text-left">
+                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/>
                                             </svg>
                                             <span>Logout</span>
@@ -150,22 +416,13 @@
         </header>
 
         <!-- Main Content -->
-        <main class="w-full px-8 py-8">
-            <!-- Back Button (hidden on dashboard) -->
-            {% if request.path != '/' and request.path != '/dashboard/' %}
-            <button onclick="window.history.back()" class="mb-4 inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-muted-foreground hover:text-foreground bg-gray-50 hover:bg-gray-100 border border-border rounded-lg transition-colors">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
-                </svg>
-                Back
-            </button>
-            {% endif %}
+        <main class="w-full px-8 py-6">
             <!-- Messages -->
             {% if messages %}
                 <div class="mb-6 space-y-2">
                     {% for message in messages %}
-                        <div class="animate-slide-in flex items-center gap-3 rounded-lg border {% if message.tags == 'success' %}bg-green-50 border-green-200 text-green-900{% elif message.tags == 'error' %}bg-red-50 border-red-200 text-red-900{% else %}bg-blue-50 border-blue-200 text-blue-900{% endif %} px-4 py-3 text-sm">
-                            <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                        <div class="animate-slide-in flex items-center gap-3 rounded-lg border {% if message.tags == 'success' %}bg-success/10 border-success/30 text-success{% elif message.tags == 'error' %}bg-destructive/10 border-destructive/30 text-destructive{% else %}bg-primary/10 border-primary/30 text-primary{% endif %} px-4 py-3 text-sm font-medium">
+                            <svg class="w-5 h-5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
                                 {% if message.tags == 'success' %}
                                 <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
                                 {% else %}
@@ -236,10 +493,10 @@
             // Visual feedback
             const originalHTML = button.innerHTML;
             button.innerHTML = '<svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path d="M9 2a1 1 0 000 2h2a1 1 0 100-2H9z"/><path d="M4 5a2 2 0 012-2 3 3 0 003 3h2a3 3 0 003-3 2 2 0 012 2v11a2 2 0 01-2 2H6a2 2 0 01-2-2V5zm9.707 5.707a1 1 0 00-1.414-1.414L9 12.586l-1.293-1.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"/></svg>';
-            button.classList.add('text-green-600');
+            button.classList.add('text-success');
             setTimeout(() => {
                 button.innerHTML = originalHTML;
-                button.classList.remove('text-green-600');
+                button.classList.remove('text-success');
             }, 1500);
         });
     }

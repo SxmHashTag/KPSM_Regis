@@ -1,6 +1,6 @@
 {% load static %}
 <!DOCTYPE html>
-<html lang="en" class="light">
+<html lang="en" class="dark">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -12,10 +12,32 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <script>
         tailwind.config = {
+            darkMode: 'class',
             theme: {
                 extend: {
                     fontFamily: {
                         sans: ['Inter', 'system-ui', 'sans-serif'],
+                    },
+                    colors: {
+                        background: 'hsl(217 33% 17%)',
+                        foreground: 'hsl(213 31% 91%)',
+                        card: 'hsl(217 33% 17%)',
+                        'card-foreground': 'hsl(213 31% 91%)',
+                        popover: 'hsl(217 33% 17%)',
+                        'popover-foreground': 'hsl(213 31% 91%)',
+                        primary: 'hsl(217 89% 61%)',
+                        'primary-foreground': 'hsl(222 47% 11%)',
+                        secondary: 'hsl(217 33% 17%)',
+                        'secondary-foreground': 'hsl(213 31% 91%)',
+                        muted: 'hsl(223 47% 11%)',
+                        'muted-foreground': 'hsl(215.4 16.3% 56.9%)',
+                        accent: 'hsl(216 34% 17%)',
+                        'accent-foreground': 'hsl(213 31% 91%)',
+                        destructive: 'hsl(0 63% 31%)',
+                        'destructive-foreground': 'hsl(213 31% 91%)',
+                        border: 'hsl(216 34% 17%)',
+                        input: 'hsl(216 34% 17%)',
+                        ring: 'hsl(224 76% 48%)',
                     },
                 }
             }
@@ -27,27 +49,28 @@
         }
         body {
             font-feature-settings: "rlig" 1, "calt" 1;
+            background-color: hsl(217 33% 17%);
         }
     </style>
 </head>
-<body class="min-h-screen bg-gradient-to-br from-gray-100 via-slate-100 to-gray-100 antialiased">
+<body class="min-h-screen antialiased">
     <div class="min-h-screen flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
         <div class="max-w-md w-full space-y-8">
             <!-- Logo and Header -->
             <div class="text-center">
                 <div class="flex justify-center mb-6">
-                    <div class="h-20 bg-white rounded-xl flex items-center justify-center shadow-lg px-4">
+                    <div class="h-20 bg-card rounded-xl flex items-center justify-center shadow-lg px-4 border border-border">
                         <img src="{% static 'forensics/images/kpsm_logo.png' %}" alt="KPSM" class="h-16 w-auto">
                     </div>
                 </div>
-                <h2 class="text-3xl font-bold text-gray-900">Digital Forensics KPSM</h2>
-                <p class="mt-2 text-sm text-gray-600">Sign in to access the system</p>
+                <h2 class="text-3xl font-bold text-foreground">Digital Forensics KPSM</h2>
+                <p class="mt-2 text-sm text-muted-foreground">Sign in to access the system</p>
             </div>
 
             <!-- Login Form -->
-            <div class="bg-white rounded-xl shadow-xl p-8 border border-gray-200">
+            <div class="bg-card rounded-xl shadow-xl p-8 border border-border">
                 {% if form.errors %}
-                <div class="mb-6 bg-red-50 border border-red-200 text-red-900 px-4 py-3 rounded-lg text-sm">
+                <div class="mb-6 bg-destructive/10 border border-destructive/30 text-destructive px-4 py-3 rounded-lg text-sm font-medium">
                     <div class="flex items-center gap-2">
                         <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
                             <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"/>
@@ -59,7 +82,7 @@
 
                 {% if next %}
                     {% if user.is_authenticated %}
-                    <div class="mb-6 bg-yellow-50 border border-yellow-200 text-yellow-900 px-4 py-3 rounded-lg text-sm">
+                    <div class="mb-6 bg-warning/10 border border-warning/30 text-warning px-4 py-3 rounded-lg text-sm font-medium">
                         Your account doesn't have access to this page.
                     </div>
                     {% endif %}
@@ -69,7 +92,7 @@
                     {% csrf_token %}
                     
                     <div>
-                        <label for="id_username" class="block text-sm font-semibold text-gray-700 mb-2">
+                        <label for="id_username" class="block text-sm font-semibold text-foreground mb-2">
                             Username
                         </label>
                         <input 
@@ -79,13 +102,13 @@
                             autocomplete="username"
                             required
                             autofocus
-                            class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                            class="w-full px-4 py-3 bg-muted border-2 border-border rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all text-foreground placeholder:text-muted-foreground"
                             placeholder="Enter your username"
                         >
                     </div>
 
                     <div>
-                        <label for="id_password" class="block text-sm font-semibold text-gray-700 mb-2">
+                        <label for="id_password" class="block text-sm font-semibold text-foreground mb-2">
                             Password
                         </label>
                         <input 
@@ -94,7 +117,7 @@
                             id="id_password"
                             autocomplete="current-password"
                             required
-                            class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                            class="w-full px-4 py-3 bg-muted border-2 border-border rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all text-foreground placeholder:text-muted-foreground"
                             placeholder="Enter your password"
                         >
                     </div>
@@ -103,22 +126,22 @@
 
                     <button 
                         type="submit"
-                        class="w-full bg-gradient-to-r from-indigo-600 to-blue-600 hover:from-indigo-700 hover:to-blue-700 text-white font-semibold py-3 px-4 rounded-lg transition-all duration-200 shadow-lg hover:shadow-xl"
+                        class="w-full bg-primary hover:bg-primary/90 text-primary-foreground font-semibold py-3 px-4 rounded-lg transition-all duration-200 shadow-lg hover:shadow-xl"
                     >
                         Sign In
                     </button>
                 </form>
 
                 <div class="mt-6 text-center">
-                    <p class="text-sm text-gray-600">Don't have an account?</p>
-                    <a href="{% url 'access_request_create' %}" class="mt-2 inline-block text-indigo-600 hover:text-indigo-800 font-semibold text-sm">
+                    <p class="text-sm text-muted-foreground">Don't have an account?</p>
+                    <a href="{% url 'access_request_create' %}" class="mt-2 inline-block text-primary hover:text-primary/80 font-semibold text-sm transition-colors">
                         Request Access →
                     </a>
                 </div>
             </div>
 
             <!-- Footer -->
-            <div class="text-center text-sm text-gray-600">
+            <div class="text-center text-sm text-muted-foreground">
                 <p>Authorized personnel only</p>
             </div>
         </div>

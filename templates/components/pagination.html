@@ -4,7 +4,7 @@
         <label for="per-page-selector" class="whitespace-nowrap">Show:</label>
         <select id="per-page-selector" 
                 onchange="window.location.href = updateQueryParam('per_page', this.value);"
-                class="px-2 py-1 border border-input rounded focus:outline-none focus:ring-2 focus:ring-ring text-sm">
+                class="px-2 py-1 bg-slate-50 text-slate-900 placeholder:text-slate-500 border border-slate-300 rounded focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-sm">
             <option value="10" {% if per_page == 10 %}selected{% endif %}>10</option>
             <option value="25" {% if per_page == 25 %}selected{% endif %}>25</option>
             <option value="50" {% if per_page == 50 %}selected{% endif %}>50</option>
@@ -18,7 +18,7 @@
     <div class="flex flex-1 justify-between sm:hidden">
         {% if page_obj.has_previous %}
         <a href="?page={{ page_obj.previous_page_number }}{% if search %}&search={{ search }}{% endif %}{% if ibs_filter %}&ibs={{ ibs_filter }}{% endif %}{% if status_filter %}&status={{ status_filter }}{% endif %}{% if priority_filter %}&priority={{ priority_filter }}{% endif %}{% if type_filter %}&type={{ type_filter }}{% endif %}&per_page={{ per_page }}"
-           class="relative inline-flex items-center rounded-md border border-border bg-background px-4 py-2 text-sm font-medium text-foreground hover:bg-secondary">
+           class="relative inline-flex items-center rounded-md border border-border bg-background px-4 py-2 text-sm font-medium text-gray-200 hover:bg-secondary">
             Previous
         </a>
         {% else %}
@@ -29,7 +29,7 @@
         
         {% if page_obj.has_next %}
         <a href="?page={{ page_obj.next_page_number }}{% if search %}&search={{ search }}{% endif %}{% if ibs_filter %}&ibs={{ ibs_filter }}{% endif %}{% if status_filter %}&status={{ status_filter }}{% endif %}{% if priority_filter %}&priority={{ priority_filter }}{% endif %}{% if type_filter %}&type={{ type_filter }}{% endif %}&per_page={{ per_page }}"
-           class="relative ml-3 inline-flex items-center rounded-md border border-border bg-background px-4 py-2 text-sm font-medium text-foreground hover:bg-secondary">
+           class="relative ml-3 inline-flex items-center rounded-md border border-border bg-background px-4 py-2 text-sm font-medium text-gray-200 hover:bg-secondary">
             Next
         </a>
         {% else %}

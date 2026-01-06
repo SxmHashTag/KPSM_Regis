@@ -18,8 +18,10 @@ ENV/
 *.log
 db.sqlite3
 db.sqlite3-journal
+db.sqlite3.backup-*
 /media
 /static
+/staticfiles
 
 # Environment variables
 .env
@@ -35,3 +37,9 @@ db.sqlite3-journal
 # OS
 .DS_Store
 Thumbs.db
+._*
+
+# Backup files
+*.backup
+*.bak
+*~

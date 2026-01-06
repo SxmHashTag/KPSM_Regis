@@ -10,52 +10,52 @@
             <h2 class="text-3xl font-bold text-foreground">Analytics Dashboard</h2>
             <p class="text-muted-foreground mt-1">Comprehensive analytics for cases and evidence</p>
         </div>
-        <a href="{% url 'dashboard' %}" class="px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors">
+        <a href="{% url 'dashboard' %}" class="px-4 py-2 bg-secondary text-foreground rounded-lg hover:bg-secondary/80 transition-colors">
             ← Back to Dashboard
         </a>
     </div>
 
     <!-- Advanced Filters Panel -->
-    <div class="bg-gradient-to-br from-purple-50 to-indigo-50 rounded-xl border-2 border-purple-300 shadow-lg">
+    <div class="bg-gradient-to-br from-secondary to-secondary rounded-xl border-2 border-primary shadow-lg">
         <form method="get" class="p-6" id="analyticsFilterForm">
             <!-- Filter Header -->
             <div class="flex items-center justify-between mb-6">
                 <div class="flex items-center gap-3">
-                    <div class="w-10 h-10 bg-purple-600 rounded-lg flex items-center justify-center">
-                        <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <div class="w-10 h-10 bg-primary rounded-lg flex items-center justify-center">
+                        <svg class="w-6 h-6 text-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"/>
                         </svg>
                     </div>
                     <div>
-                        <h3 class="text-xl font-bold text-gray-900">Advanced Filters</h3>
-                        <p class="text-sm text-gray-600">Customize your analytics view</p>
+                        <h3 class="text-xl font-bold text-foreground">Advanced Filters</h3>
+                        <p class="text-sm text-muted-foreground">Customize your analytics view</p>
                     </div>
                 </div>
-                <button type="button" onclick="toggleFilters()" class="text-purple-600 hover:text-purple-800 font-medium text-sm">
+                <button type="button" onclick="toggleFilters()" class="text-primary hover:text-purple-800 font-medium text-sm">
                     <span id="toggleText">Show All</span>
                 </button>
             </div>
             
             <!-- Quick Period Buttons -->
             <div class="mb-6">
-                <label class="block text-sm font-semibold text-gray-700 mb-3">Quick Time Periods</label>
+                <label class="block text-sm font-semibold text-foreground mb-3">Quick Time Periods</label>
                 <div class="grid grid-cols-2 md:grid-cols-6 gap-2">
-                    <button type="button" onclick="setPeriod('1m')" class="px-4 py-2 rounded-lg font-medium text-sm transition-all {% if period == '1m' %}bg-purple-600 text-white shadow-md{% else %}bg-white text-gray-700 border-2 border-purple-200 hover:border-purple-400 hover:bg-purple-50{% endif %}">
+                    <button type="button" onclick="setPeriod('1m')" class="px-4 py-2 rounded-lg font-medium text-sm transition-all {% if period == '1m' %}bg-primary text-foreground shadow-md{% else %}bg-secondary text-foreground border border-border hover:border-primary hover:bg-secondary/80{% endif %}">
                         Last Month
                     </button>
-                    <button type="button" onclick="setPeriod('3m')" class="px-4 py-2 rounded-lg font-medium text-sm transition-all {% if period == '3m' %}bg-purple-600 text-white shadow-md{% else %}bg-white text-gray-700 border-2 border-purple-200 hover:border-purple-400 hover:bg-purple-50{% endif %}">
+                    <button type="button" onclick="setPeriod('3m')" class="px-4 py-2 rounded-lg font-medium text-sm transition-all {% if period == '3m' %}bg-primary text-foreground shadow-md{% else %}bg-secondary text-foreground border border-border hover:border-primary hover:bg-secondary/80{% endif %}">
                         3 Months
                     </button>
-                    <button type="button" onclick="setPeriod('6m')" class="px-4 py-2 rounded-lg font-medium text-sm transition-all {% if period == '6m' %}bg-purple-600 text-white shadow-md{% else %}bg-white text-gray-700 border-2 border-purple-200 hover:border-purple-400 hover:bg-purple-50{% endif %}">
+                    <button type="button" onclick="setPeriod('6m')" class="px-4 py-2 rounded-lg font-medium text-sm transition-all {% if period == '6m' %}bg-primary text-foreground shadow-md{% else %}bg-secondary text-foreground border border-border hover:border-primary hover:bg-secondary/80{% endif %}">
                         6 Months
                     </button>
-                    <button type="button" onclick="setPeriod('1y')" class="px-4 py-2 rounded-lg font-medium text-sm transition-all {% if period == '1y' %}bg-purple-600 text-white shadow-md{% else %}bg-white text-gray-700 border-2 border-purple-200 hover:border-purple-400 hover:bg-purple-50{% endif %}">
+                    <button type="button" onclick="setPeriod('1y')" class="px-4 py-2 rounded-lg font-medium text-sm transition-all {% if period == '1y' %}bg-primary text-foreground shadow-md{% else %}bg-secondary text-foreground border border-border hover:border-primary hover:bg-secondary/80{% endif %}">
                         1 Year
                     </button>
-                    <button type="button" onclick="setPeriod('all')" class="px-4 py-2 rounded-lg font-medium text-sm transition-all {% if period == 'all' %}bg-purple-600 text-white shadow-md{% else %}bg-white text-gray-700 border-2 border-purple-200 hover:border-purple-400 hover:bg-purple-50{% endif %}">
+                    <button type="button" onclick="setPeriod('all')" class="px-4 py-2 rounded-lg font-medium text-sm transition-all {% if period == 'all' %}bg-primary text-foreground shadow-md{% else %}bg-secondary text-foreground border border-border hover:border-primary hover:bg-secondary/80{% endif %}">
                         All Time
                     </button>
-                    <button type="button" onclick="showCustomRange()" class="px-4 py-2 rounded-lg font-medium text-sm transition-all {% if period == 'custom' %}bg-purple-600 text-white shadow-md{% else %}bg-white text-gray-700 border-2 border-purple-200 hover:border-purple-400 hover:bg-purple-50{% endif %}">
+                    <button type="button" onclick="showCustomRange()" class="px-4 py-2 rounded-lg font-medium text-sm transition-all {% if period == 'custom' %}bg-primary text-foreground shadow-md{% else %}bg-secondary text-foreground border border-border hover:border-primary hover:bg-secondary/80{% endif %}">
                         Custom
                     </button>
                 </div>
@@ -64,29 +64,29 @@
             <!-- Advanced Filters (Collapsible) -->
             <div id="advancedFilters" class="space-y-6" style="display: none;">
                 <!-- Custom Date Range -->
-                <div id="customDateRange" class="bg-white rounded-lg p-4 border-2 border-indigo-200">
-                    <label class="block text-sm font-semibold text-gray-700 mb-3">Custom Date Range</label>
+                <div id="customDateRange" class="bg-secondary rounded-lg p-4 border border-border">
+                    <label class="block text-sm font-semibold text-foreground mb-3">Custom Date Range</label>
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
-                            <label class="block text-xs font-medium text-gray-600 mb-1">Start Date</label>
+                            <label class="block text-xs font-medium text-muted-foreground mb-1">Start Date</label>
                             <input type="date" name="start_date" value="{{ start_date }}" 
-                                   class="w-full px-3 py-2 border-2 border-gray-300 rounded-lg focus:border-purple-500 focus:ring-2 focus:ring-purple-200 transition-colors">
+                                   class="w-full px-3 py-2 border-2 border-border rounded-lg focus:border-primary focus:ring-2 focus:ring-primary/20 transition-colors">
                         </div>
                         <div>
-                            <label class="block text-xs font-medium text-gray-600 mb-1">End Date</label>
+                            <label class="block text-xs font-medium text-muted-foreground mb-1">End Date</label>
                             <input type="date" name="end_date" value="{{ end_date }}" 
-                                   class="w-full px-3 py-2 border-2 border-gray-300 rounded-lg focus:border-purple-500 focus:ring-2 focus:ring-purple-200 transition-colors">
+                                   class="w-full px-3 py-2 border-2 border-border rounded-lg focus:border-primary focus:ring-2 focus:ring-primary/20 transition-colors">
                         </div>
                     </div>
                 </div>
                 
                 <!-- Case Filters -->
-                <div class="bg-white rounded-lg p-4 border-2 border-blue-200">
-                    <label class="block text-sm font-semibold text-gray-700 mb-3">Case Filters</label>
+                <div class="bg-secondary rounded-lg p-4 border border-border">
+                    <label class="block text-sm font-semibold text-foreground mb-3">Case Filters</label>
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                         <div>
-                            <label class="block text-xs font-medium text-gray-600 mb-1">Status</label>
-                            <select name="case_status" class="w-full px-3 py-2 border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-colors">
+                            <label class="block text-xs font-medium text-muted-foreground mb-1">Status</label>
+                            <select name="case_status" class="w-full px-3 py-2 border-2 border-border rounded-lg focus:border-primary focus:ring-2 focus:ring-blue-200 transition-colors">
                                 <option value="">All Statuses</option>
                                 {% for value, label in case_status_choices %}
                                 <option value="{{ value }}" {% if case_status_filter == value %}selected{% endif %}>{{ label }}</option>
@@ -94,8 +94,8 @@
                             </select>
                         </div>
                         <div>
-                            <label class="block text-xs font-medium text-gray-600 mb-1">Priority</label>
-                            <select name="case_priority" class="w-full px-3 py-2 border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-colors">
+                            <label class="block text-xs font-medium text-muted-foreground mb-1">Priority</label>
+                            <select name="case_priority" class="w-full px-3 py-2 border-2 border-border rounded-lg focus:border-primary focus:ring-2 focus:ring-blue-200 transition-colors">
                                 <option value="">All Priorities</option>
                                 {% for value, label in case_priority_choices %}
                                 <option value="{{ value }}" {% if case_priority_filter == value %}selected{% endif %}>{{ label }}</option>
@@ -103,8 +103,8 @@
                             </select>
                         </div>
                         <div>
-                            <label class="block text-xs font-medium text-gray-600 mb-1">Department</label>
-                            <select name="case_department" class="w-full px-3 py-2 border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-colors">
+                            <label class="block text-xs font-medium text-muted-foreground mb-1">Department</label>
+                            <select name="case_department" class="w-full px-3 py-2 border-2 border-border rounded-lg focus:border-primary focus:ring-2 focus:ring-blue-200 transition-colors">
                                 <option value="">All Departments</option>
                                 {% for value, label in case_department_choices %}
                                 <option value="{{ value }}" {% if case_department_filter == value %}selected{% endif %}>{{ label }}</option>
@@ -115,12 +115,12 @@
                 </div>
                 
                 <!-- Evidence Filters -->
-                <div class="bg-white rounded-lg p-4 border-2 border-amber-200">
-                    <label class="block text-sm font-semibold text-gray-700 mb-3">Evidence Filters</label>
+                <div class="bg-secondary rounded-lg p-4 border border-border">
+                    <label class="block text-sm font-semibold text-foreground mb-3">Evidence Filters</label>
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
-                            <label class="block text-xs font-medium text-gray-600 mb-1">Status</label>
-                            <select name="evidence_status" class="w-full px-3 py-2 border-2 border-gray-300 rounded-lg focus:border-amber-500 focus:ring-2 focus:ring-amber-200 transition-colors">
+                            <label class="block text-xs font-medium text-muted-foreground mb-1">Status</label>
+                            <select name="evidence_status" class="w-full px-3 py-2 border-2 border-border rounded-lg focus:border-amber-500 focus:ring-2 focus:ring-amber-200 transition-colors">
                                 <option value="">All Statuses</option>
                                 {% for value, label in evidence_status_choices %}
                                 <option value="{{ value }}" {% if evidence_status_filter == value %}selected{% endif %}>{{ label }}</option>
@@ -128,8 +128,8 @@
                             </select>
                         </div>
                         <div>
-                            <label class="block text-xs font-medium text-gray-600 mb-1">Device Type</label>
-                            <select name="evidence_device_type" class="w-full px-3 py-2 border-2 border-gray-300 rounded-lg focus:border-amber-500 focus:ring-2 focus:ring-amber-200 transition-colors">
+                            <label class="block text-xs font-medium text-muted-foreground mb-1">Device Type</label>
+                            <select name="evidence_device_type" class="w-full px-3 py-2 border-2 border-border rounded-lg focus:border-amber-500 focus:ring-2 focus:ring-amber-200 transition-colors">
                                 <option value="">All Device Types</option>
                                 {% for value, label in evidence_device_type_choices %}
                                 <option value="{{ value }}" {% if evidence_device_type_filter == value %}selected{% endif %}>{{ label }}</option>
@@ -142,42 +142,42 @@
             
             <!-- Action Buttons -->
             <div class="flex gap-3 mt-6">
-                <button type="submit" class="flex-1 px-6 py-3 bg-gradient-to-r from-purple-600 to-indigo-600 text-white rounded-lg hover:from-purple-700 hover:to-indigo-700 transition-all shadow-md font-semibold">
+                <button type="submit" class="flex-1 px-6 py-3 bg-gradient-to-r from-primary to-primary text-foreground rounded-lg hover:from-purple-700 hover:to-indigo-700 transition-all shadow-md font-semibold">
                     Apply Filters
                 </button>
-                <a href="{% url 'analytics_dashboard' %}" class="px-6 py-3 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors shadow-md font-semibold">
+                <a href="{% url 'analytics_dashboard' %}" class="px-6 py-3 bg-secondary text-foreground rounded-lg hover:bg-secondary/80 transition-colors shadow-md font-semibold">
                     Reset
                 </a>
             </div>
             
             <!-- Current Filter Summary -->
             {% if period != 'all' or start_date or end_date or case_status_filter or case_priority_filter or case_department_filter or evidence_status_filter or evidence_device_type_filter %}
-            <div class="mt-4 p-3 bg-purple-100 rounded-lg border border-purple-300">
-                <p class="text-sm font-medium text-purple-900">Active Filters:</p>
+            <div class="mt-4 p-3 card rounded-lg border border-primary">
+                <p class="text-sm font-medium text-foreground">Active Filters:</p>
                 <div class="flex flex-wrap gap-2 mt-2">
                     {% if period and period != 'all' %}
-                    <span class="px-3 py-1 bg-purple-600 text-white text-xs rounded-full font-medium">Period: {{ period_label }}</span>
+                    <span class="px-3 py-1 bg-primary text-foreground text-xs rounded-full font-medium">Period: {{ period_label }}</span>
                     {% endif %}
                     {% if start_date %}
-                    <span class="px-3 py-1 bg-purple-600 text-white text-xs rounded-full font-medium">From: {{ start_date }}</span>
+                    <span class="px-3 py-1 bg-primary text-foreground text-xs rounded-full font-medium">From: {{ start_date }}</span>
                     {% endif %}
                     {% if end_date %}
-                    <span class="px-3 py-1 bg-purple-600 text-white text-xs rounded-full font-medium">To: {{ end_date }}</span>
+                    <span class="px-3 py-1 bg-primary text-foreground text-xs rounded-full font-medium">To: {{ end_date }}</span>
                     {% endif %}
                     {% if case_status_filter %}
-                    <span class="px-3 py-1 bg-blue-600 text-white text-xs rounded-full font-medium">Case Status: {{ case_status_filter|title }}</span>
+                    <span class="px-3 py-1 bg-primary text-foreground text-xs rounded-full font-medium">Case Status: {{ case_status_filter|title }}</span>
                     {% endif %}
                     {% if case_priority_filter %}
-                    <span class="px-3 py-1 bg-blue-600 text-white text-xs rounded-full font-medium">Priority: {{ case_priority_filter|title }}</span>
+                    <span class="px-3 py-1 bg-primary text-foreground text-xs rounded-full font-medium">Priority: {{ case_priority_filter|title }}</span>
                     {% endif %}
                     {% if case_department_filter %}
-                    <span class="px-3 py-1 bg-blue-600 text-white text-xs rounded-full font-medium">Dept: {{ case_department_filter|upper }}</span>
+                    <span class="px-3 py-1 bg-primary text-foreground text-xs rounded-full font-medium">Dept: {{ case_department_filter|upper }}</span>
                     {% endif %}
                     {% if evidence_status_filter %}
-                    <span class="px-3 py-1 bg-amber-600 text-white text-xs rounded-full font-medium">Evidence Status: {{ evidence_status_filter|title }}</span>
+                    <span class="px-3 py-1 bg-amber-600 text-foreground text-xs rounded-full font-medium">Evidence Status: {{ evidence_status_filter|title }}</span>
                     {% endif %}
                     {% if evidence_device_type_filter %}
-                    <span class="px-3 py-1 bg-amber-600 text-white text-xs rounded-full font-medium">Device: {{ evidence_device_type_filter|title }}</span>
+                    <span class="px-3 py-1 bg-amber-600 text-foreground text-xs rounded-full font-medium">Device: {{ evidence_device_type_filter|title }}</span>
                     {% endif %}
                 </div>
             </div>
@@ -224,40 +224,40 @@
     </script>
 
     <!-- Quick Comparison Cards -->
-    <div class="bg-white rounded-lg border border-border p-6 shadow-md">
+    <div class="bg-secondary rounded-lg border border-border p-6 shadow-md">
         <h3 class="text-lg font-semibold text-foreground mb-4">Period Comparison</h3>
         <div class="grid grid-cols-2 md:grid-cols-5 gap-4">
-            <div class="text-center p-4 rounded-lg {% if period == '1m' %}bg-gradient-to-br from-indigo-100 to-purple-100 border-2 border-indigo-300{% else %}bg-gray-50{% endif %}">
+            <div class="text-center p-4 rounded-lg {% if period == '1m' %}bg-gradient-to-br from-indigo-100 to-purple-100 border-2 border-indigo-300{% else %}card{% endif %}">
                 <p class="text-xs font-medium text-muted-foreground mb-2">Last Month</p>
-                <p class="text-2xl font-bold text-indigo-600">{{ comparison.1m.cases }}</p>
+                <p class="text-2xl font-bold text-primary">{{ comparison.1m.cases }}</p>
                 <p class="text-xs text-muted-foreground">Cases</p>
                 <p class="text-2xl font-bold text-amber-600 mt-2">{{ comparison.1m.evidence }}</p>
                 <p class="text-xs text-muted-foreground">Evidence</p>
             </div>
-            <div class="text-center p-4 rounded-lg {% if period == '3m' %}bg-gradient-to-br from-indigo-100 to-purple-100 border-2 border-indigo-300{% else %}bg-gray-50{% endif %}">
+            <div class="text-center p-4 rounded-lg {% if period == '3m' %}bg-gradient-to-br from-indigo-100 to-purple-100 border-2 border-indigo-300{% else %}card{% endif %}">
                 <p class="text-xs font-medium text-muted-foreground mb-2">Last 3 Months</p>
-                <p class="text-2xl font-bold text-indigo-600">{{ comparison.3m.cases }}</p>
+                <p class="text-2xl font-bold text-primary">{{ comparison.3m.cases }}</p>
                 <p class="text-xs text-muted-foreground">Cases</p>
                 <p class="text-2xl font-bold text-amber-600 mt-2">{{ comparison.3m.evidence }}</p>
                 <p class="text-xs text-muted-foreground">Evidence</p>
             </div>
-            <div class="text-center p-4 rounded-lg {% if period == '6m' %}bg-gradient-to-br from-indigo-100 to-purple-100 border-2 border-indigo-300{% else %}bg-gray-50{% endif %}">
+            <div class="text-center p-4 rounded-lg {% if period == '6m' %}bg-gradient-to-br from-indigo-100 to-purple-100 border-2 border-indigo-300{% else %}card{% endif %}">
                 <p class="text-xs font-medium text-muted-foreground mb-2">Last 6 Months</p>
-                <p class="text-2xl font-bold text-indigo-600">{{ comparison.6m.cases }}</p>
+                <p class="text-2xl font-bold text-primary">{{ comparison.6m.cases }}</p>
                 <p class="text-xs text-muted-foreground">Cases</p>
                 <p class="text-2xl font-bold text-amber-600 mt-2">{{ comparison.6m.evidence }}</p>
                 <p class="text-xs text-muted-foreground">Evidence</p>
             </div>
-            <div class="text-center p-4 rounded-lg {% if period == '1y' %}bg-gradient-to-br from-indigo-100 to-purple-100 border-2 border-indigo-300{% else %}bg-gray-50{% endif %}">
+            <div class="text-center p-4 rounded-lg {% if period == '1y' %}bg-gradient-to-br from-indigo-100 to-purple-100 border-2 border-indigo-300{% else %}card{% endif %}">
                 <p class="text-xs font-medium text-muted-foreground mb-2">Last Year</p>
-                <p class="text-2xl font-bold text-indigo-600">{{ comparison.1y.cases }}</p>
+                <p class="text-2xl font-bold text-primary">{{ comparison.1y.cases }}</p>
                 <p class="text-xs text-muted-foreground">Cases</p>
                 <p class="text-2xl font-bold text-amber-600 mt-2">{{ comparison.1y.evidence }}</p>
                 <p class="text-xs text-muted-foreground">Evidence</p>
             </div>
-            <div class="text-center p-4 rounded-lg {% if period == 'all' %}bg-gradient-to-br from-indigo-100 to-purple-100 border-2 border-indigo-300{% else %}bg-gray-50{% endif %}">
+            <div class="text-center p-4 rounded-lg {% if period == 'all' %}bg-gradient-to-br from-indigo-100 to-purple-100 border-2 border-indigo-300{% else %}card{% endif %}">
                 <p class="text-xs font-medium text-muted-foreground mb-2">All Time</p>
-                <p class="text-2xl font-bold text-indigo-600">{{ comparison.all.cases }}</p>
+                <p class="text-2xl font-bold text-primary">{{ comparison.all.cases }}</p>
                 <p class="text-xs text-muted-foreground">Cases</p>
                 <p class="text-2xl font-bold text-amber-600 mt-2">{{ comparison.all.evidence }}</p>
                 <p class="text-xs text-muted-foreground">Evidence</p>
@@ -266,50 +266,50 @@
     </div>
 
     <!-- Cases Analytics Section -->
-    <div class="bg-gradient-to-br from-indigo-50 to-blue-50 rounded-lg border-2 border-indigo-200 p-6 shadow-md">
+    <div class="card rounded-lg border border-border p-6 shadow-md">
         <h3 class="text-2xl font-bold text-foreground mb-6">Cases Analytics</h3>
         
         <!-- Case Summary Cards -->
         <div class="grid grid-cols-2 md:grid-cols-5 gap-4 mb-6">
-            <div class="bg-white rounded-lg p-4 border-2 border-indigo-200">
+            <div class="bg-secondary rounded-lg p-4 border border-border">
                 <p class="text-sm font-medium text-muted-foreground">Total Cases</p>
-                <p class="text-3xl font-bold text-indigo-600 mt-2">{{ analytics.case_analytics.total_cases }}</p>
+                <p class="text-3xl font-bold text-primary mt-2">{{ analytics.case_analytics.total_cases }}</p>
             </div>
-            <div class="bg-white rounded-lg p-4 border-2 border-green-200">
+            <div class="bg-secondary rounded-lg p-4 border border-border">
                 <p class="text-sm font-medium text-muted-foreground">Active</p>
-                <p class="text-3xl font-bold text-green-600 mt-2">{{ analytics.case_analytics.active_cases }}</p>
+                <p class="text-3xl font-bold text-success mt-2">{{ analytics.case_analytics.active_cases }}</p>
             </div>
-            <div class="bg-white rounded-lg p-4 border-2 border-blue-200">
+            <div class="bg-secondary rounded-lg p-4 border border-border">
                 <p class="text-sm font-medium text-muted-foreground">Closed</p>
-                <p class="text-3xl font-bold text-blue-600 mt-2">{{ analytics.case_analytics.closed_cases }}</p>
+                <p class="text-3xl font-bold text-primary mt-2">{{ analytics.case_analytics.closed_cases }}</p>
             </div>
-            <div class="bg-white rounded-lg p-4 border-2 border-yellow-200">
+            <div class="bg-secondary rounded-lg p-4 border-2 border-yellow-200">
                 <p class="text-sm font-medium text-muted-foreground">Suspended</p>
                 <p class="text-3xl font-bold text-yellow-600 mt-2">{{ analytics.case_analytics.suspended_cases }}</p>
             </div>
-            <div class="bg-white rounded-lg p-4 border-2 border-gray-200">
+            <div class="bg-secondary rounded-lg p-4 border-2 border-border">
                 <p class="text-sm font-medium text-muted-foreground">Archived</p>
-                <p class="text-3xl font-bold text-gray-600 mt-2">{{ analytics.case_analytics.archived_cases }}</p>
+                <p class="text-3xl font-bold text-muted-foreground mt-2">{{ analytics.case_analytics.archived_cases }}</p>
             </div>
         </div>
 
         <!-- Case Charts Grid -->
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
             <!-- Status Distribution -->
-            <div class="bg-white rounded-lg p-6 border-2 border-indigo-200">
+            <div class="bg-secondary rounded-lg p-6 border border-border">
                 <h4 class="text-lg font-semibold text-foreground mb-4">Cases by Status</h4>
                 <canvas id="caseStatusChart" class="max-h-64"></canvas>
             </div>
 
             <!-- Priority Distribution -->
-            <div class="bg-white rounded-lg p-6 border-2 border-indigo-200">
+            <div class="bg-secondary rounded-lg p-6 border border-border">
                 <h4 class="text-lg font-semibold text-foreground mb-4">Cases by Priority</h4>
                 <canvas id="casePriorityChart" class="max-h-64"></canvas>
             </div>
 
             <!-- Case Type Distribution -->
             {% if analytics.case_analytics.case_type_distribution %}
-            <div class="bg-white rounded-lg p-6 border-2 border-indigo-200">
+            <div class="bg-secondary rounded-lg p-6 border border-border">
                 <h4 class="text-lg font-semibold text-foreground mb-4">Cases by Type</h4>
                 <canvas id="caseTypeChart" class="max-h-64"></canvas>
             </div>
@@ -317,7 +317,7 @@
 
             <!-- Department Distribution -->
             {% if analytics.case_analytics.department_distribution %}
-            <div class="bg-white rounded-lg p-6 border-2 border-indigo-200">
+            <div class="bg-secondary rounded-lg p-6 border border-border">
                 <h4 class="text-lg font-semibold text-foreground mb-4">Cases by Department</h4>
                 <canvas id="caseDepartmentChart" class="max-h-64"></canvas>
             </div>
@@ -326,13 +326,13 @@
 
         <!-- Top Prosecutors -->
         {% if analytics.case_analytics.top_prosecutors %}
-        <div class="bg-white rounded-lg p-6 border-2 border-indigo-200 mt-6">
+        <div class="bg-secondary rounded-lg p-6 border border-border mt-6">
             <h4 class="text-lg font-semibold text-foreground mb-4">Top Prosecutors</h4>
             <div class="space-y-2">
                 {% for prosecutor in analytics.case_analytics.top_prosecutors %}
-                <div class="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
+                <div class="flex justify-between items-center p-3 card rounded-lg">
                     <span class="font-medium text-foreground">{{ prosecutor.prosecutor }}</span>
-                    <span class="text-sm font-semibold text-indigo-600 bg-indigo-100 px-3 py-1 rounded-full">{{ prosecutor.case_count }} cases</span>
+                    <span class="text-sm font-semibold text-primary card px-3 py-1 rounded-full">{{ prosecutor.case_count }} cases</span>
                 </div>
                 {% endfor %}
             </div>
@@ -341,42 +341,42 @@
 
         <!-- Average Case Duration -->
         {% if analytics.case_analytics.avg_duration_days %}
-        <div class="bg-white rounded-lg p-6 border-2 border-indigo-200 mt-6">
+        <div class="bg-secondary rounded-lg p-6 border border-border mt-6">
             <h4 class="text-lg font-semibold text-foreground mb-2">Average Case Duration</h4>
-            <p class="text-4xl font-bold text-indigo-600">{{ analytics.case_analytics.avg_duration_days }} days</p>
+            <p class="text-4xl font-bold text-primary">{{ analytics.case_analytics.avg_duration_days }} days</p>
             <p class="text-sm text-muted-foreground mt-2">Average time from opening to closure</p>
         </div>
         {% endif %}
     </div>
 
     <!-- Evidence Analytics Section -->
-    <div class="bg-gradient-to-br from-amber-50 to-orange-50 rounded-lg border-2 border-amber-200 p-6 shadow-md">
+    <div class="card rounded-lg border border-border p-6 shadow-md">
         <h3 class="text-2xl font-bold text-foreground mb-6">Evidence Analytics</h3>
         
         <!-- Evidence Summary Cards -->
         <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-            <div class="bg-white rounded-lg p-4 border-2 border-amber-200">
+            <div class="bg-secondary rounded-lg p-4 border border-border">
                 <p class="text-sm font-medium text-muted-foreground">Total Evidence</p>
                 <p class="text-3xl font-bold text-amber-600 mt-2">{{ analytics.evidence_analytics.total_evidence }}</p>
             </div>
-            <div class="bg-white rounded-lg p-4 border-2 border-green-200">
+            <div class="bg-secondary rounded-lg p-4 border border-border">
                 <p class="text-sm font-medium text-muted-foreground">Assigned to Cases</p>
-                <p class="text-3xl font-bold text-green-600 mt-2">{{ analytics.evidence_analytics.assigned_to_case }}</p>
+                <p class="text-3xl font-bold text-success mt-2">{{ analytics.evidence_analytics.assigned_to_case }}</p>
             </div>
-            <div class="bg-white rounded-lg p-4 border-2 border-red-200">
+            <div class="bg-secondary rounded-lg p-4 border border-border">
                 <p class="text-sm font-medium text-muted-foreground">Unassigned</p>
                 <p class="text-3xl font-bold text-red-600 mt-2">{{ analytics.evidence_analytics.unassigned }}</p>
             </div>
-            <div class="bg-white rounded-lg p-4 border-2 border-blue-200">
+            <div class="bg-secondary rounded-lg p-4 border border-border">
                 <p class="text-sm font-medium text-muted-foreground">With IBS#</p>
-                <p class="text-3xl font-bold text-blue-600 mt-2">{{ analytics.evidence_analytics.with_ibs }}</p>
+                <p class="text-3xl font-bold text-primary mt-2">{{ analytics.evidence_analytics.with_ibs }}</p>
             </div>
         </div>
 
         <!-- Evidence Status Cards -->
         <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-3 mb-6">
             {% for status, count in analytics.evidence_analytics.by_status.items %}
-            <div class="bg-white rounded-lg p-3 border border-border text-center">
+            <div class="bg-secondary rounded-lg p-3 border border-border text-center">
                 <p class="text-xs font-medium text-muted-foreground capitalize">{{ status }}</p>
                 <p class="text-2xl font-bold text-amber-600 mt-1">{{ count }}</p>
             </div>
@@ -386,20 +386,20 @@
         <!-- Evidence Charts Grid -->
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
             <!-- Device Type Distribution -->
-            <div class="bg-white rounded-lg p-6 border-2 border-amber-200">
+            <div class="bg-secondary rounded-lg p-6 border border-border">
                 <h4 class="text-lg font-semibold text-foreground mb-4">Evidence by Device Type</h4>
                 <canvas id="evidenceDeviceChart" class="max-h-64"></canvas>
             </div>
 
             <!-- Status Distribution -->
-            <div class="bg-white rounded-lg p-6 border-2 border-amber-200">
+            <div class="bg-secondary rounded-lg p-6 border border-border">
                 <h4 class="text-lg font-semibold text-foreground mb-4">Evidence by Status</h4>
                 <canvas id="evidenceStatusChart" class="max-h-64"></canvas>
             </div>
 
             <!-- Department Distribution -->
             {% if analytics.evidence_analytics.department_distribution %}
-            <div class="bg-white rounded-lg p-6 border-2 border-amber-200">
+            <div class="bg-secondary rounded-lg p-6 border border-border">
                 <h4 class="text-lg font-semibold text-foreground mb-4">Evidence by Department</h4>
                 <canvas id="evidenceDepartmentChart" class="max-h-64"></canvas>
             </div>
@@ -408,11 +408,11 @@
 
         <!-- Top Examiners -->
         {% if analytics.evidence_analytics.top_examiners %}
-        <div class="bg-white rounded-lg p-6 border-2 border-amber-200 mt-6">
+        <div class="bg-secondary rounded-lg p-6 border border-border mt-6">
             <h4 class="text-lg font-semibold text-foreground mb-4">Top Examiners</h4>
             <div class="space-y-2">
                 {% for examiner in analytics.evidence_analytics.top_examiners %}
-                <div class="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
+                <div class="flex justify-between items-center p-3 card rounded-lg">
                     <span class="font-medium text-foreground">{{ examiner.examiner_name }}</span>
                     <span class="text-sm font-semibold text-amber-600 bg-amber-100 px-3 py-1 rounded-full">{{ examiner.count }} items</span>
                 </div>
@@ -423,22 +423,22 @@
     </div>
 
     <!-- Team/Department Breakdown -->
-    <div class="bg-gradient-to-br from-green-50 to-teal-50 rounded-lg border-2 border-green-200 p-6 shadow-md">
+    <div class="bg-gradient-to-br from-secondary to-secondary rounded-lg border border-border p-6 shadow-md">
         <h3 class="text-2xl font-bold text-foreground mb-6">Team/Department Breakdown</h3>
         
         {% if analytics.case_analytics.department_distribution %}
         <div class="mb-6">
             <h4 class="text-lg font-semibold text-foreground mb-4">Cases by Team</h4>
-            <div class="bg-white rounded-lg p-4 overflow-x-auto">
+            <div class="bg-secondary rounded-lg p-4 overflow-x-auto">
                 <table class="w-full">
-                    <thead>
-                        <tr class="border-b-2 border-gray-200">
-                            <th class="text-left py-3 px-4 font-semibold text-gray-700">Department/Team</th>
-                            <th class="text-center py-3 px-4 font-semibold text-gray-700">Total Cases</th>
-                            <th class="text-center py-3 px-4 font-semibold text-gray-700">Active</th>
-                            <th class="text-center py-3 px-4 font-semibold text-gray-700">Closed</th>
-                            <th class="text-center py-3 px-4 font-semibold text-gray-700">Evidence Items</th>
-                            <th class="text-right py-3 px-4 font-semibold text-gray-700">Avg Evidence/Case</th>
+                    <thead class="card">
+                        <tr class="border-b-2 border-border">
+                            <th class="text-left py-3 px-4 font-semibold text-foreground">Department/Team</th>
+                            <th class="text-center py-3 px-4 font-semibold text-foreground">Total Cases</th>
+                            <th class="text-center py-3 px-4 font-semibold text-foreground">Active</th>
+                            <th class="text-center py-3 px-4 font-semibold text-foreground">Closed</th>
+                            <th class="text-center py-3 px-4 font-semibold text-foreground">Evidence Items</th>
+                            <th class="text-right py-3 px-4 font-semibold text-foreground">Avg Evidence/Case</th>
                         </tr>
                     </thead>
                     <tbody id="teamStatsBody">
@@ -451,7 +451,7 @@
         
         <!-- Team Performance Chart -->
         {% if analytics.case_analytics.department_distribution %}
-        <div class="bg-white rounded-lg p-6 border-2 border-green-200">
+        <div class="bg-secondary rounded-lg p-6 border border-border">
             <h4 class="text-lg font-semibold text-foreground mb-4">Team Performance Overview</h4>
             <canvas id="teamPerformanceChart" class="max-h-96"></canvas>
         </div>
@@ -459,20 +459,20 @@
     </div>
 
     <!-- Combined Metrics -->
-    <div class="bg-gradient-to-br from-purple-50 to-pink-50 rounded-lg border-2 border-purple-200 p-6 shadow-md">
+    <div class="card rounded-lg border border-border p-6 shadow-md">
         <h3 class="text-2xl font-bold text-foreground mb-6">Combined Metrics</h3>
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
             {% if analytics.avg_evidence_per_case %}
-            <div class="bg-white rounded-lg p-6 border-2 border-purple-200">
+            <div class="bg-secondary rounded-lg p-6 border border-border">
                 <h4 class="text-lg font-semibold text-foreground mb-2">Average Evidence per Case</h4>
-                <p class="text-4xl font-bold text-purple-600">{{ analytics.avg_evidence_per_case }}</p>
+                <p class="text-4xl font-bold text-primary">{{ analytics.avg_evidence_per_case }}</p>
                 <p class="text-sm text-muted-foreground mt-2">Evidence items per case on average</p>
             </div>
             {% endif %}
             
-            <div class="bg-white rounded-lg p-6 border-2 border-purple-200">
+            <div class="bg-secondary rounded-lg p-6 border border-border">
                 <h4 class="text-lg font-semibold text-foreground mb-2">Cases Without Evidence</h4>
-                <p class="text-4xl font-bold text-purple-600">{{ analytics.cases_without_evidence }}</p>
+                <p class="text-4xl font-bold text-primary">{{ analytics.cases_without_evidence }}</p>
                 <p class="text-sm text-muted-foreground mt-2">Cases with no evidence items assigned</p>
             </div>
         </div>
@@ -480,7 +480,7 @@
 
     <!-- Monthly Trends -->
     {% if analytics.case_analytics.monthly_trend %}
-    <div class="bg-white rounded-lg border-2 border-gray-200 p-6 shadow-md">
+    <div class="bg-secondary rounded-lg border-2 border-border p-6 shadow-md">
         <h3 class="text-2xl font-bold text-foreground mb-6">Monthly Trends</h3>
         <canvas id="monthlyTrendChart" class="max-h-80"></canvas>
     </div>
@@ -704,22 +704,22 @@ const teamStatsBody = document.getElementById('teamStatsBody');
 if (teamStatsBody && teamStatsData.length > 0) {
     teamStatsData.forEach((team, index) => {
         const row = document.createElement('tr');
-        row.className = index % 2 === 0 ? 'bg-gray-50' : 'bg-white';
+        row.className = index % 2 === 0 ? 'card' : 'bg-secondary';
         row.innerHTML = `
-            <td class="py-3 px-4 font-semibold text-gray-900">${team.department_name}</td>
+            <td class="py-3 px-4 font-semibold text-foreground">${team.department_name}</td>
             <td class="py-3 px-4 text-center">
-                <span class="px-3 py-1 bg-indigo-100 text-indigo-800 rounded-full font-semibold">${team.total_cases}</span>
+                <span class="px-3 py-1 bg-primary/20 text-primary rounded-full font-semibold">${team.total_cases}</span>
             </td>
             <td class="py-3 px-4 text-center">
-                <span class="px-3 py-1 bg-green-100 text-green-800 rounded-full font-semibold">${team.active_cases}</span>
+                <span class="px-3 py-1 bg-success/20 text-success rounded-full font-semibold">${team.active_cases}</span>
             </td>
             <td class="py-3 px-4 text-center">
-                <span class="px-3 py-1 bg-blue-100 text-blue-800 rounded-full font-semibold">${team.closed_cases}</span>
+                <span class="px-3 py-1 bg-primary/20 text-primary rounded-full font-semibold">${team.closed_cases}</span>
             </td>
             <td class="py-3 px-4 text-center">
-                <span class="px-3 py-1 bg-amber-100 text-amber-800 rounded-full font-semibold">${team.total_evidence}</span>
+                <span class="px-3 py-1 bg-warning/20 text-warning rounded-full font-semibold">${team.total_evidence}</span>
             </td>
-            <td class="py-3 px-4 text-right font-semibold text-purple-600">${team.avg_evidence_per_case}</td>
+            <td class="py-3 px-4 text-right font-semibold text-primary">${team.avg_evidence_per_case}</td>
         `;
         teamStatsBody.appendChild(row);
     });

@@ -10,7 +10,7 @@
             <h2 class="text-3xl font-bold text-foreground">Persons</h2>
             <p class="text-muted-foreground mt-1">Manage persons involved in investigations</p>
         </div>
-        <a href="{% url 'person_create' %}" class="inline-flex items-center gap-2 px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:opacity-90 transition-opacity font-medium">
+        <a href="{% url 'person_create' %}" class="btn btn-primary transition-opacity font-medium">
             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
             </svg>
@@ -19,41 +19,41 @@
     </div>
     
     <!-- Search -->
-    <div class="bg-gradient-to-br from-blue-50 to-cyan-50 rounded-lg border-2 border-blue-200 p-4 shadow-md">
+    <div class="card rounded-lg border border-border p-4 shadow-md">
         <form method="get" class="flex gap-2">
             <input type="text" name="search" value="{{ search|default:'' }}" placeholder="Search by name, email, or phone..." 
-                class="flex-1 px-4 py-2 border border-input rounded-lg focus:outline-none focus:ring-2 focus:ring-ring">
+                class="flex-1 px-4 py-2 bg-gray-700 text-foreground placeholder:text-slate-500 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
             <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium shadow-md">
                 Search
             </button>
             {% if search %}
-            <a href="{% url 'person_list' %}" class="px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors font-medium shadow-md">
+            <a href="{% url 'person_list' %}" class="btn btn-secondary">
                 Clear
             </a>
             {% endif %}
         </form>
     </div>
     
-    <div class="bg-gradient-to-br from-slate-50 to-gray-50 rounded-lg border-2 border-slate-200 overflow-hidden shadow-md">
+    <div class="table-container rounded-lg border border-border overflow-hidden shadow-md">
         <div class="overflow-x-auto">
             <table class="w-full">
-                <thead class="bg-gradient-to-r from-blue-100 to-cyan-100">
+                <thead class="card">
                     <tr>
-                        <th class="px-6 py-4 text-left text-sm font-semibold text-blue-900 uppercase tracking-wider">Name</th>
-                        <th class="px-6 py-4 text-left text-sm font-semibold text-blue-900 uppercase tracking-wider">Type</th>
-                        <th class="px-6 py-4 text-left text-sm font-semibold text-blue-900 uppercase tracking-wider">Email</th>
-                        <th class="px-6 py-4 text-left text-sm font-semibold text-blue-900 uppercase tracking-wider">Phone</th>
-                        <th class="px-6 py-4 text-right text-sm font-semibold text-blue-900 uppercase tracking-wider">Actions</th>
+                        <th class="px-6 py-4 text-left text-sm font-semibold text-white uppercase tracking-wider">Name</th>
+                        <th class="px-6 py-4 text-left text-sm font-semibold text-white uppercase tracking-wider">Type</th>
+                        <th class="px-6 py-4 text-left text-sm font-semibold text-white uppercase tracking-wider">Email</th>
+                        <th class="px-6 py-4 text-left text-sm font-semibold text-white uppercase tracking-wider">Phone</th>
+                        <th class="px-6 py-4 text-right text-sm font-semibold text-white uppercase tracking-wider">Actions</th>
                     </tr>
                 </thead>
-                <tbody class="bg-white divide-y divide-slate-200">
+                <tbody class="card divide-y divide-slate-600">
                     {% for person in persons %}
-                    <tr class="hover:bg-secondary/30 transition-colors">
+                    <tr class="hover:bg-muted transition-colors">
                         <td class="px-6 py-4">
                             <a href="{% url 'person_detail' person.pk %}" class="text-base font-semibold text-foreground hover:text-primary">{{ person.first_name }} {{ person.last_name }}</a>
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap">
-                            <span class="px-3 py-1.5 text-sm font-semibold rounded-full bg-blue-100 text-blue-700">
+                            <span class="badge card text-foreground">
                                 {{ person.get_person_type_display }}
                             </span>
                         </td>

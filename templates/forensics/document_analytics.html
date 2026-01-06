@@ -1,0 +1,696 @@
+{% extends 'base.html' %}
+
+{% block title %}Document Analytics - Diamond Forensics{% endblock %}
+
+{% block content %}
+<div class="flex-1 space-y-6 p-4 md:p-8 pt-6">
+    <!-- Header -->
+    <div class="flex items-center justify-between">
+        <div>
+            <h2 class="text-3xl font-bold tracking-tight text-foreground">Document Analytics</h2>
+            <p class="text-muted-foreground mt-1">
+                Track and manage all case documentation with comprehensive insights
+            </p>
+        </div>
+        <a href="{% url 'document_list' %}" class="btn btn-primary">
+            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+            </svg>
+            View All Documents
+        </a>
+    </div>
+
+    <!-- Stats Overview -->
+    <div class="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+        <a href="{% url 'document_list' %}" class="card rounded-lg border border-border hover:border-primary transition-all hover:shadow-lg block">
+            <div class="card-header flex flex-row items-center justify-between pb-2">
+                <h3 class="text-sm font-medium">Total Documents</h3>
+                <svg class="w-4 h-4 text-muted-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"/>
+                </svg>
+            </div>
+            <div class="card-body">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <div class="text-2xl font-bold">{{ total_documents }}</div>
+                        <p class="text-xs text-muted-foreground">
+                            Across all cases and evidence
+                        </p>
+                    </div>
+                    <svg class="w-5 h-5 text-muted-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+                    </svg>
+                </div>
+            </div>
+        </a>
+
+        <a href="{% url 'document_list' %}" class="card rounded-lg border border-border hover:border-primary transition-all hover:shadow-lg block">
+            <div class="card-header flex flex-row items-center justify-between pb-2">
+                <h3 class="text-sm font-medium">Recent Activity</h3>
+                <svg class="w-4 h-4 text-muted-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                </svg>
+            </div>
+            <div class="card-body">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <div class="text-2xl font-bold">{{ recent_docs_count }}</div>
+                        <p class="text-xs text-muted-foreground">
+                            Documents uploaded last 30 days
+                        </p>
+                    </div>
+                    <svg class="w-5 h-5 text-muted-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+                    </svg>
+                </div>
+            </div>
+        </a>
+
+        <a href="{% url 'document_list' %}?confidential=true" class="card rounded-lg border border-border hover:border-destructive transition-all hover:shadow-lg block">
+            <div class="card-header flex flex-row items-center justify-between pb-2">
+                <h3 class="text-sm font-medium">Confidential</h3>
+                <svg class="w-4 h-4 text-muted-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
+                </svg>
+            </div>
+            <div class="card-body">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <div class="text-2xl font-bold">{{ confidential_docs }}</div>
+                        <p class="text-xs text-muted-foreground">
+                            Marked as confidential
+                        </p>
+                    </div>
+                    <svg class="w-5 h-5 text-muted-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+                    </svg>
+                </div>
+            </div>
+        </a>
+
+        <a href="{% url 'cases_without_documents' %}" class="card rounded-lg border border-border hover:border-warning transition-all hover:shadow-lg block">
+            <div class="card-header flex flex-row items-center justify-between pb-2">
+                <h3 class="text-sm font-medium">Incomplete Cases</h3>
+                <svg class="w-4 h-4 text-muted-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+                </svg>
+            </div>
+            <div class="card-body">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <div class="text-2xl font-bold">{{ cases_without_docs }}</div>
+                        <p class="text-xs text-muted-foreground">
+                            Active cases without documents
+                        </p>
+                    </div>
+                    <svg class="w-5 h-5 text-muted-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+                    </svg>
+                </div>
+            </div>
+        </a>
+    </div>
+
+    <!-- Charts Row -->
+    <div class="grid gap-4 md:grid-cols-2">
+        <!-- Documents by Type -->
+        <div class="card rounded-lg border border-border">
+            <div class="card-header">
+                <h3 class="text-lg font-semibold">Documents by Type</h3>
+                <p class="text-sm text-muted-foreground mt-1">Distribution of document types</p>
+            </div>
+            <div class="card-body">
+                <canvas id="docTypeChart" height="300"></canvas>
+            </div>
+        </div>
+
+        <!-- Documents by Access Level -->
+        <div class="card rounded-lg border border-border">
+            <div class="card-header">
+                <h3 class="text-lg font-semibold">Documents by Access Level</h3>
+                <p class="text-sm text-muted-foreground mt-1">Security classification breakdown</p>
+            </div>
+            <div class="card-body">
+                <canvas id="accessLevelChart" height="300"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <!-- Monthly Trend -->
+    <div class="card rounded-lg border border-border">
+        <div class="card-header">
+            <h3 class="text-lg font-semibold">Document Creation Trend</h3>
+            <p class="text-sm text-muted-foreground mt-1">Monthly document uploads over the last 12 months</p>
+        </div>
+        <div class="card-body">
+            <canvas id="monthlyTrendChart" height="100"></canvas>
+        </div>
+    </div>
+
+    <!-- Two Column Layout -->
+    <div class="grid gap-4 md:grid-cols-2">
+        <!-- Top Cases by Document Count -->
+        <div class="card rounded-lg border border-border">
+            <div class="card-header">
+                <h3 class="text-lg font-semibold">Cases with Most Documents</h3>
+                <p class="text-sm text-muted-foreground mt-1">Top 10 cases by document count</p>
+            </div>
+            <div class="card-body">
+                <div class="space-y-3">
+                    {% if cases_with_doc_count %}
+                        {% for case in cases_with_doc_count %}
+                        <div class="flex items-center justify-between p-3 border border-border rounded-lg hover:bg-muted transition-colors">
+                            <div class="flex-1">
+                                <p class="font-medium">{{ case.case_number }}</p>
+                                <p class="text-sm text-muted-foreground">{{ case.case_name|truncatechars:40 }}</p>
+                            </div>
+                            <div class="flex items-center gap-3">
+                                <span class="badge badge-primary">{{ case.doc_count }} docs</span>
+                                <a href="{% url 'case_detail' case.pk %}" class="btn btn-ghost btn-sm">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+                                    </svg>
+                                </a>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    {% else %}
+                        <div class="text-center py-6 text-muted-foreground">
+                            No cases with documents yet
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Document Age Analysis -->
+        <div class="card rounded-lg border border-border">
+            <div class="card-header">
+                <h3 class="text-lg font-semibold">Document Age Analysis</h3>
+                <p class="text-sm text-muted-foreground mt-1">Document distribution by age</p>
+            </div>
+            <div class="card-body">
+                <div class="space-y-3">
+                    <div class="flex items-center justify-between p-3 rounded-lg" style="background-color: rgba(34, 197, 94, 0.1); border: 1px solid rgba(34, 197, 94, 0.3);">
+                        <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 rounded-full flex items-center justify-center font-semibold" style="background-color: rgba(34, 197, 94, 0.2); color: #22c55e;">
+                                <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+                                </svg>
+                            </div>
+                            <div>
+                                <p class="font-medium text-foreground">Very Recent</p>
+                                <p class="text-xs text-foreground/60">Last 30 days</p>
+                            </div>
+                        </div>
+                        <span class="inline-flex items-center px-3 py-1 rounded text-sm font-semibold" style="background-color: rgba(34, 197, 94, 0.2); color: #22c55e;">{{ age_analysis.very_recent }} docs</span>
+                    </div>
+                    
+                    <div class="flex items-center justify-between p-3 rounded-lg" style="background-color: rgba(59, 130, 246, 0.1); border: 1px solid rgba(59, 130, 246, 0.3);">
+                        <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 rounded-full flex items-center justify-center font-semibold" style="background-color: rgba(59, 130, 246, 0.2); color: #3b82f6;">
+                                <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd" d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z" clip-rule="evenodd"/>
+                                </svg>
+                            </div>
+                            <div>
+                                <p class="font-medium text-foreground">Recent</p>
+                                <p class="text-xs text-foreground/60">30-90 days</p>
+                            </div>
+                        </div>
+                        <span class="inline-flex items-center px-3 py-1 rounded text-sm font-semibold" style="background-color: rgba(59, 130, 246, 0.2); color: #3b82f6;">{{ age_analysis.recent }} docs</span>
+                    </div>
+                    
+                    <div class="flex items-center justify-between p-3 rounded-lg" style="background-color: rgba(234, 179, 8, 0.1); border: 1px solid rgba(234, 179, 8, 0.3);">
+                        <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 rounded-full flex items-center justify-center font-semibold" style="background-color: rgba(234, 179, 8, 0.2); color: #eab308;">
+                                <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clip-rule="evenodd"/>
+                                </svg>
+                            </div>
+                            <div>
+                                <p class="font-medium text-foreground">Moderate</p>
+                                <p class="text-xs text-foreground/60">90-180 days</p>
+                            </div>
+                        </div>
+                        <span class="inline-flex items-center px-3 py-1 rounded text-sm font-semibold" style="background-color: rgba(234, 179, 8, 0.2); color: #eab308;">{{ age_analysis.moderate }} docs</span>
+                    </div>
+                    
+                    <div class="flex items-center justify-between p-3 rounded-lg" style="background-color: rgba(249, 115, 22, 0.1); border: 1px solid rgba(249, 115, 22, 0.3);">
+                        <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 rounded-full flex items-center justify-center font-semibold" style="background-color: rgba(249, 115, 22, 0.2); color: #f97316;">
+                                <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/>
+                                </svg>
+                            </div>
+                            <div>
+                                <p class="font-medium text-foreground">Old</p>
+                                <p class="text-xs text-foreground/60">180-365 days</p>
+                            </div>
+                        </div>
+                        <span class="inline-flex items-center px-3 py-1 rounded text-sm font-semibold" style="background-color: rgba(249, 115, 22, 0.2); color: #f97316;">{{ age_analysis.old }} docs</span>
+                    </div>
+                    
+                    <div class="flex items-center justify-between p-3 rounded-lg" style="background-color: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.3);">
+                        <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 rounded-full flex items-center justify-center font-semibold" style="background-color: rgba(239, 68, 68, 0.2); color: #ef4444;">
+                                <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/>
+                                </svg>
+                            </div>
+                            <div>
+                                <p class="font-medium text-foreground">Very Old</p>
+                                <p class="text-xs text-foreground/60">Over 1 year</p>
+                            </div>
+                        </div>
+                        <span class="inline-flex items-center px-3 py-1 rounded text-sm font-semibold" style="background-color: rgba(239, 68, 68, 0.2); color: #ef4444;">{{ age_analysis.very_old }} docs</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Oldest Documents Needing Review -->
+    {% if very_old_docs %}
+    <div class="card rounded-lg border-2 border-orange-500" style="background-color: #3d2817;">
+        <div class="card-header">
+            <h3 class="text-lg font-semibold flex items-center gap-2" style="color: #f97316;">
+                <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clip-rule="evenodd"/>
+                </svg>
+                Oldest Documents
+            </h3>
+            <p class="text-sm mt-1" style="color: rgba(249, 115, 22, 0.8);">Documents over 1 year old that may need review</p>
+        </div>
+        <div class="card-body">
+            <div class="space-y-3">
+                {% for doc in very_old_docs %}
+                <div class="flex items-start justify-between p-3 bg-card border rounded-lg" style="border-color: rgba(249, 115, 22, 0.5);">
+                    <div class="flex-1">
+                        <div class="flex items-center gap-2">
+                            <div class="p-2 rounded" style="background-color: #f97316; color: white;">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"/>
+                                </svg>
+                            </div>
+                            <div class="flex-1">
+                                <p class="font-medium text-foreground">{{ doc.title }}</p>
+                                <div class="flex items-center gap-3 mt-1 text-sm text-foreground/60">
+                                    <span>{{ doc.get_document_type_display }}</span>
+                                    {% if doc.case %}
+                                    <span>{{ doc.case.case_number }}</span>
+                                    {% elif doc.evidence %}
+                                    <span>Evidence: {{ doc.evidence.evidence_number }}</span>
+                                    {% endif %}
+                                    <span class="inline-flex items-center px-2 py-0.5 rounded text-xs" style="background-color: rgba(249, 115, 22, 0.2); color: #f97316;">
+                                        {{ doc.created_at|timesince }} old
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-2 ml-4">
+                        {% if doc.file_path %}
+                        <a href="{{ doc.file_path.url }}" target="_blank" class="btn btn-ghost btn-sm" title="Download">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
+                            </svg>
+                        </a>
+                        {% endif %}
+                        {% if doc.case %}
+                        <a href="{% url 'case_detail' doc.case.pk %}" class="btn btn-ghost btn-sm" title="View Case">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+                            </svg>
+                        </a>
+                        {% elif doc.evidence %}
+                        <a href="{% url 'evidence_detail' doc.evidence.pk %}" class="btn btn-ghost btn-sm" title="View Evidence">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+                            </svg>
+                        </a>
+                        {% endif %}
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Incomplete Cases Warning -->
+    {% if incomplete_cases %}
+    <div class="card rounded-lg border-2 border-warning" style="background-color: #3d3417;">
+        <div class="card-header">
+            <h3 class="text-lg font-semibold text-warning flex items-center gap-2">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+                </svg>
+                Cases Missing Required Documents
+            </h3>
+            <p class="text-sm text-warning/80 mt-1">These active cases are missing critical documentation</p>
+        </div>
+        <div class="card-body">
+            <div class="space-y-3">
+                {% for item in incomplete_cases %}
+                <div class="flex items-start justify-between p-3 bg-card border border-warning/50 rounded-lg">
+                    <div class="flex-1">
+                        <p class="font-medium text-foreground">{{ item.case.case_number }} - {{ item.case.case_name }}</p>
+                        <div class="mt-2 flex flex-wrap gap-2">
+                            {% for missing_type in item.missing_types %}
+                            <span class="inline-flex items-center px-2.5 py-0.5 rounded text-xs font-medium bg-warning/20 text-warning border border-warning/30">Missing: {{ missing_type }}</span>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    <a href="{% url 'document_upload' item.case.pk %}" class="btn btn-sm btn-primary ml-4">
+                        <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+                        </svg>
+                        Upload
+                    </a>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Recent Documents -->
+    <div class="card rounded-lg border border-border">
+        <div class="card-header">
+            <h3 class="text-lg font-semibold">Recent Documents</h3>
+            <p class="text-sm text-muted-foreground mt-1">Latest document uploads</p>
+        </div>
+        <div class="card-body">
+            <div class="space-y-3">
+                {% if recent_documents %}
+                    {% for doc in recent_documents %}
+                    <div class="flex items-center justify-between p-3 border border-border rounded-lg hover:bg-muted transition-colors">
+                        <div class="flex items-center gap-3 flex-1">
+                            <div class="p-2 rounded bg-blue-100 text-blue-600">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"/>
+                                </svg>
+                            </div>
+                            <div class="flex-1">
+                                <div class="flex items-center gap-2">
+                                    <p class="font-medium">{{ doc.title }}</p>
+                                    {% if doc.is_confidential %}
+                                    <span class="badge badge-red text-xs">Confidential</span>
+                                    {% endif %}
+                                </div>
+                                <div class="flex items-center gap-4 text-sm text-muted-foreground mt-1">
+                                    <span>{{ doc.get_document_type_display }}</span>
+                                    {% if doc.case %}
+                                    <span>{{ doc.case.case_number }}</span>
+                                    {% endif %}
+                                    <span>{{ doc.created_at|date:"M d, Y H:i" }}</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-1">
+                            {% if doc.file_path %}
+                            <button onclick="previewDocument('{{ doc.file_path.url }}', '{{ doc.title }}', '{{ doc.file_type }}')" class="btn btn-ghost btn-sm" title="Preview">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+                                </svg>
+                            </button>
+                            {% endif %}
+                            {% if doc.case %}
+                            <a href="{% url 'case_detail' doc.case.pk %}" class="btn btn-ghost btn-sm" title="View Case">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+                                </svg>
+                            </a>
+                            {% elif doc.evidence %}
+                            <a href="{% url 'evidence_detail' doc.evidence.pk %}" class="btn btn-ghost btn-sm" title="View Evidence">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+                                </svg>
+                            </a>
+                            {% endif %}
+                        </div>
+                    </div>
+                    {% endfor %}
+                {% else %}
+                    <div class="text-center py-6 text-muted-foreground">
+                        No documents yet
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Storage Statistics -->
+    <div class="card rounded-lg border border-border">
+        <div class="card-header">
+            <h3 class="text-lg font-semibold">Storage Statistics</h3>
+            <p class="text-sm text-muted-foreground mt-1">Document storage usage</p>
+        </div>
+        <div class="card-body">
+            <div class="grid gap-4 md:grid-cols-2">
+                <div class="p-4 bg-blue-50 rounded-lg">
+                    <p class="text-sm text-blue-600 font-medium">Total Storage Used</p>
+                    <p class="text-2xl font-bold text-blue-900 mt-1">{{ total_file_size_readable }}</p>
+                </div>
+                <div class="p-4 bg-green-50 rounded-lg">
+                    <p class="text-sm text-green-600 font-medium">Average Document Size</p>
+                    <p class="text-2xl font-bold text-green-900 mt-1">{{ avg_file_size_readable }}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Chart.js Script -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script>
+    // Document Type Chart
+    const docTypeCtx = document.getElementById('docTypeChart').getContext('2d');
+    new Chart(docTypeCtx, {
+        type: 'bar',
+        data: {
+            labels: {{ docs_by_type_labels_json|safe }},
+            datasets: [{
+                label: 'Documents',
+                data: {{ docs_by_type_counts_json|safe }},
+                backgroundColor: 'rgba(59, 130, 246, 0.8)',
+                borderColor: 'rgba(59, 130, 246, 1)',
+                borderWidth: 1
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    display: false
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: {
+                        precision: 0
+                    }
+                }
+            }
+        }
+    });
+
+    // Access Level Chart
+    const accessCtx = document.getElementById('accessLevelChart').getContext('2d');
+    new Chart(accessCtx, {
+        type: 'doughnut',
+        data: {
+            labels: {{ docs_by_access_labels_json|safe }},
+            datasets: [{
+                data: {{ docs_by_access_counts_json|safe }},
+                backgroundColor: [
+                    'rgba(34, 197, 94, 0.8)',
+                    'rgba(59, 130, 246, 0.8)',
+                    'rgba(249, 115, 22, 0.8)',
+                    'rgba(239, 68, 68, 0.8)'
+                ],
+                borderWidth: 2,
+                borderColor: '#fff'
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'bottom'
+                }
+            }
+        }
+    });
+
+    // Monthly Trend Chart
+    const trendCtx = document.getElementById('monthlyTrendChart').getContext('2d');
+    new Chart(trendCtx, {
+        type: 'line',
+        data: {
+            labels: {{ monthly_labels_json|safe }},
+            datasets: [{
+                label: 'Documents Created',
+                data: {{ monthly_counts_json|safe }},
+                borderColor: 'rgba(59, 130, 246, 1)',
+                backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                borderWidth: 2,
+                fill: true,
+                tension: 0.4
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    display: false
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: {
+                        precision: 0
+                    }
+                }
+            }
+        }
+    });
+    
+    // Preview document function
+    function previewDocument(url, title, fileType) {
+        const modal = document.getElementById('previewModal');
+        const modalTitle = document.getElementById('previewModalTitle');
+        const modalContent = document.getElementById('previewModalContent');
+        
+        try {
+            // Show loading state
+            modalTitle.textContent = title || 'Document Preview';
+            modalContent.innerHTML = `
+                <div class="flex items-center justify-center py-12">
+                    <div class="flex flex-col items-center gap-3">
+                        <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+                        <p class="text-sm text-muted-foreground">Loading document...</p>
+                    </div>
+                </div>
+            `;
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+            
+            // Use setTimeout to prevent event blocking
+            setTimeout(() => {
+                try {
+                    // Determine file type from extension if not provided
+                    const extension = url.split('.').pop().toLowerCase();
+                    const isPdf = extension === 'pdf' || fileType === 'application/pdf';
+                    const isImage = ['jpg', 'jpeg', 'png', 'gif', 'bmp', 'webp', 'svg'].includes(extension);
+                    
+                    if (isPdf) {
+                        modalContent.innerHTML = `
+                            <object data="${url}" type="application/pdf" class="w-full" style="height: 70vh;">
+                                <div class="flex flex-col items-center justify-center h-full gap-4">
+                                    <svg class="w-16 h-16 text-muted-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                                    </svg>
+                                    <p class="text-muted-foreground">PDF preview not available. <a href="${url}" target="_blank" class="text-primary hover:underline">Download file</a></p>
+                                </div>
+                            </object>
+                        `;
+                    } else if (isImage) {
+                        // Preload image before displaying
+                        const img = new Image();
+                        img.onload = function() {
+                            modalContent.innerHTML = `
+                                <div class="flex items-center justify-center" style="max-height: 70vh;">
+                                    <img src="${url}" alt="${title}" class="max-w-full max-h-full object-contain rounded" />
+                                </div>
+                            `;
+                        };
+                        img.onerror = function() {
+                            modalContent.innerHTML = `
+                                <div class="flex flex-col items-center justify-center py-12 gap-4">
+                                    <svg class="w-16 h-16 text-muted-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                    </svg>
+                                    <p class="text-muted-foreground">Failed to load image.</p>
+                                </div>
+                            `;
+                        };
+                        img.src = url;
+                    } else {
+                        // For other file types, show download link
+                        modalContent.innerHTML = `
+                            <div class="flex flex-col items-center justify-center py-12 gap-4">
+                                <svg class="w-16 h-16 text-muted-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                                </svg>
+                                <p class="text-muted-foreground">Preview not available for this file type.</p>
+                                <a href="${url}" target="_blank" class="btn btn-primary">
+                                    <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
+                                    </svg>
+                                    Download File
+                                </a>
+                            </div>
+                        `;
+                    }
+                } catch (error) {
+                    console.error('Error loading preview:', error);
+                    modalContent.innerHTML = `
+                        <div class="flex flex-col items-center justify-center py-12 gap-4">
+                            <svg class="w-16 h-16 text-destructive" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                            </svg>
+                            <p class="text-muted-foreground">Error loading preview.</p>
+                        </div>
+                    `;
+                }
+            }, 100);
+        } catch (error) {
+            console.error('Error opening modal:', error);
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+        }
+    }
+    
+    function closePreviewModal() {
+        const modal = document.getElementById('previewModal');
+        modal.classList.add('hidden');
+        modal.classList.remove('flex');
+    }
+    
+    // Close modal on Escape key
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') {
+            closePreviewModal();
+        }
+    });
+</script>
+
+<!-- Preview Modal -->
+<div id="previewModal" class="hidden fixed inset-0 z-50 items-center justify-center bg-black/80" onclick="closePreviewModal()">
+    <div class="relative w-full max-w-6xl mx-4" onclick="event.stopPropagation()">
+        <div class="card rounded-lg shadow-xl" style="background-color: #2e3239;">
+            <div class="card-header flex items-center justify-between" style="border-bottom: 1px solid #393E46;">
+                <h3 id="previewModalTitle" class="text-lg font-semibold" style="color: #EEEEEE;">Document Preview</h3>
+                <button onclick="closePreviewModal()" class="btn btn-ghost btn-sm">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                    </svg>
+                </button>
+            </div>
+            <div class="card-body" style="min-height: 400px;">
+                <div id="previewModalContent" class="w-full h-full">
+                    <!-- Content will be loaded here -->
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

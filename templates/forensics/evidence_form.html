@@ -16,25 +16,24 @@
         <p class="text-muted-foreground mt-1">{% if evidence %}Update evidence information{% else %}Register new evidence item{% endif %}</p>
     </div>
 
-    <div class="bg-gradient-to-br from-purple-50 to-pink-50 rounded-lg border-2 border-purple-200 p-6 shadow-md">
+    <div class="card rounded-lg border border-border p-6 shadow-md">
         <form method="post" enctype="multipart/form-data" class="space-y-6">
             {% csrf_token %}
             
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {% if not evidence %}
                 <div>
-                    <label for="evidence_number" class="block text-sm font-medium text-foreground mb-2">Evidence Number</label>
+                    <label for="evidence_number" class="block text-sm font-medium form-label mb-2">Evidence Number</label>
                     <input type="text" id="evidence_number" name="evidence_number"
-                        class="w-full px-3 py-2 border border-input rounded-lg focus:outline-none focus:ring-2 focus:ring-ring"
-                        placeholder="Leave empty to auto-generate">
-                    <p class="text-xs text-muted-foreground mt-1">Leave blank to auto-generate (e.g., 25-0001-001)</p>
+                        value="{{ evidence.evidence_number|default:"" }}"
+                        class="w-full px-3 py-2 rounded-lg bg-gray-700 text-foreground placeholder:text-slate-500 border border-border focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 focus:border-indigo-400"
+                        placeholder="{% if evidence %}{{ evidence.evidence_number }}{% else %}Leave empty to auto-generate{% endif %}">
+                    <p class="text-xs text-muted-foreground mt-1">{% if evidence %}Update the evidence number if needed.{% else %}Leave blank to auto-generate (e.g., 25-0001-001){% endif %}</p>
                 </div>
-                {% endif %}
                 
                 <div>
-                    <label for="ibs_number" class="block text-sm font-medium text-foreground mb-2">IBS#</label>
+                    <label for="ibs_number" class="block text-sm font-medium form-label mb-2">IBS#</label>
                     <input type="text" id="ibs_number" name="ibs_number" value="{{ evidence.ibs_number|default:'' }}"
-                        class="w-full px-3 py-2 border border-input rounded-lg focus:outline-none focus:ring-2 focus:ring-ring"
+                        class="w-full px-3 py-2 rounded-lg bg-gray-700 text-foreground placeholder:text-slate-500 border border-border focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 focus:border-indigo-400"
                         placeholder="e.g., 24/46/123">
                     <p class="text-xs text-muted-foreground mt-1">IBS tracking number (optional)</p>
                 </div>
@@ -42,11 +41,11 @@
             
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
-                    <label for="case" class="block text-sm font-medium text-foreground mb-2">Case</label>
+                    <label for="case" class="block text-sm font-medium form-label mb-2">Case</label>
                     <div class="relative">
                         <!-- Search input -->
                         <input type="text" id="case-search" 
-                            class="w-full px-3 py-2 border border-input rounded-lg focus:outline-none focus:ring-2 focus:ring-ring"
+                            class="w-full px-3 py-2 rounded-lg bg-gray-700 text-foreground placeholder:text-slate-500 border border-border focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 focus:border-indigo-400"
                             placeholder="Type to search cases..."
                             autocomplete="off">
                         
@@ -64,8 +63,8 @@
                         </select>
                         
                         <!-- Dropdown results -->
-                        <div id="case-dropdown" class="hidden absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-lg shadow-lg max-h-60 overflow-y-auto">
-                            <div class="p-2 text-sm text-gray-500 text-center">Start typing to search...</div>
+                        <div id="case-dropdown" class="hidden absolute z-10 w-full mt-1 card border border-border rounded-lg shadow-lg max-h-60 overflow-y-auto">
+                            <div class="p-2 text-sm text-muted-foreground text-center">Start typing to search...</div>
                         </div>
                     </div>
                     <p class="text-xs text-muted-foreground mt-1" id="selected-case-display"></p>
@@ -74,9 +73,9 @@
             
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
-                    <label for="device_type" class="block text-sm font-medium text-foreground mb-2">Device Type *</label>
+                    <label for="device_type" class="block text-sm font-medium form-label mb-2">Device Type *</label>
                     <select id="device_type" name="device_type" required
-                        class="w-full px-3 py-2 border border-input rounded-lg focus:outline-none focus:ring-2 focus:ring-ring">
+                        class="w-full px-3 py-2 rounded-lg bg-gray-700 text-foreground placeholder:text-slate-500 border border-border focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 focus:border-indigo-400">
                         <option value="computer" {% if evidence.device_type == 'computer' %}selected{% endif %}>Computer</option>
                         <option value="mobile" {% if evidence.device_type == 'mobile' %}selected{% endif %}>Mobile Device</option>
                         <option value="storage" {% if evidence.device_type == 'storage' %}selected{% endif %}>Storage Device</option>
@@ -93,9 +92,9 @@
                 </div>
                 
                 <div>
-                    <label for="status" class="block text-sm font-medium text-foreground mb-2">Status *</label>
+                    <label for="status" class="block text-sm font-medium form-label mb-2">Status *</label>
                     <select id="status" name="status" required
-                        class="w-full px-3 py-2 border border-input rounded-lg focus:outline-none focus:ring-2 focus:ring-ring">
+                        class="w-full px-3 py-2 rounded-lg bg-gray-700 text-foreground placeholder:text-slate-500 border border-border focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 focus:border-indigo-400">
                         <option value="collected" {% if evidence.status == 'collected' or not evidence %}selected{% endif %}>Collected</option>
                         <option value="analyzed" {% if evidence.status == 'analyzed' %}selected{% endif %}>Analyzed</option>
                         <option value="returned" {% if evidence.status == 'returned' %}selected{% endif %}>Returned</option>
@@ -108,33 +107,33 @@
             
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                 <div>
-                    <label for="brand" class="block text-sm font-medium text-foreground mb-2">Brand</label>
+                    <label for="brand" class="block text-sm font-medium form-label mb-2">Brand</label>
                     <input type="text" id="brand" name="brand" value="{{ evidence.brand|default:'' }}"
-                        class="w-full px-3 py-2 border border-input rounded-lg focus:outline-none focus:ring-2 focus:ring-ring"
+                        class="w-full px-3 py-2 rounded-lg bg-gray-700 text-foreground placeholder:text-slate-500 border border-border focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 focus:border-indigo-400"
                         placeholder="Manufacturer/Brand">
                 </div>
                 <div>
-                    <label for="model" class="block text-sm font-medium text-foreground mb-2">Model</label>
+                    <label for="model" class="block text-sm font-medium form-label mb-2">Model</label>
                     <input type="text" id="model" name="model" value="{{ evidence.model|default:'' }}"
-                        class="w-full px-3 py-2 border border-input rounded-lg focus:outline-none focus:ring-2 focus:ring-ring"
+                        class="w-full px-3 py-2 rounded-lg bg-gray-700 text-foreground placeholder:text-slate-500 border border-border focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 focus:border-indigo-400"
                         placeholder="Model number/name">
                 </div>
                 <div>
-                    <label for="serial_number" class="block text-sm font-medium text-foreground mb-2">Serial Number</label>
+                    <label for="serial_number" class="block text-sm font-medium form-label mb-2">Serial Number</label>
                     <input type="text" id="serial_number" name="serial_number" value="{{ evidence.serial_number|default:'' }}"
-                        class="w-full px-3 py-2 border border-input rounded-lg focus:outline-none focus:ring-2 focus:ring-ring"
+                        class="w-full px-3 py-2 rounded-lg bg-gray-700 text-foreground placeholder:text-slate-500 border border-border focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 focus:border-indigo-400"
                         placeholder="Device serial number">
                 </div>
                 <div>
-                    <label for="color" class="block text-sm font-medium text-foreground mb-2">Color</label>
+                    <label for="color" class="block text-sm font-medium form-label mb-2">Color</label>
                     <input type="text" id="color" name="color" value="{{ evidence.color|default:'' }}"
-                        class="w-full px-3 py-2 border border-input rounded-lg focus:outline-none focus:ring-2 focus:ring-ring"
+                        class="w-full px-3 py-2 rounded-lg bg-gray-700 text-foreground placeholder:text-slate-500 border border-border focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 focus:border-indigo-400"
                         placeholder="Device color">
                 </div>
             </div>
             
             <!-- Device-Specific Sections -->
-            <div class="mt-6 p-6 bg-gray-100 rounded-lg border-2 border-gray-300">
+            <div class="mt-6 p-6 card rounded-lg border-2 border-border">
                 <h3 class="text-lg font-semibold text-foreground mb-4">Device-Specific Information</h3>
                 <p class="text-sm text-muted-foreground mb-4">Fields below will change based on the device type selected above.</p>
                 
@@ -143,8 +142,8 @@
                     <h4 class="font-medium text-foreground">Computer Information</h4>
                     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                         <div>
-                            <label for="computer_type" class="block text-sm font-medium text-foreground mb-2">Computer Type</label>
-                            <select id="computer_type" name="computer_type" class="w-full px-3 py-2 border border-input rounded-lg focus:outline-none focus:ring-2 focus:ring-ring">
+                            <label for="computer_type" class="block text-sm font-medium form-label mb-2">Computer Type</label>
+                            <select id="computer_type" name="computer_type" class="w-full px-3 py-2 rounded-lg bg-gray-700 text-foreground placeholder:text-slate-500 border border-border focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 focus:border-indigo-400">
                                 <option value="">-- Select --</option>
                                 <option value="desktop" {% if evidence.device_specific_data.computer_type == 'desktop' %}selected{% endif %}>Desktop</option>
                                 <option value="laptop" {% if evidence.device_specific_data.computer_type == 'laptop' %}selected{% endif %}>Laptop</option>
@@ -154,8 +153,8 @@
                             </select>
                         </div>
                         <div>
-                            <label for="os_type" class="block text-sm font-medium text-foreground mb-2">OS Type</label>
-                            <select id="os_type" name="os_type" class="w-full px-3 py-2 border border-input rounded-lg focus:outline-none focus:ring-2 focus:ring-ring">
+                            <label for="os_type" class="block text-sm font-medium form-label mb-2">OS Type</label>
+                            <select id="os_type" name="os_type" class="w-full px-3 py-2 rounded-lg bg-gray-700 text-foreground placeholder:text-slate-500 border border-border focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 focus:border-indigo-400">
                                 <option value="">-- Select --</option>
                                 <option value="windows" {% if evidence.device_specific_data.os_type == 'windows' %}selected{% endif %}>Windows</option>
                                 <option value="macos" {% if evidence.device_specific_data.os_type == 'macos' %}selected{% endif %}>macOS</option>
@@ -165,26 +164,26 @@
                             </select>
                         </div>
                         <div>
-                            <label for="os_version" class="block text-sm font-medium text-foreground mb-2">OS Version</label>
+                            <label for="os_version" class="block text-sm font-medium form-label mb-2">OS Version</label>
                             <input type="text" id="os_version" name="os_version" value="{{ evidence.device_specific_data.os_version|default:'' }}"
-                                class="w-full px-3 py-2 border border-input rounded-lg focus:outline-none focus:ring-2 focus:ring-ring"
+                                class="w-full px-3 py-2 rounded-lg bg-gray-700 text-foreground placeholder:text-slate-500 border border-border focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 focus:border-indigo-400"
                                 placeholder="E.g. Windows 11, macOS Sonoma">
                         </div>
                         <div>
-                            <label for="cpu" class="block text-sm font-medium text-foreground mb-2">CPU</label>
+                            <label for="cpu" class="block text-sm font-medium form-label mb-2">CPU</label>
                             <input type="text" id="cpu" name="cpu" value="{{ evidence.device_specific_data.cpu|default:'' }}"
-                                class="w-full px-3 py-2 border border-input rounded-lg focus:outline-none focus:ring-2 focus:ring-ring"
+                                class="w-full px-3 py-2 rounded-lg bg-gray-700 text-foreground placeholder:text-slate-500 border border-border focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 focus:border-indigo-400"
                                 placeholder="E.g. Intel i7, M2">
                         </div>
                         <div>
-                            <label for="ram" class="block text-sm font-medium text-foreground mb-2">RAM</label>
+                            <label for="ram" class="block text-sm font-medium form-label mb-2">RAM</label>
                             <input type="text" id="ram" name="ram" value="{{ evidence.device_specific_data.ram|default:'' }}"
-                                class="w-full px-3 py-2 border border-input rounded-lg focus:outline-none focus:ring-2 focus:ring-ring"
+                                class="w-full px-3 py-2 rounded-lg bg-gray-700 text-foreground placeholder:text-slate-500 border border-border focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 focus:border-indigo-400"
                                 placeholder="E.g. 16GB">
                         </div>
                         <div>
-                            <label for="storage_type" class="block text-sm font-medium text-foreground mb-2">Storage Type</label>
-                            <select id="storage_type" name="storage_type" class="w-full px-3 py-2 border border-input rounded-lg focus:outline-none focus:ring-2 focus:ring-ring">
+                            <label for="storage_type" class="block text-sm font-medium form-label mb-2">Storage Type</label>
+                            <select id="storage_type" name="storage_type" class="w-full px-3 py-2 rounded-lg bg-gray-700 text-foreground placeholder:text-slate-500 border border-border focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 focus:border-indigo-400">
                                 <option value="">-- Select --</option>
                                 <option value="hdd" {% if evidence.device_specific_data.storage_type == 'hdd' %}selected{% endif %}>HDD</option>
                                 <option value="ssd" {% if evidence.device_specific_data.storage_type == 'ssd' %}selected{% endif %}>SSD</option>
@@ -193,14 +192,14 @@
                             </select>
                         </div>
                         <div>
-                            <label for="storage_capacity" class="block text-sm font-medium text-foreground mb-2">Storage Capacity</label>
+                            <label for="storage_capacity" class="block text-sm font-medium form-label mb-2">Storage Capacity</label>
                             <input type="text" id="storage_capacity" name="storage_capacity" value="{{ evidence.device_specific_data.storage_capacity|default:'' }}"
-                                class="w-full px-3 py-2 border border-input rounded-lg focus:outline-none focus:ring-2 focus:ring-ring"
+                                class="w-full px-3 py-2 rounded-lg bg-gray-700 text-foreground placeholder:text-slate-500 border border-border focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 focus:border-indigo-400"
                                 placeholder="E.g. 512GB, 1TB">
                         </div>
                         <div>
-                            <label for="encryption_status" class="block text-sm font-medium text-foreground mb-2">Encryption Status</label>
-                            <select id="encryption_status" name="encryption_status" class="w-full px-3 py-2 border border-input rounded-lg focus:outline-none focus:ring-2 focus:ring-ring">
+                            <label for="encryption_status" class="block text-sm font-medium form-label mb-2">Encryption Status</label>
+                            <select id="encryption_status" name="encryption_status" class="w-full px-3 py-2 rounded-lg bg-gray-700 text-foreground placeholder:text-slate-500 border border-border focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 focus:border-indigo-400">
                                 <option value="">-- Select --</option>
                                 <option value="none" {% if evidence.device_specific_data.encryption_status == 'none' %}selected{% endif %}>None</option>
                                 <option value="bitlocker" {% if evidence.device_specific_data.encryption_status == 'bitlocker' %}selected{% endif %}>BitLocker</option>
@@ -215,18 +214,20 @@
                     <div class="flex items-center space-x-2">
                         <input type="checkbox" id="write_blocker_used" name="write_blocker_used" value="true"
                             {% if evidence.device_specific_data.write_blocker_used %}checked{% endif %}
-                            class="w-4 h-4 border-gray-300 rounded">
-                        <label for="write_blocker_used" class="text-sm font-medium text-foreground">Write Blocker Used</label>
+                            class="w-4 h-4 border-border rounded">
+                        <label for="write_blocker_used" class="text-sm font-medium form-label">Write Blocker Used</label>
                     </div>
                 </div>
 
                 <!-- Mobile Device Fields -->
                 <div id="mobile-fields" class="device-section hidden space-y-6">
                     <h4 class="font-medium text-foreground">Mobile Device Information</h4>
-                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                    
+                    <!-- Basic Device & OS Information -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                         <div>
-                            <label for="mobile_os_type" class="block text-sm font-medium text-foreground mb-2">OS Type</label>
-                            <select id="mobile_os_type" name="mobile_os_type" class="w-full px-3 py-2 border border-input rounded-lg focus:outline-none focus:ring-2 focus:ring-ring">
+                            <label for="mobile_os_type" class="block text-sm font-medium form-label mb-2">OS Type</label>
+                            <select id="mobile_os_type" name="mobile_os_type" class="w-full px-3 py-2 rounded-lg bg-gray-700 text-foreground placeholder:text-slate-500 border border-border focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 focus:border-indigo-400">
                                 <option value="">-- Select --</option>
                                 <option value="ios" {% if evidence.device_specific_data.mobile_os_type == 'ios' %}selected{% endif %}>iOS</option>
                                 <option value="android" {% if evidence.device_specific_data.mobile_os_type == 'android' %}selected{% endif %}>Android</option>
@@ -235,29 +236,24 @@
                             </select>
                         </div>
                         <div>
-                            <label for="mobile_os_version" class="block text-sm font-medium text-foreground mb-2">OS Version</label>
+                            <label for="mobile_os_version" class="block text-sm font-medium form-label mb-2">OS Version</label>
                             <input type="text" id="mobile_os_version" name="mobile_os_version" value="{{ evidence.device_specific_data.mobile_os_version|default:'' }}"
-                                class="w-full px-3 py-2 border border-input rounded-lg focus:outline-none focus:ring-2 focus:ring-ring"
+                                class="w-full px-3 py-2 rounded-lg bg-gray-700 text-foreground placeholder:text-slate-500 border border-border focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 focus:border-indigo-400"
                                 placeholder="E.g. iOS 17, Android 14">
                         </div>
                         <div>
-                            <label for="imei" class="block text-sm font-medium text-foreground mb-2">IMEI (Primary)</label>
-                            <input type="text" id="imei" name="imei" value="{{ evidence.imei|default:'' }}"
-                                class="w-full px-3 py-2 border border-input rounded-lg focus:outline-none focus:ring-2 focus:ring-ring"
-                                placeholder="Primary IMEI">
+                            <label for="battery_level" class="block text-sm font-medium form-label mb-2">Battery Level (%)</label>
+                            <input type="number" id="battery_level" name="battery_level" min="0" max="100" value="{{ evidence.device_specific_data.battery_level|default:'' }}"
+                                class="w-full px-3 py-2 rounded-lg bg-gray-700 text-foreground placeholder:text-slate-500 border border-border focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 focus:border-indigo-400"
+                                placeholder="0-100">
                         </div>
+                    </div>
+                    
+                    <!-- Device Lock Status -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
-                            <label for="sim_status" class="block text-sm font-medium text-foreground mb-2">SIM Status</label>
-                            <select id="sim_status" name="sim_status" class="w-full px-3 py-2 border border-input rounded-lg focus:outline-none focus:ring-2 focus:ring-ring">
-                                <option value="">-- Select --</option>
-                                <option value="present" {% if evidence.device_specific_data.sim_status == 'present' %}selected{% endif %}>Present</option>
-                                <option value="absent" {% if evidence.device_specific_data.sim_status == 'absent' %}selected{% endif %}>Absent</option>
-                                <option value="multiple" {% if evidence.device_specific_data.sim_status == 'multiple' %}selected{% endif %}>Multiple</option>
-                            </select>
-                        </div>
-                        <div>
-                            <label for="lock_status" class="block text-sm font-medium text-foreground mb-2">Lock Status</label>
-                            <select id="lock_status" name="lock_status" class="w-full px-3 py-2 border border-input rounded-lg focus:outline-none focus:ring-2 focus:ring-ring">
+                            <label for="lock_status" class="block text-sm font-medium form-label mb-2">Device Lock Status</label>
+                            <select id="lock_status" name="lock_status" class="w-full px-3 py-2 rounded-lg bg-gray-700 text-foreground placeholder:text-slate-500 border border-border focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 focus:border-indigo-400">
                                 <option value="">-- Select --</option>
                                 <option value="unlocked" {% if evidence.device_specific_data.lock_status == 'unlocked' %}selected{% endif %}>Unlocked</option>
                                 <option value="locked" {% if evidence.device_specific_data.lock_status == 'locked' %}selected{% endif %}>Locked</option>
@@ -266,32 +262,141 @@
                             </select>
                         </div>
                         <div>
-                            <label for="battery_level" class="block text-sm font-medium text-foreground mb-2">Battery Level (%)</label>
-                            <input type="number" id="battery_level" name="battery_level" min="0" max="100" value="{{ evidence.device_specific_data.battery_level|default:'' }}"
-                                class="w-full px-3 py-2 border border-input rounded-lg focus:outline-none focus:ring-2 focus:ring-ring"
-                                placeholder="0-100">
+                            <label for="sim_status" class="block text-sm font-medium form-label mb-2">SIM Card Status</label>
+                            <select id="sim_status" name="sim_status" class="w-full px-3 py-2 rounded-lg bg-gray-700 text-foreground placeholder:text-slate-500 border border-border focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 focus:border-indigo-400">
+                                <option value="">-- Select --</option>
+                                <option value="present" {% if evidence.device_specific_data.sim_status == 'present' %}selected{% endif %}>Present</option>
+                                <option value="absent" {% if evidence.device_specific_data.sim_status == 'absent' %}selected{% endif %}>Absent</option>
+                                <option value="multiple" {% if evidence.device_specific_data.sim_status == 'multiple' %}selected{% endif %}>Multiple SIMs</option>
+                            </select>
                         </div>
                     </div>
+                    
+                    <!-- IMEI Information -->
                     <div>
-                        <label class="block text-sm font-medium text-foreground mb-2">Additional IMEIs (Dual/Multi-SIM)</label>
-                        <div id="additional-imeis" class="space-y-2">
-                            {% if evidence.imei_numbers %}
-                                {% for imei in evidence.imei_numbers %}
-                                <div class="flex gap-2">
-                                    <input type="text" name="additional_imei" value="{{ imei }}"
-                                        class="flex-1 px-3 py-2 border border-input rounded-lg focus:outline-none focus:ring-2 focus:ring-ring"
-                                        placeholder="Additional IMEI">
-                                    <button type="button" onclick="this.parentElement.remove()" 
-                                        class="px-3 py-2 bg-destructive text-destructive-foreground rounded-lg hover:opacity-90">
-                                        Remove
-                                    </button>
+                        <h5 class="text-md font-medium text-foreground mb-3">IMEI Information</h5>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <label for="imei" class="block text-sm font-medium form-label mb-2">IMEI (Primary)</label>
+                                <input type="text" id="imei" name="imei" value="{{ evidence.imei|default:'' }}"
+                                    class="w-full px-3 py-2 rounded-lg bg-gray-700 text-foreground placeholder:text-slate-500 border border-border focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 focus:border-indigo-400"
+                                    placeholder="Primary IMEI">
+                            </div>
+                        </div>
+                        <div class="mt-3">
+                            <label class="block text-sm font-medium form-label mb-2">Additional IMEIs (Dual/Multi-SIM)</label>
+                            <div id="additional-imeis" class="space-y-2">
+                                {% if evidence.imei_numbers %}
+                                    {% for imei in evidence.imei_numbers %}
+                                    <div class="flex gap-2">
+                                        <input type="text" name="additional_imei" value="{{ imei }}"
+                                            class="flex-1 px-3 py-2 bg-gray-700 text-foreground placeholder:text-slate-500 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                                            placeholder="Additional IMEI">
+                                        <button type="button" onclick="this.parentElement.remove()" 
+                                            class="px-3 py-2 bg-destructive text-destructive-foreground rounded-lg hover:opacity-90">
+                                            Remove
+                                        </button>
+                                    </div>
+                                    {% endfor %}
+                                {% endif %}
+                            </div>
+                            <button type="button" onclick="addIMEIField()" 
+                                class="btn btn-secondary btn-sm mt-2">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
+                                </svg>
+                                Add Another IMEI
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <!-- SIM Card Details (Conditional - shown when SIM is present) -->
+                    <div id="sim-card-details" class="hidden p-4 card border border-slate-500 rounded-lg">
+                        <h5 class="text-md font-medium text-foreground mb-3 flex items-center gap-2">
+                            <svg class="w-5 h-5 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z"/>
+                            </svg>
+                            SIM Card Information
+                        </h5>
+                        
+                        <div id="sim-cards-container" class="space-y-6">
+                            <!-- SIM cards will be added here dynamically -->
+                            {% if evidence.device_specific_data.sim_cards %}
+                                {% for sim_card in evidence.device_specific_data.sim_cards %}
+                                <div class="sim-card-entry p-4 card border border-border rounded-lg">
+                                    <div class="flex justify-between items-center mb-3">
+                                        <h6 class="font-medium form-label">SIM Card <span class="sim-number">1</span></h6>
+                                        <button type="button" onclick="removeSIMCard(this)" class="px-2 py-1 text-sm bg-red-600 text-white rounded hover:bg-red-700">
+                                            Remove
+                                        </button>
+                                    </div>
+                                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                                        <div>
+                                            <label class="block text-sm font-medium form-label mb-2">ICCID (SIM Serial)</label>
+                                            <input type="text" name="sim_iccid[]" value="{{ sim_card.iccid }}"
+                                                class="w-full px-3 py-2 rounded-lg bg-gray-600 text-foreground placeholder:text-slate-400 border border-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                                                placeholder="19-20 digit ICCID">
+                                            <p class="text-xs text-muted-foreground mt-1">Integrated Circuit Card ID</p>
+                                        </div>
+                                        <div>
+                                            <label class="block text-sm font-medium form-label mb-2">IMSI</label>
+                                            <input type="text" name="sim_imsi[]" value="{{ sim_card.imsi }}"
+                                                class="w-full px-3 py-2 rounded-lg bg-gray-600 text-foreground placeholder:text-slate-400 border border-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                                                placeholder="International Mobile Subscriber Identity">
+                                            <p class="text-xs text-muted-foreground mt-1">15 digit identifier</p>
+                                        </div>
+                                        <div>
+                                            <label class="block text-sm font-medium form-label mb-2">Phone Number</label>
+                                            <input type="text" name="sim_phone_number[]" value="{{ sim_card.phone_number }}"
+                                                class="w-full px-3 py-2 rounded-lg bg-gray-600 text-foreground placeholder:text-slate-400 border border-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                                                placeholder="Associated phone number">
+                                        </div>
+                                        <div>
+                                            <label class="block text-sm font-medium form-label mb-2">Carrier/Network</label>
+                                            <input type="text" name="sim_carrier[]" value="{{ sim_card.carrier }}"
+                                                class="w-full px-3 py-2 rounded-lg bg-gray-600 text-foreground placeholder:text-slate-400 border border-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                                                placeholder="E.g. Verizon, AT&T, Vodafone">
+                                        </div>
+                                        <div>
+                                            <label class="block text-sm font-medium form-label mb-2">SIM Type</label>
+                                            <select name="sim_type[]" class="w-full px-3 py-2 rounded-lg bg-gray-600 text-foreground placeholder:text-slate-400 border border-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
+                                                <option value="">-- Select --</option>
+                                                <option value="nano_sim" {% if sim_card.sim_type == 'nano_sim' %}selected{% endif %}>Nano SIM</option>
+                                                <option value="micro_sim" {% if sim_card.sim_type == 'micro_sim' %}selected{% endif %}>Micro SIM</option>
+                                                <option value="standard_sim" {% if sim_card.sim_type == 'standard_sim' %}selected{% endif %}>Standard SIM</option>
+                                                <option value="esim" {% if sim_card.sim_type == 'esim' %}selected{% endif %}>eSIM</option>
+                                                <option value="unknown" {% if sim_card.sim_type == 'unknown' %}selected{% endif %}>Unknown</option>
+                                            </select>
+                                        </div>
+                                        <div>
+                                            <label class="block text-sm font-medium form-label mb-2">PIN Status</label>
+                                            <select name="sim_pin_status[]" class="w-full px-3 py-2 rounded-lg bg-gray-600 text-foreground placeholder:text-slate-400 border border-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
+                                                <option value="">-- Select --</option>
+                                                <option value="no_pin" {% if sim_card.pin_status == 'no_pin' %}selected{% endif %}>No PIN</option>
+                                                <option value="pin_locked" {% if sim_card.pin_status == 'pin_locked' %}selected{% endif %}>PIN Locked</option>
+                                                <option value="pin_unlocked" {% if sim_card.pin_status == 'pin_unlocked' %}selected{% endif %}>PIN Unlocked</option>
+                                                <option value="puk_locked" {% if sim_card.pin_status == 'puk_locked' %}selected{% endif %}>PUK Locked</option>
+                                                <option value="unknown" {% if sim_card.pin_status == 'unknown' %}selected{% endif %}>Unknown</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="mt-3">
+                                        <label class="block text-sm font-medium form-label mb-2">SIM Card Notes</label>
+                                        <textarea name="sim_notes[]" rows="2"
+                                            class="w-full px-3 py-2 rounded-lg bg-gray-600 text-foreground placeholder:text-slate-400 border border-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                                            placeholder="Additional notes about this SIM card...">{{ sim_card.notes }}</textarea>
+                                    </div>
                                 </div>
                                 {% endfor %}
                             {% endif %}
                         </div>
-                        <button type="button" onclick="addIMEIField()" 
-                            class="mt-2 px-3 py-1 text-sm bg-secondary text-secondary-foreground rounded-lg hover:opacity-90">
-                            + Add Another IMEI
+                        
+                        <button type="button" onclick="addSIMCard()" 
+                            class="mt-4 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 flex items-center gap-2">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
+                            </svg>
+                            Add Another SIM Card
                         </button>
                     </div>
                 </div>
@@ -301,8 +406,8 @@
                     <h4 class="font-medium text-foreground">Storage Device Information</h4>
                     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                         <div>
-                            <label for="storage_device_type" class="block text-sm font-medium text-foreground mb-2">Storage Type</label>
-                            <select id="storage_device_type" name="storage_device_type" class="w-full px-3 py-2 border border-input rounded-lg focus:outline-none focus:ring-2 focus:ring-ring">
+                            <label for="storage_device_type" class="block text-sm font-medium form-label mb-2">Storage Type</label>
+                            <select id="storage_device_type" name="storage_device_type" class="w-full px-3 py-2 rounded-lg bg-gray-700 text-foreground placeholder:text-slate-500 border border-border focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 focus:border-indigo-400">
                                 <option value="">-- Select --</option>
                                 <option value="hdd_external" {% if evidence.device_specific_data.storage_device_type == 'hdd_external' %}selected{% endif %}>HDD External</option>
                                 <option value="ssd_external" {% if evidence.device_specific_data.storage_device_type == 'ssd_external' %}selected{% endif %}>SSD External</option>
@@ -314,14 +419,14 @@
                             </select>
                         </div>
                         <div>
-                            <label for="capacity" class="block text-sm font-medium text-foreground mb-2">Capacity</label>
+                            <label for="capacity" class="block text-sm font-medium form-label mb-2">Capacity</label>
                             <input type="text" id="capacity" name="capacity" value="{{ evidence.device_specific_data.capacity|default:'' }}"
-                                class="w-full px-3 py-2 border border-input rounded-lg focus:outline-none focus:ring-2 focus:ring-ring"
+                                class="w-full px-3 py-2 rounded-lg bg-gray-700 text-foreground placeholder:text-slate-500 border border-border focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 focus:border-indigo-400"
                                 placeholder="E.g. 500GB, 1TB">
                         </div>
                         <div>
-                            <label for="connection_interface" class="block text-sm font-medium text-foreground mb-2">Connection Interface</label>
-                            <select id="connection_interface" name="connection_interface" class="w-full px-3 py-2 border border-input rounded-lg focus:outline-none focus:ring-2 focus:ring-ring">
+                            <label for="connection_interface" class="block text-sm font-medium form-label mb-2">Connection Interface</label>
+                            <select id="connection_interface" name="connection_interface" class="w-full px-3 py-2 rounded-lg bg-gray-700 text-foreground placeholder:text-slate-500 border border-border focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 focus:border-indigo-400">
                                 <option value="">-- Select --</option>
                                 <option value="usb" {% if evidence.device_specific_data.connection_interface == 'usb' %}selected{% endif %}>USB</option>
                                 <option value="usb_c" {% if evidence.device_specific_data.connection_interface == 'usb_c' %}selected{% endif %}>USB-C</option>
@@ -332,8 +437,8 @@
                             </select>
                         </div>
                         <div>
-                            <label for="filesystem" class="block text-sm font-medium text-foreground mb-2">Filesystem</label>
-                            <select id="filesystem" name="filesystem" class="w-full px-3 py-2 border border-input rounded-lg focus:outline-none focus:ring-2 focus:ring-ring">
+                            <label for="filesystem" class="block text-sm font-medium form-label mb-2">Filesystem</label>
+                            <select id="filesystem" name="filesystem" class="w-full px-3 py-2 rounded-lg bg-gray-700 text-foreground placeholder:text-slate-500 border border-border focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 focus:border-indigo-400">
                                 <option value="">-- Select --</option>
                                 <option value="ntfs" {% if evidence.device_specific_data.filesystem == 'ntfs' %}selected{% endif %}>NTFS</option>
                                 <option value="fat32" {% if evidence.device_specific_data.filesystem == 'fat32' %}selected{% endif %}>FAT32</option>
@@ -353,8 +458,8 @@
                     <h4 class="font-medium text-foreground">Network Device Information</h4>
                     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                         <div>
-                            <label for="network_device_type" class="block text-sm font-medium text-foreground mb-2">Network Device Type</label>
-                            <select id="network_device_type" name="network_device_type" class="w-full px-3 py-2 border border-input rounded-lg focus:outline-none focus:ring-2 focus:ring-ring">
+                            <label for="network_device_type" class="block text-sm font-medium form-label mb-2">Network Device Type</label>
+                            <select id="network_device_type" name="network_device_type" class="w-full px-3 py-2 rounded-lg bg-gray-700 text-foreground placeholder:text-slate-500 border border-border focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 focus:border-indigo-400">
                                 <option value="">-- Select --</option>
                                 <option value="router" {% if evidence.device_specific_data.network_device_type == 'router' %}selected{% endif %}>Router</option>
                                 <option value="switch" {% if evidence.device_specific_data.network_device_type == 'switch' %}selected{% endif %}>Switch</option>
@@ -365,20 +470,20 @@
                             </select>
                         </div>
                         <div>
-                            <label for="network_ip_address" class="block text-sm font-medium text-foreground mb-2">IP Address</label>
+                            <label for="network_ip_address" class="block text-sm font-medium form-label mb-2">IP Address</label>
                             <input type="text" id="network_ip_address" name="network_ip_address" value="{{ evidence.device_specific_data.network_ip_address|default:'' }}"
-                                class="w-full px-3 py-2 border border-input rounded-lg focus:outline-none focus:ring-2 focus:ring-ring"
+                                class="w-full px-3 py-2 rounded-lg bg-gray-700 text-foreground placeholder:text-slate-500 border border-border focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 focus:border-indigo-400"
                                 placeholder="E.g. 192.168.1.1">
                         </div>
                         <div>
-                            <label for="subnet_mask" class="block text-sm font-medium text-foreground mb-2">Subnet Mask</label>
+                            <label for="subnet_mask" class="block text-sm font-medium form-label mb-2">Subnet Mask</label>
                             <input type="text" id="subnet_mask" name="subnet_mask" value="{{ evidence.device_specific_data.subnet_mask|default:'' }}"
-                                class="w-full px-3 py-2 border border-input rounded-lg focus:outline-none focus:ring-2 focus:ring-ring"
+                                class="w-full px-3 py-2 rounded-lg bg-gray-700 text-foreground placeholder:text-slate-500 border border-border focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 focus:border-indigo-400"
                                 placeholder="E.g. 255.255.255.0">
                         </div>
                         <div>
-                            <label for="admin_access_method" class="block text-sm font-medium text-foreground mb-2">Admin Access Method</label>
-                            <select id="admin_access_method" name="admin_access_method" class="w-full px-3 py-2 border border-input rounded-lg focus:outline-none focus:ring-2 focus:ring-ring">
+                            <label for="admin_access_method" class="block text-sm font-medium form-label mb-2">Admin Access Method</label>
+                            <select id="admin_access_method" name="admin_access_method" class="w-full px-3 py-2 rounded-lg bg-gray-700 text-foreground placeholder:text-slate-500 border border-border focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 focus:border-indigo-400">
                                 <option value="">-- Select --</option>
                                 <option value="ssh" {% if evidence.device_specific_data.admin_access_method == 'ssh' %}selected{% endif %}>SSH</option>
                                 <option value="telnet" {% if evidence.device_specific_data.admin_access_method == 'telnet' %}selected{% endif %}>Telnet</option>
@@ -396,8 +501,8 @@
                     <h4 class="font-medium text-foreground">Cloud/Online Account Information</h4>
                     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                         <div>
-                            <label for="service_provider" class="block text-sm font-medium text-foreground mb-2">Service Provider</label>
-                            <select id="service_provider" name="service_provider" class="w-full px-3 py-2 border border-input rounded-lg focus:outline-none focus:ring-2 focus:ring-ring">
+                            <label for="service_provider" class="block text-sm font-medium form-label mb-2">Service Provider</label>
+                            <select id="service_provider" name="service_provider" class="w-full px-3 py-2 rounded-lg bg-gray-700 text-foreground placeholder:text-slate-500 border border-border focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 focus:border-indigo-400">
                                 <option value="">-- Select --</option>
                                 <option value="google" {% if evidence.device_specific_data.service_provider == 'google' %}selected{% endif %}>Google</option>
                                 <option value="microsoft" {% if evidence.device_specific_data.service_provider == 'microsoft' %}selected{% endif %}>Microsoft</option>
@@ -409,14 +514,14 @@
                             </select>
                         </div>
                         <div>
-                            <label for="account_identifier" class="block text-sm font-medium text-foreground mb-2">Account Identifier</label>
+                            <label for="account_identifier" class="block text-sm font-medium form-label mb-2">Account Identifier</label>
                             <input type="text" id="account_identifier" name="account_identifier" value="{{ evidence.device_specific_data.account_identifier|default:'' }}"
-                                class="w-full px-3 py-2 border border-input rounded-lg focus:outline-none focus:ring-2 focus:ring-ring"
+                                class="w-full px-3 py-2 rounded-lg bg-gray-700 text-foreground placeholder:text-slate-500 border border-border focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 focus:border-indigo-400"
                                 placeholder="Email, username, or ID">
                         </div>
                         <div>
-                            <label for="legal_authority" class="block text-sm font-medium text-foreground mb-2">Legal Authority</label>
-                            <select id="legal_authority" name="legal_authority" class="w-full px-3 py-2 border border-input rounded-lg focus:outline-none focus:ring-2 focus:ring-ring">
+                            <label for="legal_authority" class="block text-sm font-medium form-label mb-2">Legal Authority</label>
+                            <select id="legal_authority" name="legal_authority" class="w-full px-3 py-2 rounded-lg bg-gray-700 text-foreground placeholder:text-slate-500 border border-border focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 focus:border-indigo-400">
                                 <option value="">-- Select --</option>
                                 <option value="search_warrant" {% if evidence.device_specific_data.legal_authority == 'search_warrant' %}selected{% endif %}>Search Warrant</option>
                                 <option value="court_order" {% if evidence.device_specific_data.legal_authority == 'court_order' %}selected{% endif %}>Court Order</option>
@@ -426,8 +531,8 @@
                             </select>
                         </div>
                         <div>
-                            <label for="access_method" class="block text-sm font-medium text-foreground mb-2">Access Method</label>
-                            <select id="access_method" name="access_method" class="w-full px-3 py-2 border border-input rounded-lg focus:outline-none focus:ring-2 focus:ring-ring">
+                            <label for="access_method" class="block text-sm font-medium form-label mb-2">Access Method</label>
+                            <select id="access_method" name="access_method" class="w-full px-3 py-2 rounded-lg bg-gray-700 text-foreground placeholder:text-slate-500 border border-border focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 focus:border-indigo-400">
                                 <option value="">-- Select --</option>
                                 <option value="direct_login" {% if evidence.device_specific_data.access_method == 'direct_login' %}selected{% endif %}>Direct Login</option>
                                 <option value="api_tokens" {% if evidence.device_specific_data.access_method == 'api_tokens' %}selected{% endif %}>API Tokens</option>
@@ -444,39 +549,39 @@
                     <h4 class="font-medium text-foreground">Vehicle Information</h4>
                     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                         <div>
-                            <label for="vehicle_make" class="block text-sm font-medium text-foreground mb-2">Vehicle Make</label>
+                            <label for="vehicle_make" class="block text-sm font-medium form-label mb-2">Vehicle Make</label>
                             <input type="text" id="vehicle_make" name="vehicle_make" value="{{ evidence.device_specific_data.vehicle_make|default:'' }}"
-                                class="w-full px-3 py-2 border border-input rounded-lg focus:outline-none focus:ring-2 focus:ring-ring"
+                                class="w-full px-3 py-2 rounded-lg bg-gray-700 text-foreground placeholder:text-slate-500 border border-border focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 focus:border-indigo-400"
                                 placeholder="E.g. Toyota, Ford">
                         </div>
                         <div>
-                            <label for="vehicle_model" class="block text-sm font-medium text-foreground mb-2">Vehicle Model</label>
+                            <label for="vehicle_model" class="block text-sm font-medium form-label mb-2">Vehicle Model</label>
                             <input type="text" id="vehicle_model" name="vehicle_model" value="{{ evidence.device_specific_data.vehicle_model|default:'' }}"
-                                class="w-full px-3 py-2 border border-input rounded-lg focus:outline-none focus:ring-2 focus:ring-ring"
+                                class="w-full px-3 py-2 rounded-lg bg-gray-700 text-foreground placeholder:text-slate-500 border border-border focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 focus:border-indigo-400"
                                 placeholder="E.g. Camry, F-150">
                         </div>
                         <div>
-                            <label for="vehicle_year" class="block text-sm font-medium text-foreground mb-2">Vehicle Year</label>
+                            <label for="vehicle_year" class="block text-sm font-medium form-label mb-2">Vehicle Year</label>
                             <input type="text" id="vehicle_year" name="vehicle_year" value="{{ evidence.device_specific_data.vehicle_year|default:'' }}"
-                                class="w-full px-3 py-2 border border-input rounded-lg focus:outline-none focus:ring-2 focus:ring-ring"
+                                class="w-full px-3 py-2 rounded-lg bg-gray-700 text-foreground placeholder:text-slate-500 border border-border focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 focus:border-indigo-400"
                                 placeholder="E.g. 2020">
                         </div>
                         <div>
-                            <label for="vin_number" class="block text-sm font-medium text-foreground mb-2">VIN Number</label>
+                            <label for="vin_number" class="block text-sm font-medium form-label mb-2">VIN Number</label>
                             <input type="text" id="vin_number" name="vin_number" value="{{ evidence.device_specific_data.vin_number|default:'' }}"
-                                class="w-full px-3 py-2 border border-input rounded-lg focus:outline-none focus:ring-2 focus:ring-ring"
+                                class="w-full px-3 py-2 rounded-lg bg-gray-700 text-foreground placeholder:text-slate-500 border border-border focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 focus:border-indigo-400"
                                 placeholder="Vehicle Identification Number">
                         </div>
                         <div>
-                            <label for="license_plate" class="block text-sm font-medium text-foreground mb-2">License Plate</label>
+                            <label for="license_plate" class="block text-sm font-medium form-label mb-2">License Plate</label>
                             <input type="text" id="license_plate" name="license_plate" value="{{ evidence.device_specific_data.license_plate|default:'' }}"
-                                class="w-full px-3 py-2 border border-input rounded-lg focus:outline-none focus:ring-2 focus:ring-ring"
+                                class="w-full px-3 py-2 rounded-lg bg-gray-700 text-foreground placeholder:text-slate-500 border border-border focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 focus:border-indigo-400"
                                 placeholder="License plate number">
                         </div>
                         <div>
-                            <label for="odometer" class="block text-sm font-medium text-foreground mb-2">Odometer</label>
+                            <label for="odometer" class="block text-sm font-medium form-label mb-2">Odometer</label>
                             <input type="text" id="odometer" name="odometer" value="{{ evidence.device_specific_data.odometer|default:'' }}"
-                                class="w-full px-3 py-2 border border-input rounded-lg focus:outline-none focus:ring-2 focus:ring-ring"
+                                class="w-full px-3 py-2 rounded-lg bg-gray-700 text-foreground placeholder:text-slate-500 border border-border focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 focus:border-indigo-400"
                                 placeholder="Mileage">
                         </div>
                     </div>
@@ -487,8 +592,8 @@
                     <h4 class="font-medium text-foreground">Video Evidence Information</h4>
                     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                         <div>
-                            <label for="video_source_type" class="block text-sm font-medium text-foreground mb-2">Video Source Type</label>
-                            <select id="video_source_type" name="video_source_type" class="w-full px-3 py-2 border border-input rounded-lg focus:outline-none focus:ring-2 focus:ring-ring">
+                            <label for="video_source_type" class="block text-sm font-medium form-label mb-2">Video Source Type</label>
+                            <select id="video_source_type" name="video_source_type" class="w-full px-3 py-2 rounded-lg bg-gray-700 text-foreground placeholder:text-slate-500 border border-border focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 focus:border-indigo-400">
                                 <option value="">-- Select --</option>
                                 <option value="cctv_system" {% if evidence.device_specific_data.video_source_type == 'cctv_system' %}selected{% endif %}>CCTV System</option>
                                 <option value="security_camera" {% if evidence.device_specific_data.video_source_type == 'security_camera' %}selected{% endif %}>Security Camera</option>
@@ -500,14 +605,14 @@
                             </select>
                         </div>
                         <div>
-                            <label for="camera_location" class="block text-sm font-medium text-foreground mb-2">Camera Location</label>
+                            <label for="camera_location" class="block text-sm font-medium form-label mb-2">Camera Location</label>
                             <input type="text" id="camera_location" name="camera_location" value="{{ evidence.device_specific_data.camera_location|default:'' }}"
-                                class="w-full px-3 py-2 border border-input rounded-lg focus:outline-none focus:ring-2 focus:ring-ring"
+                                class="w-full px-3 py-2 rounded-lg bg-gray-700 text-foreground placeholder:text-slate-500 border border-border focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 focus:border-indigo-400"
                                 placeholder="Physical location of camera">
                         </div>
                         <div>
-                            <label for="video_format" class="block text-sm font-medium text-foreground mb-2">Video Format</label>
-                            <select id="video_format" name="video_format" class="w-full px-3 py-2 border border-input rounded-lg focus:outline-none focus:ring-2 focus:ring-ring">
+                            <label for="video_format" class="block text-sm font-medium form-label mb-2">Video Format</label>
+                            <select id="video_format" name="video_format" class="w-full px-3 py-2 rounded-lg bg-gray-700 text-foreground placeholder:text-slate-500 border border-border focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 focus:border-indigo-400">
                                 <option value="">-- Select --</option>
                                 <option value="mp4" {% if evidence.device_specific_data.video_format == 'mp4' %}selected{% endif %}>MP4</option>
                                 <option value="avi" {% if evidence.device_specific_data.video_format == 'avi' %}selected{% endif %}>AVI</option>
@@ -518,27 +623,27 @@
                             </select>
                         </div>
                         <div>
-                            <label for="resolution" class="block text-sm font-medium text-foreground mb-2">Resolution</label>
+                            <label for="resolution" class="block text-sm font-medium form-label mb-2">Resolution</label>
                             <input type="text" id="resolution" name="resolution" value="{{ evidence.device_specific_data.resolution|default:'' }}"
-                                class="w-full px-3 py-2 border border-input rounded-lg focus:outline-none focus:ring-2 focus:ring-ring"
+                                class="w-full px-3 py-2 rounded-lg bg-gray-700 text-foreground placeholder:text-slate-500 border border-border focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 focus:border-indigo-400"
                                 placeholder="E.g. 1920x1080, 4K">
                         </div>
                         <div>
-                            <label for="duration" class="block text-sm font-medium text-foreground mb-2">Duration</label>
+                            <label for="duration" class="block text-sm font-medium form-label mb-2">Duration</label>
                             <input type="text" id="duration" name="duration" value="{{ evidence.device_specific_data.duration|default:'' }}"
-                                class="w-full px-3 py-2 border border-input rounded-lg focus:outline-none focus:ring-2 focus:ring-ring"
+                                class="w-full px-3 py-2 rounded-lg bg-gray-700 text-foreground placeholder:text-slate-500 border border-border focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 focus:border-indigo-400"
                                 placeholder="E.g. 01:23:45">
                         </div>
                         <div>
-                            <label for="frame_rate" class="block text-sm font-medium text-foreground mb-2">Frame Rate</label>
+                            <label for="frame_rate" class="block text-sm font-medium form-label mb-2">Frame Rate</label>
                             <input type="text" id="frame_rate" name="frame_rate" value="{{ evidence.device_specific_data.frame_rate|default:'' }}"
-                                class="w-full px-3 py-2 border border-input rounded-lg focus:outline-none focus:ring-2 focus:ring-ring"
+                                class="w-full px-3 py-2 rounded-lg bg-gray-700 text-foreground placeholder:text-slate-500 border border-border focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 focus:border-indigo-400"
                                 placeholder="E.g. 30fps, 60fps">
                         </div>
                     </div>
                     
                     <!-- Time Difference Calculator -->
-                    <div class="mt-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                    <div class="mt-6 p-4 card border border-border rounded-lg">
                         <h5 class="font-medium text-foreground mb-3 flex items-center gap-2">
                             <svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
@@ -549,28 +654,28 @@
                         
                         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                             <div>
-                                <label for="dvr_date" class="block text-sm font-medium text-foreground mb-2">DVR/NVR Date</label>
+                                <label for="dvr_date" class="block text-sm font-medium form-label mb-2">DVR/NVR Date</label>
                                 <input type="date" id="dvr_date"
-                                    class="w-full px-3 py-2 border border-input rounded-lg focus:outline-none focus:ring-2 focus:ring-ring">
+                                    class="w-full px-3 py-2 rounded-lg bg-gray-700 text-foreground placeholder:text-slate-500 border border-border focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 focus:border-indigo-400">
                                 <p class="text-xs text-muted-foreground mt-1">Date shown on device</p>
                             </div>
                             <div>
-                                <label for="dvr_time" class="block text-sm font-medium text-foreground mb-2">DVR/NVR Time</label>
+                                <label for="dvr_time" class="block text-sm font-medium form-label mb-2">DVR/NVR Time</label>
                                 <input type="time" id="dvr_time" step="1"
-                                    class="w-full px-3 py-2 border border-input rounded-lg focus:outline-none focus:ring-2 focus:ring-ring"
+                                    class="w-full px-3 py-2 rounded-lg bg-gray-700 text-foreground placeholder:text-slate-500 border border-border focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 focus:border-indigo-400"
                                     placeholder="HH:MM:SS">
                                 <p class="text-xs text-muted-foreground mt-1">Time shown on device</p>
                             </div>
                             <div>
-                                <label for="real_date" class="block text-sm font-medium text-foreground mb-2">Actual Date</label>
+                                <label for="real_date" class="block text-sm font-medium form-label mb-2">Actual Date</label>
                                 <input type="date" id="real_date"
-                                    class="w-full px-3 py-2 border border-input rounded-lg focus:outline-none focus:ring-2 focus:ring-ring">
+                                    class="w-full px-3 py-2 rounded-lg bg-gray-700 text-foreground placeholder:text-slate-500 border border-border focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 focus:border-indigo-400">
                                 <p class="text-xs text-muted-foreground mt-1">Verified actual date</p>
                             </div>
                             <div>
-                                <label for="real_time" class="block text-sm font-medium text-foreground mb-2">Actual Time</label>
+                                <label for="real_time" class="block text-sm font-medium form-label mb-2">Actual Time</label>
                                 <input type="time" id="real_time" step="1"
-                                    class="w-full px-3 py-2 border border-input rounded-lg focus:outline-none focus:ring-2 focus:ring-ring"
+                                    class="w-full px-3 py-2 rounded-lg bg-gray-700 text-foreground placeholder:text-slate-500 border border-border focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 focus:border-indigo-400"
                                     placeholder="HH:MM:SS">
                                 <p class="text-xs text-muted-foreground mt-1">Verified actual time</p>
                             </div>
@@ -578,15 +683,15 @@
                         
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
                             <div>
-                                <label class="block text-sm font-medium text-foreground mb-2">Date Difference</label>
-                                <div id="date_difference" class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-center font-mono text-lg font-semibold text-gray-700">
+                                <label class="block text-sm font-medium form-label mb-2">Date Difference</label>
+                                <div id="date_difference" class="w-full px-3 py-2 card border border-border rounded-lg text-center font-mono text-lg font-semibold form-label">
                                     -- days
                                 </div>
                                 <p class="text-xs text-muted-foreground mt-1">Days to add/subtract</p>
                             </div>
                             <div>
-                                <label class="block text-sm font-medium text-foreground mb-2">Time Difference</label>
-                                <div id="time_difference" class="w-full px-3 py-2 bg-green-50 border border-green-300 rounded-lg text-center font-mono text-lg font-semibold text-green-700">
+                                <label class="block text-sm font-medium form-label mb-2">Time Difference</label>
+                                <div id="time_difference" class="w-full px-3 py-2 card border border-green-300 rounded-lg text-center font-mono text-lg font-semibold text-foreground">
                                     --:--:--
                                 </div>
                                 <p class="text-xs text-muted-foreground mt-1">Time to add/subtract</p>
@@ -656,14 +761,14 @@
                         dateDiffDisplay.textContent = formattedDateDiff;
                         dateDiffDisplay.className = `w-full px-3 py-2 border rounded-lg text-center font-mono text-lg font-semibold ${
                             daysDiff < 0 ? 'bg-red-50 border-red-300 text-red-700' : 
-                            daysDiff > 0 ? 'bg-green-50 border-green-300 text-green-700' : 
-                            'bg-gray-100 border-gray-300 text-gray-700'
+                            daysDiff > 0 ? 'bg-green-50 border-green-300 text-foreground' : 
+                            'card border-border form-label'
                         }`;
                         
                         // Update time difference display
                         timeDiffDisplay.textContent = formattedTimeDiff;
                         timeDiffDisplay.className = `w-full px-3 py-2 border rounded-lg text-center font-mono text-lg font-semibold ${
-                            (diffSeconds % 86400) < 0 ? 'bg-red-50 border-red-300 text-red-700' : 'bg-green-50 border-green-300 text-green-700'
+                            (diffSeconds % 86400) < 0 ? 'bg-red-50 border-red-300 text-red-700' : 'bg-green-50 border-green-300 text-foreground'
                         }`;
                         
                         // Build instruction text
@@ -713,8 +818,8 @@
                     <h4 class="font-medium text-foreground">Gaming Console Information</h4>
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
-                            <label for="console_type" class="block text-sm font-medium text-foreground mb-2">Console Type</label>
-                            <select id="console_type" name="console_type" class="w-full px-3 py-2 border border-input rounded-lg focus:outline-none focus:ring-2 focus:ring-ring">
+                            <label for="console_type" class="block text-sm font-medium form-label mb-2">Console Type</label>
+                            <select id="console_type" name="console_type" class="w-full px-3 py-2 rounded-lg bg-gray-700 text-foreground placeholder:text-slate-500 border border-border focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 focus:border-indigo-400">
                                 <option value="">-- Select --</option>
                                 <option value="playstation" {% if evidence.device_specific_data.console_type == 'playstation' %}selected{% endif %}>PlayStation</option>
                                 <option value="xbox" {% if evidence.device_specific_data.console_type == 'xbox' %}selected{% endif %}>Xbox</option>
@@ -725,9 +830,9 @@
                             </select>
                         </div>
                         <div>
-                            <label for="account_username" class="block text-sm font-medium text-foreground mb-2">Account Username</label>
+                            <label for="account_username" class="block text-sm font-medium form-label mb-2">Account Username</label>
                             <input type="text" id="account_username" name="account_username" value="{{ evidence.device_specific_data.account_username|default:'' }}"
-                                class="w-full px-3 py-2 border border-input rounded-lg focus:outline-none focus:ring-2 focus:ring-ring"
+                                class="w-full px-3 py-2 rounded-lg bg-gray-700 text-foreground placeholder:text-slate-500 border border-border focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 focus:border-indigo-400"
                                 placeholder="Gaming account username">
                         </div>
                     </div>
@@ -738,8 +843,8 @@
                     <h4 class="font-medium text-foreground">Drone/UAV Information</h4>
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
-                            <label for="drone_storage_type" class="block text-sm font-medium text-foreground mb-2">Storage Type</label>
-                            <select id="drone_storage_type" name="drone_storage_type" class="w-full px-3 py-2 border border-input rounded-lg focus:outline-none focus:ring-2 focus:ring-ring">
+                            <label for="drone_storage_type" class="block text-sm font-medium form-label mb-2">Storage Type</label>
+                            <select id="drone_storage_type" name="drone_storage_type" class="w-full px-3 py-2 rounded-lg bg-gray-700 text-foreground placeholder:text-slate-500 border border-border focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 focus:border-indigo-400">
                                 <option value="">-- Select --</option>
                                 <option value="internal" {% if evidence.device_specific_data.drone_storage_type == 'internal' %}selected{% endif %}>Internal</option>
                                 <option value="sd_card" {% if evidence.device_specific_data.drone_storage_type == 'sd_card' %}selected{% endif %}>SD Card</option>
@@ -748,9 +853,9 @@
                             </select>
                         </div>
                         <div>
-                            <label for="controller_serial" class="block text-sm font-medium text-foreground mb-2">Controller Serial</label>
+                            <label for="controller_serial" class="block text-sm font-medium form-label mb-2">Controller Serial</label>
                             <input type="text" id="controller_serial" name="controller_serial" value="{{ evidence.device_specific_data.controller_serial|default:'' }}"
-                                class="w-full px-3 py-2 border border-input rounded-lg focus:outline-none focus:ring-2 focus:ring-ring"
+                                class="w-full px-3 py-2 rounded-lg bg-gray-700 text-foreground placeholder:text-slate-500 border border-border focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 focus:border-indigo-400"
                                 placeholder="Controller serial number">
                         </div>
                     </div>
@@ -761,8 +866,8 @@
                     <h4 class="font-medium text-foreground">IoT Device Information</h4>
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
-                            <label for="iot_device_type" class="block text-sm font-medium text-foreground mb-2">IoT Device Type</label>
-                            <select id="iot_device_type" name="iot_device_type" class="w-full px-3 py-2 border border-input rounded-lg focus:outline-none focus:ring-2 focus:ring-ring">
+                            <label for="iot_device_type" class="block text-sm font-medium form-label mb-2">IoT Device Type</label>
+                            <select id="iot_device_type" name="iot_device_type" class="w-full px-3 py-2 rounded-lg bg-gray-700 text-foreground placeholder:text-slate-500 border border-border focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 focus:border-indigo-400">
                                 <option value="">-- Select --</option>
                                 <option value="smart_speaker" {% if evidence.device_specific_data.iot_device_type == 'smart_speaker' %}selected{% endif %}>Smart Speaker</option>
                                 <option value="smart_tv" {% if evidence.device_specific_data.iot_device_type == 'smart_tv' %}selected{% endif %}>Smart TV</option>
@@ -773,8 +878,8 @@
                             </select>
                         </div>
                         <div>
-                            <label for="network_type" class="block text-sm font-medium text-foreground mb-2">Network Type</label>
-                            <select id="network_type" name="network_type" class="w-full px-3 py-2 border border-input rounded-lg focus:outline-none focus:ring-2 focus:ring-ring">
+                            <label for="network_type" class="block text-sm font-medium form-label mb-2">Network Type</label>
+                            <select id="network_type" name="network_type" class="w-full px-3 py-2 rounded-lg bg-gray-700 text-foreground placeholder:text-slate-500 border border-border focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 focus:border-indigo-400">
                                 <option value="">-- Select --</option>
                                 <option value="wifi" {% if evidence.device_specific_data.network_type == 'wifi' %}selected{% endif %}>WiFi</option>
                                 <option value="ethernet" {% if evidence.device_specific_data.network_type == 'ethernet' %}selected{% endif %}>Ethernet</option>
@@ -792,8 +897,8 @@
                     <h4 class="font-medium text-foreground">Memory Acquisition Information</h4>
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
-                            <label for="memory_type" class="block text-sm font-medium text-foreground mb-2">Memory Type</label>
-                            <select id="memory_type" name="memory_type" class="w-full px-3 py-2 border border-input rounded-lg focus:outline-none focus:ring-2 focus:ring-ring">
+                            <label for="memory_type" class="block text-sm font-medium form-label mb-2">Memory Type</label>
+                            <select id="memory_type" name="memory_type" class="w-full px-3 py-2 rounded-lg bg-gray-700 text-foreground placeholder:text-slate-500 border border-border focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 focus:border-indigo-400">
                                 <option value="">-- Select --</option>
                                 <option value="volatile" {% if evidence.device_specific_data.memory_type == 'volatile' %}selected{% endif %}>Volatile (RAM)</option>
                                 <option value="non_volatile" {% if evidence.device_specific_data.memory_type == 'non_volatile' %}selected{% endif %}>Non-Volatile</option>
@@ -801,8 +906,8 @@
                             </select>
                         </div>
                         <div>
-                            <label for="system_state" class="block text-sm font-medium text-foreground mb-2">System State</label>
-                            <select id="system_state" name="system_state" class="w-full px-3 py-2 border border-input rounded-lg focus:outline-none focus:ring-2 focus:ring-ring">
+                            <label for="system_state" class="block text-sm font-medium form-label mb-2">System State</label>
+                            <select id="system_state" name="system_state" class="w-full px-3 py-2 rounded-lg bg-gray-700 text-foreground placeholder:text-slate-500 border border-border focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 focus:border-indigo-400">
                                 <option value="">-- Select --</option>
                                 <option value="running" {% if evidence.device_specific_data.system_state == 'running' %}selected{% endif %}>Running</option>
                                 <option value="hibernated" {% if evidence.device_specific_data.system_state == 'hibernated' %}selected{% endif %}>Hibernated</option>
@@ -812,15 +917,15 @@
                             </select>
                         </div>
                         <div>
-                            <label for="memory_size" class="block text-sm font-medium text-foreground mb-2">Memory Size</label>
+                            <label for="memory_size" class="block text-sm font-medium form-label mb-2">Memory Size</label>
                             <input type="text" id="memory_size" name="memory_size" value="{{ evidence.device_specific_data.memory_size|default:'' }}"
-                                class="w-full px-3 py-2 border border-input rounded-lg focus:outline-none focus:ring-2 focus:ring-ring"
+                                class="w-full px-3 py-2 rounded-lg bg-gray-700 text-foreground placeholder:text-slate-500 border border-border focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 focus:border-indigo-400"
                                 placeholder="E.g. 16GB">
                         </div>
                         <div>
-                            <label for="acquisition_duration" class="block text-sm font-medium text-foreground mb-2">Acquisition Duration</label>
+                            <label for="acquisition_duration" class="block text-sm font-medium form-label mb-2">Acquisition Duration</label>
                             <input type="text" id="acquisition_duration" name="acquisition_duration" value="{{ evidence.device_specific_data.acquisition_duration|default:'' }}"
-                                class="w-full px-3 py-2 border border-input rounded-lg focus:outline-none focus:ring-2 focus:ring-ring"
+                                class="w-full px-3 py-2 rounded-lg bg-gray-700 text-foreground placeholder:text-slate-500 border border-border focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 focus:border-indigo-400"
                                 placeholder="E.g. 15 minutes">
                         </div>
                     </div>
@@ -839,7 +944,7 @@
                 div.className = 'flex gap-2';
                 div.innerHTML = `
                     <input type="text" name="additional_imei" 
-                        class="flex-1 px-3 py-2 border border-input rounded-lg focus:outline-none focus:ring-2 focus:ring-ring"
+                        class="flex-1 px-3 py-2 bg-gray-700 text-foreground placeholder:text-slate-500 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
                         placeholder="Additional IMEI">
                     <button type="button" onclick="this.parentElement.remove()" 
                         class="px-3 py-2 bg-destructive text-destructive-foreground rounded-lg hover:opacity-90">
@@ -906,7 +1011,7 @@
                     const selectedOption = caseSelect.options[caseSelect.selectedIndex];
                     searchInput.value = selectedOption.text;
                     displayText.textContent = `Selected: ${selectedOption.text}`;
-                    displayText.classList.add('text-green-600', 'font-medium');
+                    displayText.classList.add('text-success', 'font-medium');
                 }
                 
                 // Show dropdown on focus
@@ -949,7 +1054,7 @@
                     dropdown.innerHTML = '';
                     
                     if (results.length === 0) {
-                        dropdown.innerHTML = '<div class="p-3 text-sm text-gray-500 text-center">No cases found</div>';
+                        dropdown.innerHTML = '<div class="p-3 text-sm text-muted-foreground text-center">No cases found</div>';
                         dropdown.classList.remove('hidden');
                         return;
                     }
@@ -957,13 +1062,13 @@
                     // Add "Clear Selection" option at top if something is selected
                     if (caseSelect.value) {
                         const clearDiv = document.createElement('div');
-                        clearDiv.className = 'p-3 hover:bg-red-50 cursor-pointer border-b border-gray-200 text-red-600 font-medium';
+                        clearDiv.className = 'p-3 hover:bg-red-50 cursor-pointer border-b border-border text-red-600 font-medium';
                         clearDiv.textContent = '✕ Clear Selection';
                         clearDiv.onclick = function() {
                             caseSelect.value = '';
                             searchInput.value = '';
                             displayText.textContent = '';
-                            displayText.classList.remove('text-green-600', 'font-medium');
+                            displayText.classList.remove('text-success', 'font-medium');
                             dropdown.classList.add('hidden');
                         };
                         dropdown.appendChild(clearDiv);
@@ -971,16 +1076,16 @@
                     
                     results.forEach(result => {
                         const div = document.createElement('div');
-                        div.className = 'p-3 hover:bg-gray-100 cursor-pointer border-b border-gray-100';
+                        div.className = 'p-3 hover:card cursor-pointer border-b border-gray-100';
                         div.innerHTML = `
-                            <div class="font-medium text-gray-900">${result.number}</div>
-                            <div class="text-sm text-gray-600">${result.name}</div>
+                            <div class="font-medium text-white">${result.number}</div>
+                            <div class="text-sm text-foreground">${result.name}</div>
                         `;
                         div.onclick = function() {
                             caseSelect.value = result.id;
                             searchInput.value = result.text;
                             displayText.textContent = `Selected: ${result.text}`;
-                            displayText.classList.add('text-green-600', 'font-medium');
+                            displayText.classList.add('text-success', 'font-medium');
                             dropdown.classList.add('hidden');
                         };
                         dropdown.appendChild(div);
@@ -990,22 +1095,143 @@
                 }
             }
             
+            // Add a new SIM card entry
+            function addSIMCard() {
+                const container = document.getElementById('sim-cards-container');
+                const simCardDiv = document.createElement('div');
+                simCardDiv.className = 'sim-card-entry p-4 card border border-border rounded-lg';
+                simCardDiv.innerHTML = `
+                    <div class="flex justify-between items-center mb-3">
+                        <h6 class="font-medium form-label">SIM Card <span class="sim-number">1</span></h6>
+                        <button type="button" onclick="removeSIMCard(this)" class="px-2 py-1 text-sm bg-red-600 text-white rounded hover:bg-red-700">
+                            Remove
+                        </button>
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium form-label mb-2">ICCID (SIM Serial)</label>
+                            <input type="text" name="sim_iccid[]" 
+                                class="w-full px-3 py-2 rounded-lg bg-gray-600 text-foreground placeholder:text-slate-400 border border-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                                placeholder="19-20 digit ICCID">
+                            <p class="text-xs text-muted-foreground mt-1">Integrated Circuit Card ID</p>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium form-label mb-2">IMSI</label>
+                            <input type="text" name="sim_imsi[]" 
+                                class="w-full px-3 py-2 rounded-lg bg-gray-600 text-foreground placeholder:text-slate-400 border border-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                                placeholder="International Mobile Subscriber Identity">
+                            <p class="text-xs text-muted-foreground mt-1">15 digit identifier</p>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium form-label mb-2">Phone Number</label>
+                            <input type="text" name="sim_phone_number[]" 
+                                class="w-full px-3 py-2 rounded-lg bg-gray-600 text-foreground placeholder:text-slate-400 border border-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                                placeholder="Associated phone number">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium form-label mb-2">Carrier/Network</label>
+                            <input type="text" name="sim_carrier[]" 
+                                class="w-full px-3 py-2 rounded-lg bg-gray-600 text-foreground placeholder:text-slate-400 border border-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                                placeholder="E.g. Verizon, AT&T, Vodafone">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium form-label mb-2">SIM Type</label>
+                            <select name="sim_type[]" class="w-full px-3 py-2 rounded-lg bg-gray-600 text-foreground placeholder:text-slate-400 border border-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
+                                <option value="">-- Select --</option>
+                                <option value="nano_sim">Nano SIM</option>
+                                <option value="micro_sim">Micro SIM</option>
+                                <option value="standard_sim">Standard SIM</option>
+                                <option value="esim">eSIM</option>
+                                <option value="unknown">Unknown</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium form-label mb-2">PIN Status</label>
+                            <select name="sim_pin_status[]" class="w-full px-3 py-2 rounded-lg bg-gray-600 text-foreground placeholder:text-slate-400 border border-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
+                                <option value="">-- Select --</option>
+                                <option value="no_pin">No PIN</option>
+                                <option value="pin_locked">PIN Locked</option>
+                                <option value="pin_unlocked">PIN Unlocked</option>
+                                <option value="puk_locked">PUK Locked</option>
+                                <option value="unknown">Unknown</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="mt-3">
+                        <label class="block text-sm font-medium form-label mb-2">SIM Card Notes</label>
+                        <textarea name="sim_notes[]" rows="2"
+                            class="w-full px-3 py-2 rounded-lg bg-gray-600 text-foreground placeholder:text-slate-400 border border-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                            placeholder="Additional notes about this SIM card..."></textarea>
+                    </div>
+                `;
+                container.appendChild(simCardDiv);
+                updateSIMCardNumbers();
+            }
+            
+            // Remove a SIM card entry
+            function removeSIMCard(button) {
+                const simCardEntry = button.closest('.sim-card-entry');
+                simCardEntry.remove();
+                updateSIMCardNumbers();
+            }
+            
+            // Update SIM card numbers
+            function updateSIMCardNumbers() {
+                const simCards = document.querySelectorAll('.sim-card-entry');
+                simCards.forEach((card, index) => {
+                    const numberSpan = card.querySelector('.sim-number');
+                    if (numberSpan) {
+                        numberSpan.textContent = index + 1;
+                    }
+                });
+            }
+            
+            // Show/hide SIM card details based on SIM status
+            function toggleSimCardDetails() {
+                const simStatus = document.getElementById('sim_status');
+                const simCardDetails = document.getElementById('sim-card-details');
+                const simCardsContainer = document.getElementById('sim-cards-container');
+                
+                if (simStatus && simCardDetails) {
+                    const status = simStatus.value;
+                    if (status === 'present' || status === 'multiple') {
+                        simCardDetails.classList.remove('hidden');
+                        // Add initial SIM card if container is empty
+                        if (simCardsContainer && simCardsContainer.children.length === 0) {
+                            addSIMCard();
+                        }
+                    } else {
+                        simCardDetails.classList.add('hidden');
+                    }
+                }
+            }
+            
             // Initialize on page load
             document.addEventListener('DOMContentLoaded', function() {
                 toggleDeviceFields();
                 document.getElementById('device_type').addEventListener('change', toggleDeviceFields);
                 initializeCaseSearch();
+                
+                // Initialize SIM card details toggle
+                const simStatusSelect = document.getElementById('sim_status');
+                if (simStatusSelect) {
+                    toggleSimCardDetails(); // Check initial state
+                    simStatusSelect.addEventListener('change', toggleSimCardDetails);
+                }
+                
+                // Update SIM card numbers on initial load
+                updateSIMCardNumbers();
             });
             </script>
             
             <!-- Department and Custody Tracking -->
-            <div class="p-6 bg-purple-50 rounded-lg border-2 border-purple-200">
+            <div class="p-6 card rounded-lg border border-border">
                 <h3 class="text-lg font-semibold text-foreground mb-4">Department & Custody Tracking</h3>
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                     <div>
-                        <label for="current_department" class="block text-sm font-medium text-foreground mb-2">Current Department</label>
+                        <label for="current_department" class="block text-sm font-medium form-label mb-2">Current Department</label>
                         <select id="current_department" name="current_department"
-                            class="w-full px-3 py-2 border border-input rounded-lg focus:outline-none focus:ring-2 focus:ring-ring">
+                            class="w-full px-3 py-2 rounded-lg bg-gray-700 text-foreground placeholder:text-slate-500 border border-border focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 focus:border-indigo-400">
                             <option value="">Not Assigned</option>
                             <option value="ibs" {% if evidence.current_department == 'ibs' %}selected{% endif %}>IBS</option>
                             <option value="team" {% if evidence.current_department == 'team' %}selected{% endif %}>Team</option>
@@ -1014,23 +1240,23 @@
                     </div>
                     
                     <div>
-                        <label for="received_by" class="block text-sm font-medium text-foreground mb-2">Received By</label>
+                        <label for="received_by" class="block text-sm font-medium form-label mb-2">Received By</label>
                         <input type="text" id="received_by" name="received_by" value="{{ evidence.received_by|default:'' }}"
-                            class="w-full px-3 py-2 border border-input rounded-lg focus:outline-none focus:ring-2 focus:ring-ring"
+                            class="w-full px-3 py-2 rounded-lg bg-gray-700 text-foreground placeholder:text-slate-500 border border-border focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 focus:border-indigo-400"
                             placeholder="Person who received the device">
                     </div>
                     
                     <div>
-                        <label for="received_date" class="block text-sm font-medium text-foreground mb-2">Received Date</label>
+                        <label for="received_date" class="block text-sm font-medium form-label mb-2">Received Date</label>
                         <input type="datetime-local" id="received_date" name="received_date" 
                             value="{% if evidence.received_date %}{{ evidence.received_date|date:'Y-m-d\TH:i' }}{% endif %}"
-                            class="w-full px-3 py-2 border border-input rounded-lg focus:outline-none focus:ring-2 focus:ring-ring">
+                            class="w-full px-3 py-2 rounded-lg bg-gray-700 text-foreground placeholder:text-slate-500 border border-border focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 focus:border-indigo-400">
                     </div>
                 </div>
             </div>
             
             <!-- Person Relationships -->
-            <div class="p-6 bg-amber-50 rounded-lg border-2 border-amber-200">
+            <div class="p-6 card rounded-lg border border-border">
                 <div class="flex justify-between items-center mb-4">
                     <div>
                         <h3 class="text-lg font-semibold text-foreground">Person Relationships</h3>
@@ -1046,9 +1272,9 @@
                 </div>
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                     <div>
-                        <label for="owner_person" class="block text-sm font-medium text-foreground mb-2">Owner</label>
+                        <label for="owner_person" class="block text-sm font-medium form-label mb-2">Owner</label>
                         <select id="owner_person" name="owner_person"
-                            class="w-full px-3 py-2 border border-input rounded-lg focus:outline-none focus:ring-2 focus:ring-ring">
+                            class="w-full px-3 py-2 rounded-lg bg-gray-700 text-foreground placeholder:text-slate-500 border border-border focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 focus:border-indigo-400">
                             <option value="">-- Select Owner (Optional) --</option>
                             {% for person in persons %}
                             <option value="{{ person.id }}" {% if evidence.owner_person.id == person.id %}selected{% endif %}>
@@ -1060,9 +1286,9 @@
                     </div>
                     
                     <div>
-                        <label for="seized_from_person" class="block text-sm font-medium text-foreground mb-2">Seized From</label>
+                        <label for="seized_from_person" class="block text-sm font-medium form-label mb-2">Seized From</label>
                         <select id="seized_from_person" name="seized_from_person"
-                            class="w-full px-3 py-2 border border-input rounded-lg focus:outline-none focus:ring-2 focus:ring-ring">
+                            class="w-full px-3 py-2 rounded-lg bg-gray-700 text-foreground placeholder:text-slate-500 border border-border focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 focus:border-indigo-400">
                             <option value="">-- Select Person (Optional) --</option>
                             {% for person in persons %}
                             <option value="{{ person.id }}" {% if evidence.seized_from_person.id == person.id %}selected{% endif %}>
@@ -1074,9 +1300,9 @@
                     </div>
                     
                     <div>
-                        <label for="custodian_person" class="block text-sm font-medium text-foreground mb-2">Custodian</label>
+                        <label for="custodian_person" class="block text-sm font-medium form-label mb-2">Custodian</label>
                         <select id="custodian_person" name="custodian_person"
-                            class="w-full px-3 py-2 border border-input rounded-lg focus:outline-none focus:ring-2 focus:ring-ring">
+                            class="w-full px-3 py-2 rounded-lg bg-gray-700 text-foreground placeholder:text-slate-500 border border-border focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 focus:border-indigo-400">
                             <option value="">-- Select Custodian (Optional) --</option>
                             {% for person in persons %}
                             <option value="{{ person.id }}" {% if evidence.custodian_person.id == person.id %}selected{% endif %}>
@@ -1091,33 +1317,33 @@
             
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
-                    <label for="description" class="block text-sm font-medium text-foreground mb-2">Description</label>
+                    <label for="description" class="block text-sm font-medium form-label mb-2">Description</label>
                     <textarea id="description" name="description" rows="3"
-                        class="w-full px-3 py-2 border border-input rounded-lg focus:outline-none focus:ring-2 focus:ring-ring"
+                        class="w-full px-3 py-2 rounded-lg bg-gray-700 text-foreground placeholder:text-slate-500 border border-border focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 focus:border-indigo-400"
                         placeholder="Detailed description of the evidence">{{ evidence.description|default:'' }}</textarea>
                 </div>
                 
                 <div>
-                    <label for="notes" class="block text-sm font-medium text-foreground mb-2">Notes</label>
+                    <label for="notes" class="block text-sm font-medium form-label mb-2">Notes</label>
                     <textarea id="notes" name="notes" rows="3"
-                        class="w-full px-3 py-2 border border-input rounded-lg focus:outline-none focus:ring-2 focus:ring-ring"
+                        class="w-full px-3 py-2 rounded-lg bg-gray-700 text-foreground placeholder:text-slate-500 border border-border focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 focus:border-indigo-400"
                         placeholder="Additional notes">{{ evidence.notes|default:'' }}</textarea>
                 </div>
             </div>
             
             <!-- Documents -->
-            <div class="mt-6 p-6 bg-green-50 rounded-lg border-2 border-green-200">
+            <div class="mt-6 p-6 card rounded-lg border border-border">
                 <h3 class="text-lg font-semibold text-foreground mb-4">Documents</h3>
                 <p class="text-sm text-muted-foreground mb-4">Upload related documents (PDFs, Word docs, etc.)</p>
                 
                 {% if evidence and evidence.documents.all %}
                 <div class="mb-4">
-                    <h4 class="text-sm font-medium text-foreground mb-2">Current Documents</h4>
+                    <h4 class="text-sm font-medium form-label mb-2">Current Documents</h4>
                     <div class="space-y-2">
                         {% for doc in evidence.documents.all %}
-                        <div class="flex items-center justify-between p-3 bg-white rounded-lg border border-green-200">
+                        <div class="flex items-center justify-between p-3 card rounded-lg border border-border">
                             <div class="flex items-center gap-3">
-                                <svg class="w-8 h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <svg class="w-8 h-8 text-success" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"/>
                                 </svg>
                                 <div>
@@ -1139,26 +1365,26 @@
                 {% endif %}
                 
                 <div>
-                    <label for="evidence_documents" class="block text-sm font-medium text-foreground mb-2">Upload Documents</label>
+                    <label for="evidence_documents" class="block text-sm font-medium form-label mb-2">Upload Documents</label>
                     <input type="file" id="evidence_documents" name="evidence_documents" multiple 
                         accept=".pdf,.doc,.docx,.xls,.xlsx,.txt,.csv"
-                        class="w-full px-3 py-2 border border-input rounded-lg focus:outline-none focus:ring-2 focus:ring-ring file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-green-50 file:text-green-700 hover:file:bg-green-100">
+                        class="form-input">
                     <p class="text-xs text-muted-foreground mt-1">Supported: PDF, Word, Excel, Text, CSV</p>
                 </div>
             </div>
             
             <!-- Evidence Images -->
-            <div class="mt-6 p-6 bg-blue-50 rounded-lg border-2 border-blue-200">
+            <div class="mt-6 p-6 card rounded-lg border border-border">
                 <h3 class="text-lg font-semibold text-foreground mb-4">Evidence Images</h3>
                 <p class="text-sm text-muted-foreground mb-4">Upload photos of the evidence item. You can upload multiple images.</p>
                 
                 {% if evidence and evidence.images.all %}
                 <div class="mb-4">
-                    <h4 class="text-sm font-medium text-foreground mb-2">Current Images</h4>
+                    <h4 class="text-sm font-medium form-label mb-2">Current Images</h4>
                     <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
                         {% for image in evidence.images.all %}
                         <div class="relative group">
-                            <img src="{{ image.image.url }}" alt="{{ image.caption }}" class="w-full h-32 object-cover rounded-lg border border-gray-300">
+                            <img src="{{ image.image.url }}" alt="{{ image.caption }}" class="w-full h-32 object-cover rounded-lg border border-border">
                             <div class="absolute top-2 right-2">
                                 <label class="flex items-center space-x-1 bg-red-500 text-white px-2 py-1 rounded text-xs cursor-pointer hover:bg-red-600">
                                     <input type="checkbox" name="delete_image" value="{{ image.id }}" class="w-3 h-3">
@@ -1166,7 +1392,7 @@
                                 </label>
                             </div>
                             {% if image.caption %}
-                            <p class="text-xs text-gray-600 mt-1 truncate">{{ image.caption }}</p>
+                            <p class="text-xs text-foreground mt-1 truncate">{{ image.caption }}</p>
                             {% endif %}
                         </div>
                         {% endfor %}
@@ -1175,9 +1401,9 @@
                 {% endif %}
                 
                 <div>
-                    <label for="evidence_images" class="block text-sm font-medium text-foreground mb-2">Upload New Images</label>
+                    <label for="evidence_images" class="block text-sm font-medium form-label mb-2">Upload New Images</label>
                     <input type="file" id="evidence_images" name="evidence_images" multiple accept="image/*"
-                        class="w-full px-3 py-2 border border-input rounded-lg focus:outline-none focus:ring-2 focus:ring-ring file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-purple-50 file:text-purple-700 hover:file:bg-purple-100">
+                        class="form-input">
                     <p class="text-xs text-muted-foreground mt-1">Supported formats: JPG, PNG, GIF. You can select multiple files.</p>
                 </div>
                 
@@ -1201,8 +1427,8 @@
                             const div = document.createElement('div');
                             div.className = 'relative';
                             div.innerHTML = `
-                                <img src="${e.target.result}" class="w-full h-32 object-cover rounded-lg border border-gray-300">
-                                <p class="text-xs text-gray-600 mt-1 truncate">${file.name}</p>
+                                <img src="${e.target.result}" class="w-full h-32 object-cover rounded-lg border border-border">
+                                <p class="text-xs text-foreground mt-1 truncate">${file.name}</p>
                             `;
                             previewContainer.appendChild(div);
                         };
@@ -1220,7 +1446,7 @@
                     {% if evidence %}Update Evidence{% else %}Add Evidence{% endif %}
                 </button>
                 <button type="button" onclick="window.history.back();"
-                    class="px-6 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors font-medium shadow-md">
+                    class="btn btn-secondary">
                     Cancel
                 </button>
             </div>
@@ -1228,12 +1454,12 @@
     </div>
 
     <!-- Add Person Modal -->
-    <div id="personModal" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50 flex items-center justify-center p-4">
-        <div class="bg-white rounded-lg shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+    <div id="personModal" class="fixed inset-0 bg-black/50 hidden z-50 flex items-center justify-center p-4">
+        <div class="bg-secondary rounded-lg shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
             <div class="p-6">
                 <div class="flex justify-between items-center mb-4">
-                    <h3 class="text-xl font-bold text-gray-900">Add New Person</h3>
-                    <button type="button" onclick="closePersonModal()" class="text-gray-400 hover:text-gray-600">
+                    <h3 class="text-xl font-bold text-white">Add New Person</h3>
+                    <button type="button" onclick="closePersonModal()" class="text-muted-foreground hover:text-foreground">
                         <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
                         </svg>
@@ -1244,27 +1470,27 @@
                     {% csrf_token %}
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">First Name *</label>
+                            <label class="block text-sm font-medium form-label mb-1">First Name *</label>
                             <input type="text" id="modal_first_name" required
-                                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500">
+                                class="w-full px-3 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500">
                         </div>
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Last Name *</label>
+                            <label class="block text-sm font-medium form-label mb-1">Last Name *</label>
                             <input type="text" id="modal_last_name" required
-                                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500">
+                                class="w-full px-3 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500">
                         </div>
                     </div>
 
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Middle Name</label>
+                            <label class="block text-sm font-medium form-label mb-1">Middle Name</label>
                             <input type="text" id="modal_middle_name"
-                                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500">
+                                class="w-full px-3 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500">
                         </div>
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Person Type *</label>
+                            <label class="block text-sm font-medium form-label mb-1">Person Type *</label>
                             <select id="modal_person_type" required
-                                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500">
+                                class="w-full px-3 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500">
                                 <option value="suspect">Suspect</option>
                                 <option value="victim">Victim</option>
                                 <option value="witness">Witness</option>
@@ -1276,34 +1502,34 @@
                     </div>
 
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Date of Birth</label>
+                        <label class="block text-sm font-medium form-label mb-1">Date of Birth</label>
                         <input type="date" id="modal_date_of_birth"
-                            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500">
+                            class="w-full px-3 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500">
                     </div>
 
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Email</label>
+                            <label class="block text-sm font-medium form-label mb-1">Email</label>
                             <input type="email" id="modal_email"
-                                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500">
+                                class="w-full px-3 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500">
                         </div>
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Phone</label>
+                            <label class="block text-sm font-medium form-label mb-1">Phone</label>
                             <input type="tel" id="modal_phone"
-                                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500">
+                                class="w-full px-3 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500">
                         </div>
                     </div>
 
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Address</label>
+                        <label class="block text-sm font-medium form-label mb-1">Address</label>
                         <input type="text" id="modal_address"
-                            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500">
+                            class="w-full px-3 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500">
                     </div>
 
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Notes</label>
+                        <label class="block text-sm font-medium form-label mb-1">Notes</label>
                         <textarea id="modal_notes" rows="3"
-                            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500"></textarea>
+                            class="w-full px-3 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500"></textarea>
                     </div>
 
                     <div class="flex gap-3 pt-4">
@@ -1312,7 +1538,7 @@
                             Create Person
                         </button>
                         <button type="button" onclick="closePersonModal()"
-                            class="px-4 py-2 bg-gray-300 text-gray-700 rounded-lg hover:bg-gray-400 transition-colors font-medium">
+                            class="px-4 py-2 bg-secondary text-foreground border border-border rounded-lg hover:bg-secondary/80 transition-colors font-medium">
                             Cancel
                         </button>
                     </div>

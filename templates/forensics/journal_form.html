@@ -9,77 +9,77 @@
     <nav class="mb-6" aria-label="Breadcrumb">
         <ol class="flex items-center space-x-2 text-sm">
             <li>
-                <a href="{% url 'dashboard' %}" class="text-gray-500 hover:text-indigo-600 transition-colors">
+                <a href="{% url 'dashboard' %}" class="text-muted-foreground hover:text-primary transition-colors">
                     <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
                         <path d="M10.707 2.293a1 1 0 00-1.414 0l-7 7a1 1 0 001.414 1.414L4 10.414V17a1 1 0 001 1h2a1 1 0 001-1v-2a1 1 0 011-1h2a1 1 0 011 1v2a1 1 0 001 1h2a1 1 0 001-1v-6.586l.293.293a1 1 0 001.414-1.414l-7-7z"/>
                     </svg>
                 </a>
             </li>
             <li class="flex items-center">
-                <svg class="w-4 h-4 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
+                <svg class="w-4 h-4 text-muted-foreground" fill="currentColor" viewBox="0 0 20 20">
                     <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd"/>
                 </svg>
-                <a href="{% url 'journal_list' %}" class="ml-2 text-gray-500 hover:text-indigo-600 transition-colors">Journals</a>
+                <a href="{% url 'journal_list' %}" class="ml-2 text-muted-foreground hover:text-primary transition-colors">Journals</a>
             </li>
             {% if is_edit %}
             <li class="flex items-center">
-                <svg class="w-4 h-4 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
+                <svg class="w-4 h-4 text-muted-foreground" fill="currentColor" viewBox="0 0 20 20">
                     <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd"/>
                 </svg>
-                <a href="{% url 'journal_detail' journal.pk %}" class="ml-2 text-gray-500 hover:text-indigo-600 transition-colors">{{ journal.title|truncatewords:5 }}</a>
+                <a href="{% url 'journal_detail' journal.pk %}" class="ml-2 text-muted-foreground hover:text-primary transition-colors">{{ journal.title|truncatewords:5 }}</a>
             </li>
             {% endif %}
             <li class="flex items-center">
-                <svg class="w-4 h-4 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
+                <svg class="w-4 h-4 text-muted-foreground" fill="currentColor" viewBox="0 0 20 20">
                     <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd"/>
                 </svg>
-                <span class="ml-2 font-semibold text-gray-900">{% if is_edit %}Edit{% else %}New Entry{% endif %}</span>
+                <span class="ml-2 font-semibold text-foreground">{% if is_edit %}Edit{% else %}New Entry{% endif %}</span>
             </li>
         </ol>
     </nav>
 
     <!-- Header -->
     <div class="mb-6">
-        <h1 class="text-3xl font-bold text-gray-900 mb-2">
+        <h1 class="text-3xl font-bold text-foreground mb-2">
             {% if is_edit %}
                 ✏️ Edit Journal Entry
             {% else %}
                 📝 New Journal Entry
             {% endif %}
         </h1>
-        <p class="text-gray-600">{% if is_edit %}Update your journal entry{% else %}Document your daily work and activities{% endif %}</p>
+        <p class="text-muted-foreground">{% if is_edit %}Update your journal entry{% else %}Document your daily work and activities{% endif %}</p>
     </div>
 
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <!-- Main Form -->
         <div class="lg:col-span-2">
-            <form method="post" class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 space-y-6">
+            <form method="post" class="bg-secondary rounded-xl shadow-sm border border-border p-6 space-y-6">
                 {% csrf_token %}
                 
                 <!-- Date -->
                 <div>
-                    <label for="date" class="block text-sm font-semibold text-gray-700 mb-2">
+                    <label for="date" class="block text-sm font-semibold text-slate-700 mb-2">
                         📅 Date <span class="text-red-600">*</span>
                     </label>
                     <input 
                         type="date" 
-                        class="w-full px-4 py-3 bg-gray-50 border border-gray-300 rounded-lg text-gray-900 focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all" 
+                        class="w-full px-4 py-3 bg-secondary placeholder:text-muted-foreground border border-border rounded-lg text-foreground focus:ring-2 focus:ring-primary focus:border-primary transition-all" 
                         id="date" 
                         name="date" 
                         value="{% if is_edit %}{{ journal.date|date:'Y-m-d' }}{% else %}{{ today }}{% endif %}"
                         required
                     >
-                    <p class="mt-1 text-sm text-gray-500">⚠️ You can only have one entry per date</p>
+                    <p class="mt-1 text-sm text-muted-foreground">⚠️ You can only have one entry per date</p>
                 </div>
 
                 <!-- Title -->
                 <div>
-                    <label for="title" class="block text-sm font-semibold text-gray-700 mb-2">
+                    <label for="title" class="block text-sm font-semibold text-slate-700 mb-2">
                         📌 Title <span class="text-red-600">*</span>
                     </label>
                     <input 
                         type="text" 
-                        class="w-full px-4 py-3 bg-gray-50 border border-gray-300 rounded-lg text-gray-900 focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all" 
+                        class="w-full px-4 py-3 bg-secondary placeholder:text-muted-foreground border border-border rounded-lg text-foreground focus:ring-2 focus:ring-primary focus:border-primary transition-all" 
                         id="title" 
                         name="title" 
                         value="{% if is_edit %}{{ journal.title }}{% endif %}"
@@ -87,16 +87,16 @@
                         maxlength="255"
                         required
                     >
-                    <p class="mt-1 text-sm text-gray-500">Brief summary of your day</p>
+                    <p class="mt-1 text-sm text-muted-foreground">Brief summary of your day</p>
                 </div>
 
                 <!-- Content -->
                 <div>
-                    <label for="content" class="block text-sm font-semibold text-gray-700 mb-2">
+                    <label for="content" class="block text-sm font-semibold text-slate-700 mb-2">
                         📄 Content <span class="text-red-600">*</span>
                     </label>
                     <textarea 
-                        class="w-full px-4 py-3 bg-gray-50 border border-gray-300 rounded-lg text-gray-900 focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all resize-none font-mono text-sm" 
+                        class="w-full px-4 py-3 bg-secondary placeholder:text-muted-foreground border border-border rounded-lg text-foreground focus:ring-2 focus:ring-primary focus:border-primary transition-all resize-none font-mono text-sm" 
                         id="content" 
                         name="content" 
                         rows="18"
@@ -120,30 +120,30 @@ Example:
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
                         required
                     >{% if is_edit %}{{ journal.content }}{% endif %}</textarea>
-                    <p class="mt-1 text-sm text-gray-500">💡 Use bullet points, emojis, and formatting to organize your content</p>
+                    <p class="mt-1 text-sm text-muted-foreground">💡 Use bullet points, emojis, and formatting to organize your content</p>
                 </div>
 
                 <!-- Tags -->
                 <div>
-                    <label for="tags" class="block text-sm font-semibold text-gray-700 mb-2">
+                    <label for="tags" class="block text-sm font-semibold text-slate-700 mb-2">
                         🏷️ Tags
                     </label>
                     <input 
                         type="text" 
-                        class="w-full px-4 py-3 bg-gray-50 border border-gray-300 rounded-lg text-gray-900 focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all" 
+                        class="w-full px-4 py-3 bg-secondary placeholder:text-muted-foreground border border-border rounded-lg text-foreground focus:ring-2 focus:ring-primary focus:border-primary transition-all" 
                         id="tags" 
                         name="tags" 
                         value="{% if is_edit %}{{ tags_string }}{% endif %}"
                         placeholder="analysis, investigation, report, meeting"
                     >
-                    <p class="mt-1 text-sm text-gray-500">Separate tags with commas</p>
+                    <p class="mt-1 text-sm text-muted-foreground">Separate tags with commas</p>
                 </div>
 
                 <!-- Pin Checkbox -->
-                <div class="flex items-center gap-3 p-4 bg-amber-50 border-2 border-amber-200 rounded-lg">
+                <div class="flex items-center gap-3 p-4 bg-secondary text-slate-700 border border-border rounded-lg">
                     <input 
                         type="checkbox" 
-                        class="w-5 h-5 text-amber-600 bg-white border-gray-300 rounded focus:ring-2 focus:ring-amber-500" 
+                        class="w-5 h-5 text-amber-600 bg-secondary placeholder:text-muted-foreground border-border rounded focus:ring-2 focus:ring-amber-500" 
                         id="is_pinned" 
                         name="is_pinned"
                         {% if is_edit and journal.is_pinned %}checked{% endif %}
@@ -155,13 +155,13 @@ Example:
 
                 <!-- Action Buttons -->
                 <div class="flex gap-3 pt-4">
-                    <a href="{% if is_edit %}{% url 'journal_detail' journal.pk %}{% else %}{% url 'journal_list' %}{% endif %}" class="flex-1 inline-flex items-center justify-center gap-2 px-5 py-3 bg-gray-100 text-gray-700 font-semibold rounded-lg hover:bg-gray-200 transition-all">
+                    <a href="{% if is_edit %}{% url 'journal_detail' journal.pk %}{% else %}{% url 'journal_list' %}{% endif %}" class="flex-1 inline-flex items-center justify-center gap-2 px-5 py-3 bg-secondary placeholder:text-muted-foreground text-slate-700 font-semibold rounded-lg hover:bg-gray-200 transition-all">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
                         </svg>
                         Cancel
                     </a>
-                    <button type="submit" class="flex-1 inline-flex items-center justify-center gap-2 px-5 py-3 bg-gradient-to-r from-indigo-600 to-blue-600 text-white font-semibold rounded-lg hover:from-indigo-700 hover:to-blue-700 shadow-md hover:shadow-lg transition-all">
+                    <button type="submit" class="flex-1 inline-flex items-center justify-center gap-2 px-5 py-3 bg-gradient-to-r from-indigo-600 to-blue-600 text-foreground font-semibold rounded-lg hover:from-indigo-700 hover:to-blue-700 shadow-md hover:shadow-lg transition-all">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
                         </svg>
@@ -174,16 +174,16 @@ Example:
         <!-- Tips Sidebar -->
         <div class="space-y-6">
             <!-- Tips Card -->
-            <div class="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-xl border-2 border-blue-200 p-6">
+            <div class="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-xl border border-border p-6">
                 <div class="flex items-center gap-3 mb-4">
-                    <div class="w-10 h-10 bg-blue-500 rounded-lg flex items-center justify-center">
-                        <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <div class="w-10 h-10 bg-secondary0 rounded-lg flex items-center justify-center">
+                        <svg class="w-6 h-6 text-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/>
                         </svg>
                     </div>
-                    <h3 class="text-lg font-bold text-gray-900">💡 Writing Tips</h3>
+                    <h3 class="text-lg font-bold text-foreground">💡 Writing Tips</h3>
                 </div>
-                <ul class="space-y-3 text-sm text-gray-700">
+                <ul class="space-y-3 text-sm text-slate-700">
                     <li class="flex items-start gap-2">
                         <span class="text-blue-600 font-bold">✓</span>
                         <span>Be specific about tasks completed</span>
@@ -212,35 +212,35 @@ Example:
             </div>
 
             <!-- Common Tags -->
-            <div class="bg-white rounded-xl border border-gray-200 p-6">
-                <h3 class="text-lg font-bold text-gray-900 mb-4">🏷️ Common Tags</h3>
+            <div class="bg-secondary rounded-xl border border-border p-6">
+                <h3 class="text-lg font-bold text-foreground mb-4">🏷️ Common Tags</h3>
                 <div class="flex flex-wrap gap-2">
-                    <button type="button" onclick="addTag('analysis')" class="px-3 py-1.5 bg-indigo-50 text-indigo-700 text-sm font-medium rounded-full hover:bg-indigo-100 transition-all cursor-pointer">
+                    <button type="button" onclick="addTag('analysis')" class="px-3 py-1.5 bg-secondary text-slate-700 text-sm font-medium rounded-full hover:bg-slate-200 transition-all cursor-pointer">
                         analysis
                     </button>
-                    <button type="button" onclick="addTag('investigation')" class="px-3 py-1.5 bg-indigo-50 text-indigo-700 text-sm font-medium rounded-full hover:bg-indigo-100 transition-all cursor-pointer">
+                    <button type="button" onclick="addTag('investigation')" class="px-3 py-1.5 bg-secondary text-slate-700 text-sm font-medium rounded-full hover:bg-slate-200 transition-all cursor-pointer">
                         investigation
                     </button>
-                    <button type="button" onclick="addTag('report')" class="px-3 py-1.5 bg-indigo-50 text-indigo-700 text-sm font-medium rounded-full hover:bg-indigo-100 transition-all cursor-pointer">
+                    <button type="button" onclick="addTag('report')" class="px-3 py-1.5 bg-secondary text-slate-700 text-sm font-medium rounded-full hover:bg-slate-200 transition-all cursor-pointer">
                         report
                     </button>
-                    <button type="button" onclick="addTag('meeting')" class="px-3 py-1.5 bg-indigo-50 text-indigo-700 text-sm font-medium rounded-full hover:bg-indigo-100 transition-all cursor-pointer">
+                    <button type="button" onclick="addTag('meeting')" class="px-3 py-1.5 bg-secondary text-slate-700 text-sm font-medium rounded-full hover:bg-slate-200 transition-all cursor-pointer">
                         meeting
                     </button>
-                    <button type="button" onclick="addTag('training')" class="px-3 py-1.5 bg-indigo-50 text-indigo-700 text-sm font-medium rounded-full hover:bg-indigo-100 transition-all cursor-pointer">
+                    <button type="button" onclick="addTag('training')" class="px-3 py-1.5 bg-secondary text-slate-700 text-sm font-medium rounded-full hover:bg-slate-200 transition-all cursor-pointer">
                         training
                     </button>
-                    <button type="button" onclick="addTag('admin')" class="px-3 py-1.5 bg-indigo-50 text-indigo-700 text-sm font-medium rounded-full hover:bg-indigo-100 transition-all cursor-pointer">
+                    <button type="button" onclick="addTag('admin')" class="px-3 py-1.5 bg-secondary text-slate-700 text-sm font-medium rounded-full hover:bg-slate-200 transition-all cursor-pointer">
                         admin
                     </button>
-                    <button type="button" onclick="addTag('mobile-forensics')" class="px-3 py-1.5 bg-indigo-50 text-indigo-700 text-sm font-medium rounded-full hover:bg-indigo-100 transition-all cursor-pointer">
+                    <button type="button" onclick="addTag('mobile-forensics')" class="px-3 py-1.5 bg-secondary text-slate-700 text-sm font-medium rounded-full hover:bg-slate-200 transition-all cursor-pointer">
                         mobile-forensics
                     </button>
-                    <button type="button" onclick="addTag('documentation')" class="px-3 py-1.5 bg-indigo-50 text-indigo-700 text-sm font-medium rounded-full hover:bg-indigo-100 transition-all cursor-pointer">
+                    <button type="button" onclick="addTag('documentation')" class="px-3 py-1.5 bg-secondary text-slate-700 text-sm font-medium rounded-full hover:bg-slate-200 transition-all cursor-pointer">
                         documentation
                     </button>
                 </div>
-                <p class="text-xs text-gray-500 mt-3">💡 Click to add to your entry</p>
+                <p class="text-xs text-muted-foreground mt-3">💡 Click to add to your entry</p>
             </div>
         </div>
     </div>

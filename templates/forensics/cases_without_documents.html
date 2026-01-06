@@ -1,0 +1,138 @@
+{% extends 'base.html' %}
+
+{% block title %}Cases Without Documents - Diamond Forensics{% endblock %}
+
+{% block content %}
+<div class="flex-1 space-y-6 p-4 md:p-8 pt-6">
+    <!-- Header -->
+    <div class="flex items-center justify-between">
+        <div>
+            <h2 class="text-3xl font-bold tracking-tight text-foreground">Cases Without Documents</h2>
+            <p class="text-muted-foreground mt-1">
+                Active cases that don't have any documentation yet
+            </p>
+        </div>
+        <a href="{% url 'document_analytics' %}" class="btn btn-secondary">
+            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
+            </svg>
+            Back to Analytics
+        </a>
+    </div>
+
+    <!-- Alert Banner -->
+    <div class="card rounded-lg border-2 border-warning" style="background-color: #3d3417;">
+        <div class="card-body">
+            <div class="flex items-start gap-3">
+                <svg class="w-6 h-6 text-warning flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/>
+                </svg>
+                <div>
+                    <h3 class="font-semibold text-warning">Documentation Required</h3>
+                    <p class="text-sm text-warning/80 mt-1">
+                        These active cases are missing all documentation. Consider uploading required documents such as Ontvangstbewijs, Intake, KVI, Na-sporing, Proces-Verbaal, or Rapport.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Results Info -->
+    <div class="flex items-center justify-between">
+        <p class="text-sm text-foreground/70">
+            {% if total_cases %}
+            Total: {{ total_cases }} active case{{ total_cases|pluralize }} without documents
+            {% else %}
+            No cases without documents found
+            {% endif %}
+        </p>
+    </div>
+
+    <!-- Cases List Grouped by Department -->
+    {% if grouped_cases %}
+    <div class="space-y-6">
+        {% for dept_group in grouped_cases %}
+        <div class="space-y-3">
+            <!-- Department Header -->
+            <div class="flex items-center gap-3 pb-2 border-b border-border">
+                <h3 class="text-xl font-semibold text-foreground">{{ dept_group.department_name }}</h3>
+                <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium" style="background-color: rgba(0, 173, 181, 0.15); color: #00ADB5;">
+                    {{ dept_group.count }} case{{ dept_group.count|pluralize }}
+                </span>
+            </div>
+            
+            <!-- Cases in Department -->
+            {% for case in dept_group.cases %}
+            <div class="card rounded-lg border border-border hover:border-warning transition-colors">
+                <div class="card-body">
+                    <div class="flex items-start justify-between">
+                        <div class="flex-1">
+                            <div class="flex items-center gap-3 mb-2">
+                                <h4 class="text-lg font-semibold text-foreground">{{ case.case_number }}</h4>
+                                <span class="inline-flex items-center px-2.5 py-0.5 rounded text-xs font-medium" style="background-color: rgba(0, 173, 181, 0.2); color: #00ADB5; border: 1px solid #00ADB5;">
+                                    {{ case.get_status_display }}
+                                </span>
+                                {% if case.priority == 'high' or case.priority == 'critical' %}
+                                <span class="inline-flex items-center px-2.5 py-0.5 rounded text-xs font-medium" style="background-color: rgba(239, 68, 68, 0.2); color: #ef4444; border: 1px solid rgba(239, 68, 68, 0.3);">
+                                    {{ case.get_priority_display }}
+                                </span>
+                                {% endif %}
+                            </div>
+                            
+                            <p class="text-foreground font-medium mb-2">{{ case.case_name }}</p>
+                            
+                            <div class="flex items-center gap-4 text-sm text-foreground/60">
+                                {% if case.prosecutor %}
+                                <span>Prosecutor: {{ case.prosecutor }}</span>
+                                {% endif %}
+                                <span>Opened: {{ case.date_opened|date:"M d, Y" }}</span>
+                            </div>
+                            
+                            {% if case.description %}
+                            <p class="text-sm text-foreground/70 mt-2">{{ case.description|truncatechars:150 }}</p>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="flex items-center gap-2 ml-4">
+                            <a href="{% url 'document_upload' case.pk %}" class="btn btn-sm btn-primary" title="Upload Document">
+                                <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"/>
+                                </svg>
+                                Upload
+                            </a>
+                            <a href="{% url 'case_detail' case.pk %}" class="btn btn-sm btn-secondary" title="View Case">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+                                </svg>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="card rounded-lg border border-border">
+        <div class="card-body text-center py-12">
+            <svg class="w-16 h-16 mx-auto mb-4 text-success" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+            </svg>
+            <h3 class="text-lg font-semibold text-foreground mb-2">All Cases Have Documents!</h3>
+            <p class="text-foreground/60">Great job! All active cases have at least one document.</p>
+        </div>
+    </div>
+    {% endif %}
+</div>
+
+<script>
+    function updatePerPage(value) {
+        const url = new URL(window.location.href);
+        url.searchParams.set('per_page', value);
+        url.searchParams.set('page', '1');
+        window.location.href = url.toString();
+    }
+</script>
+{% endblock %}

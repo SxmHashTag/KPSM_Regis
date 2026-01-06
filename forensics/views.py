@@ -3,7 +3,7 @@ from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse, HttpResponse
 import csv
-from django.db import models
+from django.db import models, IntegrityError
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.db.models import Count, Q
 from django.utils import timezone
@@ -49,6 +49,53 @@ def _extract_device_specific_data(post_data):
                 device_data[field] = True
             else:
                 device_data[field] = value.strip()
+    
+    # Handle multiple SIM cards (array data)
+    sim_iccids = post_data.getlist('sim_iccid[]')
+    sim_imsis = post_data.getlist('sim_imsi[]')
+    sim_phone_numbers = post_data.getlist('sim_phone_number[]')
+    sim_carriers = post_data.getlist('sim_carrier[]')
+    sim_types = post_data.getlist('sim_type[]')
+    sim_pin_statuses = post_data.getlist('sim_pin_status[]')
+    sim_notes_list = post_data.getlist('sim_notes[]')
+    
+    # Build SIM cards array if any SIM data exists
+    if any([sim_iccids, sim_imsis, sim_phone_numbers, sim_carriers, sim_types, sim_pin_statuses, sim_notes_list]):
+        sim_cards = []
+        # Get the maximum length to handle all SIM cards
+        max_length = max(
+            len(sim_iccids),
+            len(sim_imsis),
+            len(sim_phone_numbers),
+            len(sim_carriers),
+            len(sim_types),
+            len(sim_pin_statuses),
+            len(sim_notes_list)
+        )
+        
+        for i in range(max_length):
+            sim_card = {}
+            if i < len(sim_iccids) and sim_iccids[i].strip():
+                sim_card['iccid'] = sim_iccids[i].strip()
+            if i < len(sim_imsis) and sim_imsis[i].strip():
+                sim_card['imsi'] = sim_imsis[i].strip()
+            if i < len(sim_phone_numbers) and sim_phone_numbers[i].strip():
+                sim_card['phone_number'] = sim_phone_numbers[i].strip()
+            if i < len(sim_carriers) and sim_carriers[i].strip():
+                sim_card['carrier'] = sim_carriers[i].strip()
+            if i < len(sim_types) and sim_types[i].strip():
+                sim_card['sim_type'] = sim_types[i].strip()
+            if i < len(sim_pin_statuses) and sim_pin_statuses[i].strip():
+                sim_card['pin_status'] = sim_pin_statuses[i].strip()
+            if i < len(sim_notes_list) and sim_notes_list[i].strip():
+                sim_card['notes'] = sim_notes_list[i].strip()
+            
+            # Only add SIM card if it has at least one field
+            if sim_card:
+                sim_cards.append(sim_card)
+        
+        if sim_cards:
+            device_data['sim_cards'] = sim_cards
     
     return device_data
 
@@ -101,6 +148,8 @@ def dashboard(request):
     evidence_device_data = Evidence.objects.values('device_type').annotate(count=Count('id')).order_by('-count')[:10]
     evidence_device_labels = [dict(Evidence.DEVICE_TYPE_CHOICES).get(item['device_type'], item['device_type']) for item in evidence_device_data]
     evidence_device_counts = [item['count'] for item in evidence_device_data]
+    # Combine labels and counts for easier template rendering
+    evidence_by_type = [{'name': label, 'count': count} for label, count in zip(evidence_device_labels, evidence_device_counts)]
     
     # 3. Monthly Activity (last 30 days)
     thirty_days_ago = timezone.now() - timedelta(days=30)
@@ -156,6 +205,7 @@ def dashboard(request):
         'case_status_counts': case_status_counts,
         'evidence_device_labels': evidence_device_labels,
         'evidence_device_counts': evidence_device_counts,
+        'evidence_by_type': evidence_by_type,
         'cases_this_month': cases_this_month,
         'evidence_this_month': evidence_this_month,
         'cases_closed_this_month': cases_closed_this_month,
@@ -198,6 +248,34 @@ def case_list(request):
     if department:
         cases = cases.filter(department=department)
     
+    # Filter by case type
+    case_type = request.GET.get('case_type')
+    if case_type:
+        cases = cases.filter(case_type=case_type)
+    
+    # Filter by date range
+    date_from = request.GET.get('date_from')
+    date_to = request.GET.get('date_to')
+    if date_from:
+        from django.utils.dateparse import parse_date
+        parsed_date = parse_date(date_from)
+        if parsed_date:
+            cases = cases.filter(date_opened__gte=parsed_date)
+    if date_to:
+        from django.utils.dateparse import parse_date
+        parsed_date = parse_date(date_to)
+        if parsed_date:
+            from datetime import time
+            cases = cases.filter(date_opened__lte=timezone.datetime.combine(parsed_date, time.max))
+    
+    # Sorting
+    sort_by = request.GET.get('sort', '-date_opened')
+    allowed_sorts = ['case_number', '-case_number', 'case_name', '-case_name', 'date_opened', '-date_opened', 'status', '-status', 'priority', '-priority']
+    if sort_by in allowed_sorts:
+        cases = cases.order_by(sort_by)
+    else:
+        cases = cases.order_by('-date_opened')
+
     # Pagination
     per_page = request.GET.get('per_page', '25')
     try:
@@ -222,7 +300,11 @@ def case_list(request):
         'status_filter': status,
         'priority_filter': priority,
         'department_filter': department,
+        'case_type_filter': case_type,
+        'date_from': date_from,
+        'date_to': date_to,
         'department_choices': Case.DEPARTMENT_CHOICES,
+        'case_type_choices': Case.TYPE_CHOICES,
         'per_page': per_page,
         'breadcrumbs': [
             {'name': 'Dashboard', 'url': '/'},
@@ -236,15 +318,35 @@ def case_list(request):
 def case_detail(request, pk):
     """Detailed view of a case with all related information"""
     case = get_object_or_404(Case, pk=pk)
+    
+    # Get all documents: case documents + evidence documents
+    evidence_docs = Document.objects.filter(evidence__case=case)
+    case_docs = case.documents.all()
+    all_documents = (case_docs | evidence_docs).distinct().order_by('-date_created')
+    
+    # Count unique persons from case and evidence
+    case_person_ids = set(case.case_persons.values_list('person_id', flat=True))
+    evidence_person_ids = set()
+    for evidence in case.evidence.all():
+        if evidence.owner_person_id:
+            evidence_person_ids.add(evidence.owner_person_id)
+        if evidence.seized_from_person_id:
+            evidence_person_ids.add(evidence.seized_from_person_id)
+        if evidence.custodian_person_id:
+            evidence_person_ids.add(evidence.custodian_person_id)
+    all_person_ids = case_person_ids | evidence_person_ids
+    
     context = {
         'case': case,
         'evidence': case.evidence.all(),
         'persons': case.case_persons.all(),
+        'persons_count': len(all_person_ids),
         'documents': case.documents.all(),
+        'all_documents': all_documents,
         'tasks': case.tasks.all(),
         'timeline': case.timeline_activities.all()[:10],
         'breadcrumbs': [
-            {'name': 'Dashboard', 'url': '/'},
+            {'name': 'Dashboard', 'url': '/'}, 
             {'name': 'Cases', 'url': '/cases/'},
             {'name': case.case_number, 'url': None},
         ],
@@ -257,18 +359,35 @@ def case_create(request):
     """Create a new case"""
     if request.method == 'POST':
         case_number = request.POST.get('case_number', '').strip()
-        case = Case.objects.create(
-            case_number=case_number if case_number else '',  # Will auto-generate if empty
-            case_name=request.POST.get('case_name'),
-            description=request.POST.get('description', ''),
-            status=request.POST.get('status', 'active'),
-            priority=request.POST.get('priority', 'medium'),
-            case_type=request.POST.get('case_type', ''),
-            prosecutor=request.POST.get('prosecutor', ''),
-            department=request.POST.get('department', ''),
-        )
-        messages.success(request, f'Case {case.case_number} created successfully!')
-        return redirect('case_detail', pk=case.pk)
+        
+        try:
+            case = Case.objects.create(
+                case_number=case_number if case_number else '',  # Will auto-generate if empty
+                case_name=request.POST.get('case_name'),
+                description=request.POST.get('description', ''),
+                status=request.POST.get('status', 'active'),
+                priority=request.POST.get('priority', 'medium'),
+                case_type=request.POST.get('case_type', ''),
+                prosecutor=request.POST.get('prosecutor', ''),
+                department=request.POST.get('department', ''),
+            )
+            messages.success(request, f'Case {case.case_number} created successfully!')
+            return redirect('case_detail', pk=case.pk)
+        except IntegrityError:
+            # Duplicate case number
+            messages.error(request, f'Case number "{case_number}" already exists. Please use a different case number.')
+            # Re-render form with user's data preserved
+            prosecutors = Case.objects.exclude(prosecutor='').values_list('prosecutor', flat=True).distinct().order_by('prosecutor')
+            context = {
+                'prosecutors': prosecutors,
+                'form_data': request.POST,
+                'breadcrumbs': [
+                    {'name': 'Dashboard', 'url': '/'},
+                    {'name': 'Cases', 'url': '/cases/'},
+                    {'name': 'New Case', 'url': None},
+                ],
+            }
+            return render(request, 'forensics/case_form.html', context)
     
     # Get distinct prosecutors from existing cases
     prosecutors = Case.objects.exclude(prosecutor='').values_list('prosecutor', flat=True).distinct().order_by('prosecutor')
@@ -709,10 +828,13 @@ def evidence_location_search(request):
         )
     
     # Get stats by department
-    from django.db.models import Count
+    from django.db.models import Count, Sum
     department_stats = Evidence.objects.values('current_department').annotate(
         count=Count('id')
     ).order_by('current_department')
+    
+    # Calculate total evidence count
+    total_evidence = Evidence.objects.count()
     
     # Pagination
     per_page = request.GET.get('per_page', '25')
@@ -738,7 +860,8 @@ def evidence_location_search(request):
         'received_by_filter': received_by,
         'search': search,
         'department_stats': department_stats,
-        'department_choices': Evidence.DEPARTMENT_CHOICES,
+        'total_evidence': total_evidence,
+        'department_choices': Evidence.LOCATION_CHOICES,
         'per_page': per_page,
         'breadcrumbs': [
             {'name': 'Dashboard', 'url': '/'},
@@ -782,6 +905,51 @@ def evidence_list(request):
     if status:
         evidence_items = evidence_items.filter(status=status)
     
+    # Filter by department
+    department = request.GET.get('department')
+    if department:
+        evidence_items = evidence_items.filter(current_department=department)
+    
+    # Filter by state
+    state = request.GET.get('state')
+    if state:
+        evidence_items = evidence_items.filter(state=state)
+    
+    # Filter by damages
+    damages = request.GET.get('damages')
+    if damages:
+        evidence_items = evidence_items.filter(damages=(damages == 'true'))
+    
+    # Filter by date range
+    date_from = request.GET.get('date_from')
+    date_to = request.GET.get('date_to')
+    if date_from:
+        from django.utils.dateparse import parse_date
+        parsed_date = parse_date(date_from)
+        if parsed_date:
+            evidence_items = evidence_items.filter(collected_date__gte=parsed_date)
+    if date_to:
+        from django.utils.dateparse import parse_date
+        parsed_date = parse_date(date_to)
+        if parsed_date:
+            from datetime import time
+            evidence_items = evidence_items.filter(collected_date__lte=timezone.datetime.combine(parsed_date, time.max))
+    
+    # Sorting
+    sort_by = request.GET.get('sort', '-collected_date')
+    allowed_sorts = [
+        'evidence_number', '-evidence_number',
+        'item_name', '-item_name',
+        'device_type', '-device_type',
+        'status', '-status',
+        'collected_date', '-collected_date',
+        'case__case_number', '-case__case_number'
+    ]
+    if sort_by in allowed_sorts:
+        evidence_items = evidence_items.order_by(sort_by)
+    else:
+        evidence_items = evidence_items.order_by('-collected_date')
+    
     # Pagination
     per_page = request.GET.get('per_page', '25')
     try:
@@ -806,6 +974,13 @@ def evidence_list(request):
         'ibs_filter': ibs_filter,
         'type_filter': device_type,
         'status_filter': status,
+        'department_filter': department,
+        'state_filter': state,
+        'damages_filter': damages,
+        'date_from': date_from,
+        'date_to': date_to,
+        'department_choices': Evidence.LOCATION_CHOICES,
+        'state_choices': Evidence.STATE_CHOICES,
         'per_page': per_page,
         'breadcrumbs': [
             {'name': 'Dashboard', 'url': '/'},
@@ -826,7 +1001,24 @@ def evidence_create(request):
         if not evidence_number:
             if case_id:
                 # Get the case to extract case number
-                case = Case.objects.get(pk=case_id)
+                try:
+                    case = Case.objects.get(pk=case_id)
+                except Case.DoesNotExist:
+                    messages.error(request, f'Invalid case selected. Please choose a valid case from the dropdown.')
+                    # Redirect back to form
+                    cases = Case.objects.all().order_by('-date_opened')
+                    persons = Person.objects.all().order_by('last_name', 'first_name')
+                    context = {
+                        'cases': cases,
+                        'persons': persons,
+                        'breadcrumbs': [
+                            {'name': 'Dashboard', 'url': '/'},
+                            {'name': 'Evidence', 'url': '/evidence/'},
+                            {'name': 'Add Evidence', 'url': None},
+                        ],
+                    }
+                    return render(request, 'forensics/evidence_form.html', context)
+                
                 # Get the highest evidence number for this case
                 case_evidence = Evidence.objects.filter(
                     case=case,
@@ -904,10 +1096,28 @@ def evidence_create(request):
         seized_from_person_id = request.POST.get('seized_from_person') or None
         custodian_person_id = request.POST.get('custodian_person') or None
         
-        evidence = Evidence.objects.create(
-            evidence_number=evidence_number,
-            ibs_number=request.POST.get('ibs_number', '').strip(),
-            case_id=case_id if case_id else None,
+        # Validate case_id if provided
+        if case_id:
+            if not Case.objects.filter(pk=case_id).exists():
+                messages.error(request, 'Invalid case selected. Please choose a valid case from the dropdown.')
+                cases = Case.objects.all().order_by('-date_opened')
+                persons = Person.objects.all().order_by('last_name', 'first_name')
+                context = {
+                    'cases': cases,
+                    'persons': persons,
+                    'breadcrumbs': [
+                        {'name': 'Dashboard', 'url': '/'},
+                        {'name': 'Evidence', 'url': '/evidence/'},
+                        {'name': 'Add Evidence', 'url': None},
+                    ],
+                }
+                return render(request, 'forensics/evidence_form.html', context)
+        
+        try:
+            evidence = Evidence.objects.create(
+                evidence_number=evidence_number,
+                ibs_number=request.POST.get('ibs_number', '').strip(),
+                case_id=case_id if case_id else None,
             device_type=device_type,
             item_name=item_name,
             description=request.POST.get('description', ''),
@@ -927,10 +1137,24 @@ def evidence_create(request):
             received_date=received_date,
             seizure_date=seizure_date,
             acquisition_date=acquisition_date,
-            owner_person_id=owner_person_id,
-            seized_from_person_id=seized_from_person_id,
-            custodian_person_id=custodian_person_id,
-        )
+                owner_person_id=owner_person_id,
+                seized_from_person_id=seized_from_person_id,
+                custodian_person_id=custodian_person_id,
+            )
+        except Exception as e:
+            messages.error(request, f'Error creating evidence: {str(e)}')
+            cases = Case.objects.all().order_by('-date_opened')
+            persons = Person.objects.all().order_by('last_name', 'first_name')
+            context = {
+                'cases': cases,
+                'persons': persons,
+                'breadcrumbs': [
+                    {'name': 'Dashboard', 'url': '/'},
+                    {'name': 'Evidence', 'url': '/evidence/'},
+                    {'name': 'Add Evidence', 'url': None},
+                ],
+            }
+            return render(request, 'forensics/evidence_form.html', context)
         
         # Log initial department assignment if set
         if evidence.current_department:
@@ -1018,8 +1242,28 @@ def evidence_update(request, pk):
         device_specific_data = _extract_device_specific_data(request.POST)
         
         case_id = request.POST.get('case')
+        # Validate case_id if provided
+        if case_id:
+            if not Case.objects.filter(pk=case_id).exists():
+                messages.error(request, 'Invalid case selected. Please choose a valid case from the dropdown.')
+                cases = Case.objects.all().order_by('-date_opened')
+                persons = Person.objects.all().order_by('last_name', 'first_name')
+                context = {
+                    'evidence': evidence,
+                    'cases': cases,
+                    'persons': persons,
+                    'breadcrumbs': [
+                        {'name': 'Dashboard', 'url': '/'},
+                        {'name': 'Evidence', 'url': '/evidence/'},
+                        {'name': evidence.evidence_number, 'url': f'/evidence/{evidence.pk}/'},
+                        {'name': 'Edit', 'url': None},
+                    ],
+                }
+                return render(request, 'forensics/evidence_form.html', context)
+        
         evidence.case_id = case_id if case_id else None
         evidence.ibs_number = request.POST.get('ibs_number', '').strip()
+        evidence.evidence_number = request.POST.get('evidence_number', '').strip() or evidence.evidence_number
         device_type = request.POST.get('device_type')
         evidence.device_type = device_type
         
@@ -1565,3 +1809,112 @@ def analytics_dashboard(request):
     }
     
     return render(request, 'forensics/analytics.html', context)
+
+
+@login_required
+def check_case_number(request):
+    """Check if a case number already exists"""
+    case_number = request.GET.get('case_number', '').strip()
+    
+    if not case_number:
+        return JsonResponse({'exists': False})
+    
+    # Check if case number exists
+    exists = Case.objects.filter(case_number=case_number).exists()
+    
+    return JsonResponse({'exists': exists})
+
+
+@login_required
+def check_case_name(request):
+    """Check if a case name already exists and return matching cases"""
+    case_name = request.GET.get('case_name', '').strip()
+    
+    if not case_name:
+        return JsonResponse({'exists': False, 'cases': []})
+    
+    # Find cases with the same name
+    matching_cases = Case.objects.filter(case_name__iexact=case_name).values(
+        'case_number', 'case_name', 'status'
+    )[:5]  # Limit to 5 results
+    
+    exists = len(matching_cases) > 0
+    
+    return JsonResponse({
+        'exists': exists,
+        'cases': list(matching_cases)
+    })
+
+
+# Document Views
+@login_required
+def document_upload(request, case_pk):
+    """Upload a document to a case"""
+    from .forms import DocumentForm
+    case = get_object_or_404(Case, pk=case_pk)
+    
+    if request.method == 'POST':
+        form = DocumentForm(request.POST, request.FILES, case=case)
+        if form.is_valid():
+            document = form.save(commit=False)
+            document.case = case
+            
+            # Set file metadata
+            if document.file_path:
+                document.file_name = document.file_path.name
+                document.file_size = document.file_path.size
+                # Extract file extension (e.g., 'pdf' from 'document.pdf')
+                import os
+                file_extension = os.path.splitext(document.file_path.name)[1].lstrip('.').lower()
+                document.file_type = file_extension if file_extension else 'unknown'
+            
+            document.save()
+            messages.success(request, f'Document "{document.title}" uploaded successfully.')
+            return redirect('case_detail', pk=case.pk)
+    else:
+        form = DocumentForm(case=case)
+    
+    context = {
+        'form': form,
+        'case': case,
+        'breadcrumbs': [
+            {'name': 'Dashboard', 'url': '/'},
+            {'name': 'Cases', 'url': '/cases/'},
+            {'name': case.case_number, 'url': f'/cases/{case.pk}/'},
+            {'name': 'Upload Document', 'url': None},
+        ],
+    }
+    return render(request, 'forensics/document_upload.html', context)
+
+
+@login_required
+def document_delete(request, pk):
+    """Delete a document"""
+    document = get_object_or_404(Document, pk=pk)
+    case = document.case
+    
+    if request.method == 'POST':
+        document_title = document.title
+        
+        # Delete the file from filesystem
+        if document.file_path:
+            try:
+                document.file_path.delete()
+            except Exception as e:
+                messages.warning(request, f'Document deleted from database but file could not be removed: {str(e)}')
+        
+        document.delete()
+        messages.success(request, f'Document "{document_title}" deleted successfully.')
+        return redirect('case_detail', pk=case.pk)
+    
+    context = {
+        'document': document,
+        'case': case,
+        'breadcrumbs': [
+            {'name': 'Dashboard', 'url': '/'},
+            {'name': 'Cases', 'url': '/cases/'},
+            {'name': case.case_number, 'url': f'/cases/{case.pk}/'},
+            {'name': 'Delete Document', 'url': None},
+        ],
+    }
+    return render(request, 'forensics/document_confirm_delete.html', context)

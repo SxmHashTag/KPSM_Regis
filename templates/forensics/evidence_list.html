@@ -11,13 +11,13 @@
             <p class="text-muted-foreground mt-1">Manage evidence items</p>
         </div>
         <div class="flex gap-2">
-            <a href="{% url 'evidence_export_csv' %}?{{ request.GET.urlencode }}" class="inline-flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors font-medium">
+            <a href="{% url 'evidence_export_csv' %}?{{ request.GET.urlencode }}" class="btn btn-success">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
                 </svg>
                 Export CSV
             </a>
-            <a href="{% url 'evidence_create' %}" class="inline-flex items-center gap-2 px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:opacity-90 transition-opacity font-medium">
+            <a href="{% url 'evidence_create' %}" class="btn btn-primary transition-opacity font-medium">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
                 </svg>
@@ -26,24 +26,102 @@
         </div>
     </div>
     
-    <!-- Search -->
-    <div class="bg-gradient-to-br from-purple-50 to-pink-50 rounded-lg border-2 border-purple-200 p-4 shadow-md">
-        <form method="get" class="space-y-3">
-            <div class="flex gap-2">
+    <!-- Search and Filters -->
+    <div class="card rounded-lg border border-border p-4 shadow-md">
+        <form method="get" class="space-y-4">
+            <div>
                 <input type="text" name="search" value="{{ search|default:'' }}" placeholder="Search by evidence number, IBS#, brand, model, serial, IMEI, or case number..."
-                    class="flex-1 px-3 py-2 border border-input rounded-lg focus:outline-none focus:ring-2 focus:ring-ring">
-                <button type="submit" class="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors font-medium shadow-md">
-                    Search
-                </button>
-                {% if search or type_filter or status_filter or ibs_filter %}
-                <a href="{% url 'evidence_list' %}" class="px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors font-medium shadow-md">
-                    Clear
-                </a>
-                {% endif %}
+                    class="form-input">
+            </div>
+            <div class="flex flex-wrap gap-4">
+                <div class="w-48">
+                    <label class="block text-sm font-medium text-muted-foreground mb-1">Type</label>
+                    <select name="type" class="form-input">
+                        <option value="">All Types</option>
+                        <option value="computer" {% if type_filter == 'computer' %}selected{% endif %}>Computer</option>
+                        <option value="mobile" {% if type_filter == 'mobile' %}selected{% endif %}>Mobile Device</option>
+                        <option value="storage" {% if type_filter == 'storage' %}selected{% endif %}>Storage Device</option>
+                        <option value="network" {% if type_filter == 'network' %}selected{% endif %}>Network Device</option>
+                        <option value="cloud" {% if type_filter == 'cloud' %}selected{% endif %}>Cloud/Online Account</option>
+                        <option value="drone" {% if type_filter == 'drone' %}selected{% endif %}>Drone/UAV</option>
+                        <option value="gaming" {% if type_filter == 'gaming' %}selected{% endif %}>Gaming Console</option>
+                        <option value="car" {% if type_filter == 'car' %}selected{% endif %}>Vehicle/Automotive</option>
+                        <option value="iot" {% if type_filter == 'iot' %}selected{% endif %}>IoT Device</option>
+                        <option value="memory" {% if type_filter == 'memory' %}selected{% endif %}>Memory/RAM</option>
+                        <option value="video" {% if type_filter == 'video' %}selected{% endif %}>Video Evidence</option>
+                        <option value="other" {% if type_filter == 'other' %}selected{% endif %}>Other</option>
+                    </select>
+                </div>
+                
+                <div class="w-48">
+                    <label class="block text-sm font-medium text-muted-foreground mb-1">Status</label>
+                    <select name="status" class="form-input">
+                        <option value="">All</option>
+                        <option value="collected" {% if status_filter == 'collected' %}selected{% endif %}>Collected</option>
+                        <option value="processing" {% if status_filter == 'processing' %}selected{% endif %}>Processing</option>
+                        <option value="analyzed" {% if status_filter == 'analyzed' %}selected{% endif %}>Analyzed</option>
+                        <option value="reviewed" {% if status_filter == 'reviewed' %}selected{% endif %}>Reviewed</option>
+                        <option value="archived" {% if status_filter == 'archived' %}selected{% endif %}>Archived</option>
+                        <option value="returned" {% if status_filter == 'returned' %}selected{% endif %}>Returned</option>
+                        <option value="destroyed" {% if status_filter == 'destroyed' %}selected{% endif %}>Destroyed</option>
+                    </select>
+                </div>
+                
+                <div class="w-48">
+                    <label class="block text-sm font-medium text-muted-foreground mb-1">Department</label>
+                    <select name="department" class="form-input">
+                        <option value="">All Departments</option>
+                        {% for value, label in department_choices %}
+                        <option value="{{ value }}" {% if department_filter == value %}selected{% endif %}>{{ label }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                
+                <div class="w-48">
+                    <label class="block text-sm font-medium text-muted-foreground mb-1">State</label>
+                    <select name="state" class="form-input">
+                        <option value="">All</option>
+                        {% for value, label in state_choices %}
+                        <option value="{{ value }}" {% if state_filter == value %}selected{% endif %}>{{ label }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                
+                <div class="w-48">
+                    <label class="block text-sm font-medium text-muted-foreground mb-1">Damages</label>
+                    <select name="damages" class="form-input">
+                        <option value="">All</option>
+                        <option value="true" {% if damages_filter == 'true' %}selected{% endif %}>Has Damages</option>
+                        <option value="false" {% if damages_filter == 'false' %}selected{% endif %}>No Damages</option>
+                    </select>
+                </div>
+                
+                <div class="w-48">
+                    <label class="block text-sm font-medium text-muted-foreground mb-1">Date From</label>
+                    <input type="date" name="date_from" value="{{ date_from|default:'' }}" 
+                        class="form-input">
+                </div>
+                
+                <div class="w-48">
+                    <label class="block text-sm font-medium text-muted-foreground mb-1">Date To</label>
+                    <input type="date" name="date_to" value="{{ date_to|default:'' }}" 
+                        class="form-input">
+                </div>
+                
+                <div class="flex items-end gap-2">
+                    <button type="submit" class="btn btn-primary">
+                        Search & Filter
+                    </button>
+                    {% if search or type_filter or status_filter or department_filter or state_filter or damages_filter or date_from or date_to or ibs_filter %}
+                    <a href="{% url 'evidence_list' %}" class="btn btn-secondary">
+                        Clear
+                    </a>
+                    {% endif %}
+                </div>
             </div>
             {% if ibs_filter %}
             <div class="flex items-center gap-2 text-sm">
-                <span class="px-3 py-1 bg-blue-100 text-blue-700 rounded-full font-medium">
+                <span class="px-3 py-1 card text-foreground rounded-full font-medium">
                     Filtering by IBS#: {{ ibs_filter }}
                 </span>
             </div>
@@ -56,13 +134,13 @@
         <div class="flex items-center justify-between">
             <span id="selectedCount" class="font-semibold">0 items selected</span>
             <div class="flex gap-2">
-                <select id="bulkDepartment" class="px-3 py-1.5 bg-white text-gray-900 rounded border-0 text-sm font-medium">
+                <select id="bulkDepartment" class="px-3 py-1.5 card text-white rounded border-0 text-sm font-medium">
                     <option value="">Assign to Department...</option>
                     <option value="ibs">IBS</option>
                     <option value="team">Team</option>
                     <option value="digi">DIGI</option>
                 </select>
-                <select id="bulkStatus" class="px-3 py-1.5 bg-white text-gray-900 rounded border-0 text-sm font-medium">
+                <select id="bulkStatus" class="px-3 py-1.5 card text-white rounded border-0 text-sm font-medium">
                     <option value="">Change Status...</option>
                     <option value="collected">Collected</option>
                     <option value="processing">Processing</option>
@@ -72,44 +150,86 @@
                     <option value="returned">Returned</option>
                 </select>
                 <button onclick="applyBulkAction()" class="px-4 py-1.5 bg-green-500 hover:bg-green-600 rounded font-medium text-sm">Apply</button>
-                <button onclick="clearSelection()" class="px-4 py-1.5 bg-gray-500 hover:bg-gray-600 rounded font-medium text-sm">Cancel</button>
+                <button onclick="clearSelection()" class="px-4 py-1.5 card0 hover:bg-gray-600 rounded font-medium text-sm">Cancel</button>
             </div>
         </div>
     </div>
     
-    <div class="bg-gradient-to-br from-slate-50 to-gray-50 rounded-lg border-2 border-slate-200 overflow-hidden shadow-md">
+    <div class="table-container rounded-lg border border-border overflow-hidden shadow-md">
         <div class="overflow-x-auto">
             <table class="w-full">
-                <thead class="bg-gradient-to-r from-purple-100 to-pink-100">
+                <thead class="card">
                     <tr>
                         <th class="px-6 py-4 text-left">
                             <input type="checkbox" id="selectAll" onchange="toggleSelectAll(this)" class="w-4 h-4 rounded border-purple-300">
                         </th>
-                        <th class="px-6 py-4 text-left text-sm font-semibold text-purple-900 uppercase tracking-wider">Image</th>
-                        <th class="px-6 py-4 text-left text-sm font-semibold text-purple-900 uppercase tracking-wider">Evidence #</th>
-                        <th class="px-6 py-4 text-left text-sm font-semibold text-purple-900 uppercase tracking-wider">Item Name</th>
-                        <th class="px-6 py-4 text-left text-sm font-semibold text-purple-900 uppercase tracking-wider">Type</th>
-                        <th class="px-6 py-4 text-left text-sm font-semibold text-purple-900 uppercase tracking-wider">Brand/Model</th>
-                        <th class="px-6 py-4 text-left text-sm font-semibold text-purple-900 uppercase tracking-wider">Case</th>
-                        <th class="px-6 py-4 text-left text-sm font-semibold text-purple-900 uppercase tracking-wider">Status</th>
-                        <th class="px-6 py-4 text-left text-sm font-semibold text-purple-900 uppercase tracking-wider">Collected</th>
-                        <th class="px-6 py-4 text-right text-sm font-semibold text-purple-900 uppercase tracking-wider">Actions</th>
+                        <th class="px-6 py-4 text-left text-sm font-semibold text-white uppercase tracking-wider">Image</th>
+                        <th class="px-6 py-4 text-left text-sm font-semibold text-white uppercase tracking-wider">
+                            <a href="?sort={% if request.GET.sort == 'evidence_number' %}-{% endif %}evidence_number{% if search %}&search={{ search }}{% endif %}{% if type_filter %}&type={{ type_filter }}{% endif %}{% if status_filter %}&status={{ status_filter }}{% endif %}{% if department_filter %}&department={{ department_filter }}{% endif %}{% if state_filter %}&state={{ state_filter }}{% endif %}{% if damages_filter %}&damages={{ damages_filter }}{% endif %}{% if date_from %}&date_from={{ date_from }}{% endif %}{% if date_to %}&date_to={{ date_to }}{% endif %}" class="flex items-center gap-1 hover:text-indigo-400">
+                                Evidence #
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4"/>
+                                </svg>
+                            </a>
+                        </th>
+                        <th class="px-6 py-4 text-left text-sm font-semibold text-white uppercase tracking-wider">
+                            <a href="?sort={% if request.GET.sort == 'item_name' %}-{% endif %}item_name{% if search %}&search={{ search }}{% endif %}{% if type_filter %}&type={{ type_filter }}{% endif %}{% if status_filter %}&status={{ status_filter }}{% endif %}{% if department_filter %}&department={{ department_filter }}{% endif %}{% if state_filter %}&state={{ state_filter }}{% endif %}{% if damages_filter %}&damages={{ damages_filter }}{% endif %}{% if date_from %}&date_from={{ date_from }}{% endif %}{% if date_to %}&date_to={{ date_to }}{% endif %}" class="flex items-center gap-1 hover:text-indigo-400">
+                                Item Name
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4"/>
+                                </svg>
+                            </a>
+                        </th>
+                        <th class="px-6 py-4 text-left text-sm font-semibold text-white uppercase tracking-wider">
+                            <a href="?sort={% if request.GET.sort == 'device_type' %}-{% endif %}device_type{% if search %}&search={{ search }}{% endif %}{% if type_filter %}&type={{ type_filter }}{% endif %}{% if status_filter %}&status={{ status_filter }}{% endif %}{% if department_filter %}&department={{ department_filter }}{% endif %}{% if state_filter %}&state={{ state_filter }}{% endif %}{% if damages_filter %}&damages={{ damages_filter }}{% endif %}{% if date_from %}&date_from={{ date_from }}{% endif %}{% if date_to %}&date_to={{ date_to }}{% endif %}" class="flex items-center gap-1 hover:text-indigo-400">
+                                Type
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4"/>
+                                </svg>
+                            </a>
+                        </th>
+                        <th class="px-6 py-4 text-left text-sm font-semibold text-white uppercase tracking-wider">Brand/Model</th>
+                        <th class="px-6 py-4 text-left text-sm font-semibold text-white uppercase tracking-wider">
+                            <a href="?sort={% if request.GET.sort == 'case__case_number' %}-{% endif %}case__case_number{% if search %}&search={{ search }}{% endif %}{% if type_filter %}&type={{ type_filter }}{% endif %}{% if status_filter %}&status={{ status_filter }}{% endif %}{% if department_filter %}&department={{ department_filter }}{% endif %}{% if state_filter %}&state={{ state_filter }}{% endif %}{% if damages_filter %}&damages={{ damages_filter }}{% endif %}{% if date_from %}&date_from={{ date_from }}{% endif %}{% if date_to %}&date_to={{ date_to }}{% endif %}" class="flex items-center gap-1 hover:text-indigo-400">
+                                Case
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4"/>
+                                </svg>
+                            </a>
+                        </th>
+                        <th class="px-6 py-4 text-left text-sm font-semibold text-white uppercase tracking-wider">
+                            <a href="?sort={% if request.GET.sort == 'status' %}-{% endif %}status{% if search %}&search={{ search }}{% endif %}{% if type_filter %}&type={{ type_filter }}{% endif %}{% if status_filter %}&status={{ status_filter }}{% endif %}{% if department_filter %}&department={{ department_filter }}{% endif %}{% if state_filter %}&state={{ state_filter }}{% endif %}{% if damages_filter %}&damages={{ damages_filter }}{% endif %}{% if date_from %}&date_from={{ date_from }}{% endif %}{% if date_to %}&date_to={{ date_to }}{% endif %}" class="flex items-center gap-1 hover:text-indigo-400">
+                                Status
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4"/>
+                                </svg>
+                            </a>
+                        </th>
+                        <th class="px-6 py-4 text-left text-sm font-semibold text-white uppercase tracking-wider">
+                            <a href="?sort={% if request.GET.sort == 'collected_date' %}-{% endif %}collected_date{% if search %}&search={{ search }}{% endif %}{% if type_filter %}&type={{ type_filter }}{% endif %}{% if status_filter %}&status={{ status_filter }}{% endif %}{% if department_filter %}&department={{ department_filter }}{% endif %}{% if state_filter %}&state={{ state_filter }}{% endif %}{% if damages_filter %}&damages={{ damages_filter }}{% endif %}{% if date_from %}&date_from={{ date_from }}{% endif %}{% if date_to %}&date_to={{ date_to }}{% endif %}" class="flex items-center gap-1 hover:text-indigo-400">
+                                Collected
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4"/>
+                                </svg>
+                            </a>
+                        </th>
+                        <th class="px-6 py-4 text-right text-sm font-semibold text-white uppercase tracking-wider">Actions</th>
                     </tr>
                 </thead>
-                <tbody class="bg-white divide-y divide-slate-200">
+                <tbody class="card divide-y divide-slate-600">
                     {% for item in evidence_items %}
-                    <tr class="hover:bg-secondary/30 transition-colors">
+                    <tr class="hover:bg-muted transition-colors">
                         <td class="px-6 py-4">
-                            <input type="checkbox" class="evidence-checkbox w-4 h-4 rounded border-gray-300" value="{{ item.pk }}" onchange="updateBulkBar()">
+                            <input type="checkbox" class="evidence-checkbox w-4 h-4 rounded border-border" value="{{ item.pk }}" onchange="updateBulkBar()">
                         </td>
                         <td class="px-6 py-4">
                             {% if item.images.first %}
                             <a href="{% url 'evidence_detail' item.pk %}" class="block">
-                                <img src="{{ item.images.first.image.url }}" alt="{{ item.evidence_number }}" class="w-16 h-16 object-cover rounded-lg border-2 border-purple-200 hover:border-purple-400 transition-colors shadow-sm">
+                                <img src="{{ item.images.first.image.url }}" alt="{{ item.evidence_number }}" class="w-16 h-16 object-cover rounded-lg border border-border hover:border-slate-400 transition-colors shadow-sm">
                             </a>
                             {% else %}
-                            <div class="w-16 h-16 bg-gray-100 rounded-lg border-2 border-gray-200 flex items-center justify-center">
-                                <svg class="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <div class="w-16 h-16 card rounded-lg border-2 border-border flex items-center justify-center">
+                                <svg class="w-8 h-8 text-muted-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
                                 </svg>
                             </div>
@@ -124,7 +244,7 @@
                                     {% endif %}
                                 </a>
                                 <button onclick="copyToClipboard('{{ item.evidence_number }}', this)" 
-                                    class="text-gray-400 hover:text-primary transition-colors" title="Copy evidence number">
+                                    class="text-muted-foreground hover:text-primary transition-colors" title="Copy evidence number">
                                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/>
                                     </svg>
@@ -133,7 +253,7 @@
                         </td>
                         <td class="px-6 py-4 text-base text-foreground">{{ item.item_name }}</td>
                         <td class="px-6 py-4 whitespace-nowrap">
-                            <span class="px-3 py-1.5 text-sm font-semibold rounded-full bg-purple-100 text-purple-700">
+                            <span class="badge card text-foreground">
                                 {{ item.get_device_type_display }}
                             </span>
                         </td>
@@ -153,7 +273,7 @@
                             {% endif %}
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap">
-                            <span class="px-3 py-1.5 text-sm font-semibold rounded-full bg-green-100 text-green-700">
+                            <span class="badge card text-foreground">
                                 {{ item.get_status_display }}
                             </span>
                         </td>

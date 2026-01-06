@@ -17,6 +17,8 @@ urlpatterns = [
     path('cases/<uuid:pk>/delete/', views.case_delete, name='case_delete'),
     path('cases/<uuid:pk>/export/csv/', views.case_detail_export_csv, name='case_detail_export_csv'),
     path('cases/<uuid:pk>/export/print/', views.case_detail_export_print, name='case_detail_export_print'),
+    path('check-case-number/', views.check_case_number, name='check_case_number'),
+    path('check-case-name/', views.check_case_name, name='check_case_name'),
 
     # Persons
     path('persons/', views.person_list, name='person_list'),
@@ -24,6 +26,10 @@ urlpatterns = [
     path('persons/<uuid:pk>/', views.person_detail, name='person_detail'),
     path('persons/<uuid:pk>/edit/', views.person_update, name='person_update'),
     path('persons/<uuid:pk>/delete/', views.person_delete, name='person_delete'),
+
+    # Documents
+    path('cases/<uuid:case_pk>/documents/upload/', views.document_upload, name='document_upload'),
+    path('documents/<uuid:pk>/delete/', views.document_delete, name='document_delete'),
 
     # Evidence
     path('evidence/', views.evidence_list, name='evidence_list'),

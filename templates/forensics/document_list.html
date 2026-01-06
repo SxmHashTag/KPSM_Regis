@@ -1,0 +1,475 @@
+{% extends 'base.html' %}
+
+{% block title %}Documents - Diamond Forensics{% endblock %}
+
+{% block content %}
+<div class="flex-1 space-y-6 p-4 md:p-8 pt-6">
+    <!-- Header -->
+    <div class="flex items-center justify-between">
+        <div>
+            <h2 class="text-3xl font-bold tracking-tight text-foreground">Documents</h2>
+            <p class="text-muted-foreground mt-1">
+                Browse and filter all case documentation
+            </p>
+        </div>
+        <a href="{% url 'document_analytics' %}" class="btn btn-secondary">
+            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
+            </svg>
+            View Analytics
+        </a>
+    </div>
+
+    <!-- Search and Filter Section -->
+    <div class="card rounded-lg border border-border">
+        <div class="card-body">
+            <form method="get" class="space-y-4">
+                <!-- Search Bar -->
+                <div class="flex gap-2">
+                    <div class="flex-1 relative">
+                        <svg class="w-5 h-5 absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+                        </svg>
+                        <input 
+                            type="text" 
+                            name="search" 
+                            value="{{ search|default:'' }}" 
+                            placeholder="Search documents by title, author, case number..." 
+                            class="form-input w-full pl-10"
+                            style="color: #EEEEEE; background-color: #2e3239;"
+                        >
+                    </div>
+                    <button type="submit" class="btn btn-primary">Search</button>
+                </div>
+
+                <!-- Filter Toggles -->
+                <div class="flex items-center gap-2">
+                    <button type="button" onclick="toggleFilters()" class="btn btn-ghost btn-sm">
+                        <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4"/>
+                        </svg>
+                        Advanced Filters
+                    </button>
+                    {% if type_filter or access_level_filter or case_filter or confidential_filter or author_filter or date_from or date_to %}
+                    <a href="{% url 'document_list' %}" class="btn btn-ghost btn-sm text-red-600">
+                        <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                        </svg>
+                        Clear Filters
+                    </a>
+                    {% endif %}
+                </div>
+
+                <!-- Advanced Filters (Hidden by default) -->
+                <div id="advancedFilters" class="hidden grid gap-4 md:grid-cols-2 lg:grid-cols-3 pt-4 border-t border-border">
+                    <div>
+                        <label class="block text-sm font-medium mb-2" style="color: #EEEEEE;">Document Type</label>
+                        <select name="type" class="form-select w-full" style="color: #EEEEEE; background-color: #2e3239;">
+                            <option value="">All Types</option>
+                            {% for value, label in document_type_choices %}
+                            <option value="{{ value }}" {% if type_filter == value %}selected{% endif %}>{{ label }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-medium mb-2" style="color: #EEEEEE;">Access Level</label>
+                        <select name="access_level" class="form-select w-full" style="color: #EEEEEE; background-color: #2e3239;">
+                            <option value="">All Levels</option>
+                            {% for value, label in access_level_choices %}
+                            <option value="{{ value }}" {% if access_level_filter == value %}selected{% endif %}>{{ label }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-medium mb-2" style="color: #EEEEEE;">Case</label>
+                        <select name="case" class="form-select w-full" style="color: #EEEEEE; background-color: #2e3239;">
+                            <option value="">All Cases</option>
+                            {% for case in all_cases %}
+                            <option value="{{ case.pk }}" {% if case_filter == case.pk|stringformat:"s" %}selected{% endif %}>
+                                {{ case.case_number }} - {{ case.case_name|truncatechars:30 }}
+                            </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-medium mb-2" style="color: #EEEEEE;">Author</label>
+                        <select name="author" class="form-select w-full" style="color: #EEEEEE; background-color: #2e3239;">
+                            <option value="">All Authors</option>
+                            {% for author in all_authors %}
+                            <option value="{{ author }}" {% if author_filter == author %}selected{% endif %}>{{ author }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-medium mb-2" style="color: #EEEEEE;">Confidential Status</label>
+                        <select name="confidential" class="form-select w-full" style="color: #EEEEEE; background-color: #2e3239;">
+                            <option value="">All Documents</option>
+                            <option value="true" {% if confidential_filter == 'true' %}selected{% endif %}>Confidential Only</option>
+                            <option value="false" {% if confidential_filter == 'false' %}selected{% endif %}>Non-Confidential Only</option>
+                        </select>
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-medium mb-2" style="color: #EEEEEE;">Date Range</label>
+                        <div class="flex gap-2">
+                            <input 
+                                type="date" 
+                                name="date_from" 
+                                value="{{ date_from }}" 
+                                class="form-input flex-1"
+                                style="color: #EEEEEE; background-color: #2e3239;"
+                                placeholder="From"
+                            >
+                            <input 
+                                type="date" 
+                                name="date_to" 
+                                value="{{ date_to }}" 
+                                class="form-input flex-1"
+                                style="color: #EEEEEE; background-color: #2e3239;"
+                                placeholder="To"
+                            >
+                        </div>
+                    </div>
+
+                    <div class="flex items-end">
+                        <button type="submit" class="btn btn-primary w-full">Apply Filters</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Results Info -->
+    <div class="flex items-center justify-between">
+        <p class="text-sm text-foreground/70">
+            Showing {{ documents.start_index }} to {{ documents.end_index }} of {{ documents.paginator.count }} documents
+        </p>
+        <div class="flex items-center gap-2">
+            <label class="text-sm text-foreground/70">Per page:</label>
+            <select onchange="updatePerPage(this.value)" class="form-select select-sm" style="width: auto; padding: 0.375rem 2rem 0.375rem 0.875rem; color: #EEEEEE; background-color: #2e3239;">
+                <option value="10" {% if per_page == 10 %}selected{% endif %}>10</option>
+                <option value="25" {% if per_page == 25 %}selected{% endif %}>25</option>
+                <option value="50" {% if per_page == 50 %}selected{% endif %}>50</option>
+                <option value="100" {% if per_page == 100 %}selected{% endif %}>100</option>
+            </select>
+        </div>
+    </div>
+
+    <!-- Document Table -->
+    <div class="table-container">
+        <table class="table w-full">
+            <thead>
+                <tr>
+                    <th>Title</th>
+                    <th>Type</th>
+                    <th>Case</th>
+                    <th>Author</th>
+                    <th>Access Level</th>
+                    <th>Date</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                        {% if documents %}
+                            {% for doc in documents %}
+                            <tr>
+                                <td>
+                                    <div class="flex items-center gap-2">
+                                        <div class="p-2 rounded" style="background-color: #00ADB5; color: white;">
+                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"/>
+                                            </svg>
+                                        </div>
+                                        <div>
+                                            <div class="font-medium text-foreground">{{ doc.title }}</div>
+                                            {% if doc.is_confidential %}
+                                            <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-destructive/20 text-destructive border border-destructive/30 mt-1">Confidential</span>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>
+                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded text-xs font-medium" style="background-color: #2e3239; color: #EEEEEE; border: 1px solid #00ADB5;">{{ doc.get_document_type_display }}</span>
+                                </td>
+                                <td>
+                                    {% if doc.case %}
+                                    <a href="{% url 'case_detail' doc.case.pk %}" class="text-primary hover:underline font-medium">
+                                        {{ doc.case.case_number }}
+                                    </a>
+                                    {% elif doc.evidence %}
+                                    <a href="{% url 'evidence_detail' doc.evidence.pk %}" class="text-primary hover:underline font-medium">
+                                        Evidence: {{ doc.evidence.evidence_number }}
+                                    </a>
+                                    {% else %}
+                                    <span class="text-foreground/60">—</span>
+                                    {% endif %}
+                                </td>
+                                <td class="text-foreground">{{ doc.author|default:"—" }}</td>
+                                <td>
+                                    {% if doc.access_level == 'public' %}
+                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded text-xs font-medium" style="background-color: rgba(34, 197, 94, 0.2); color: #22c55e; border: 1px solid rgba(34, 197, 94, 0.3);">{{ doc.get_access_level_display }}</span>
+                                    {% elif doc.access_level == 'internal' %}
+                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded text-xs font-medium" style="background-color: rgba(59, 130, 246, 0.2); color: #3b82f6; border: 1px solid rgba(59, 130, 246, 0.3);">{{ doc.get_access_level_display }}</span>
+                                    {% elif doc.access_level == 'restricted' %}
+                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded text-xs font-medium" style="background-color: rgba(249, 115, 22, 0.2); color: #f97316; border: 1px solid rgba(249, 115, 22, 0.3);">{{ doc.get_access_level_display }}</span>
+                                    {% else %}
+                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded text-xs font-medium" style="background-color: rgba(239, 68, 68, 0.2); color: #ef4444; border: 1px solid rgba(239, 68, 68, 0.3);">{{ doc.get_access_level_display }}</span>
+                                    {% endif %}
+                                </td>
+                                <td class="text-sm text-foreground/70">
+                                    {{ doc.date_created|date:"M d, Y" }}
+                                </td>
+                                <td>
+                                    <div class="flex items-center gap-1">
+                                        {% if doc.file_path %}
+                                        <button onclick="previewDocument('{{ doc.file_path.url }}', '{{ doc.title }}', '{{ doc.file_type }}')" class="btn btn-ghost btn-sm" title="Preview">
+                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+                                            </svg>
+                                        </button>
+                                        <a href="{{ doc.file_path.url }}" target="_blank" class="btn btn-ghost btn-sm" title="Download">
+                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
+                                            </svg>
+                                        </a>
+                                        {% endif %}
+                                        {% if doc.case %}
+                                        <a href="{% url 'case_detail' doc.case.pk %}" class="btn btn-ghost btn-sm" title="View Case">
+                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                                            </svg>
+                                        </a>
+                                        {% elif doc.evidence %}
+                                        <a href="{% url 'evidence_detail' doc.evidence.pk %}" class="btn btn-ghost btn-sm" title="View Evidence">
+                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z"/>
+                                            </svg>
+                                        </a>
+                                        {% endif %}
+                                        <a href="{% url 'document_delete' doc.pk %}" class="btn btn-ghost btn-sm text-destructive" title="Delete">
+                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                                            </svg>
+                                        </a>
+                                    </div>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        {% else %}
+                            <tr>
+                                <td colspan="7" class="text-center py-8 text-foreground/60">
+                                    No documents found matching your criteria.
+                                </td>
+                            </tr>
+                        {% endif %}
+                    </tbody>
+        </table>
+    </div>
+
+    <!-- Pagination -->
+    {% if documents.has_other_pages %}
+    <div class="flex items-center justify-center gap-2">
+        <div class="btn-group">
+            {% if documents.has_previous %}
+            <a href="?page=1{% if search %}&search={{ search }}{% endif %}{% if type_filter %}&type={{ type_filter }}{% endif %}{% if access_level_filter %}&access_level={{ access_level_filter }}{% endif %}{% if case_filter %}&case={{ case_filter }}{% endif %}{% if confidential_filter %}&confidential={{ confidential_filter }}{% endif %}{% if author_filter %}&author={{ author_filter }}{% endif %}{% if date_from %}&date_from={{ date_from }}{% endif %}{% if date_to %}&date_to={{ date_to }}{% endif %}&per_page={{ per_page }}" class="btn btn-sm">
+                &laquo; First
+            </a>
+            <a href="?page={{ documents.previous_page_number }}{% if search %}&search={{ search }}{% endif %}{% if type_filter %}&type={{ type_filter }}{% endif %}{% if access_level_filter %}&access_level={{ access_level_filter }}{% endif %}{% if case_filter %}&case={{ case_filter }}{% endif %}{% if confidential_filter %}&confidential={{ confidential_filter }}{% endif %}{% if author_filter %}&author={{ author_filter }}{% endif %}{% if date_from %}&date_from={{ date_from }}{% endif %}{% if date_to %}&date_to={{ date_to }}{% endif %}&per_page={{ per_page }}" class="btn btn-sm">
+                &lsaquo; Previous
+            </a>
+            {% endif %}
+
+            <span class="btn btn-sm btn-disabled">
+                Page {{ documents.number }} of {{ documents.paginator.num_pages }}
+            </span>
+
+            {% if documents.has_next %}
+            <a href="?page={{ documents.next_page_number }}{% if search %}&search={{ search }}{% endif %}{% if type_filter %}&type={{ type_filter }}{% endif %}{% if access_level_filter %}&access_level={{ access_level_filter }}{% endif %}{% if case_filter %}&case={{ case_filter }}{% endif %}{% if confidential_filter %}&confidential={{ confidential_filter }}{% endif %}{% if author_filter %}&author={{ author_filter }}{% endif %}{% if date_from %}&date_from={{ date_from }}{% endif %}{% if date_to %}&date_to={{ date_to }}{% endif %}&per_page={{ per_page }}" class="btn btn-sm">
+                Next &rsaquo;
+            </a>
+            <a href="?page={{ documents.paginator.num_pages }}{% if search %}&search={{ search }}{% endif %}{% if type_filter %}&type={{ type_filter }}{% endif %}{% if access_level_filter %}&access_level={{ access_level_filter }}{% endif %}{% if case_filter %}&case={{ case_filter }}{% endif %}{% if confidential_filter %}&confidential={{ confidential_filter }}{% endif %}{% if author_filter %}&author={{ author_filter }}{% endif %}{% if date_from %}&date_from={{ date_from }}{% endif %}{% if date_to %}&date_to={{ date_to }}{% endif %}&per_page={{ per_page }}" class="btn btn-sm">
+                Last &raquo;
+            </a>
+            {% endif %}
+        </div>
+    </div>
+    {% endif %}
+</div>
+
+<script>
+    function toggleFilters() {
+        const filters = document.getElementById('advancedFilters');
+        filters.classList.toggle('hidden');
+    }
+
+    function updatePerPage(value) {
+        const url = new URL(window.location.href);
+        url.searchParams.set('per_page', value);
+        url.searchParams.set('page', '1'); // Reset to page 1
+        window.location.href = url.toString();
+    }
+
+    // Document Preview Modal
+    function previewDocument(url, title, fileType) {
+        // Prevent default action
+        event.preventDefault();
+        event.stopPropagation();
+        
+        // Create modal
+        const modal = document.createElement('div');
+        modal.className = 'fixed inset-0 z-50 flex items-center justify-center p-4';
+        modal.style.backgroundColor = 'rgba(0, 0, 0, 0.8)';
+        
+        // Close modal function
+        const closeModal = function() {
+            document.body.style.overflow = '';
+            if (document.body.contains(modal)) {
+                document.body.removeChild(modal);
+            }
+        };
+        
+        modal.onclick = function(e) {
+            if (e.target === modal) {
+                closeModal();
+            }
+        };
+
+        // Create modal content
+        const content = document.createElement('div');
+        content.className = 'relative w-full max-w-6xl max-h-[90vh] rounded-lg overflow-hidden';
+        content.style.backgroundColor = '#393E46';
+        content.style.border = '2px solid #00ADB5';
+
+        // Header
+        const header = document.createElement('div');
+        header.className = 'flex items-center justify-between p-4';
+        header.style.backgroundColor = '#2e3239';
+        header.style.borderBottom = '1px solid #00ADB5';
+        header.innerHTML = `
+            <h3 class="text-lg font-semibold" style="color: #EEEEEE;">${title}</h3>
+            <div class="flex items-center gap-2">
+                <a href="${url}" target="_blank" class="btn btn-sm btn-secondary" title="Open in new tab">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/>
+                    </svg>
+                </a>
+                <button onclick="event.stopPropagation(); this.closest('.fixed').remove(); document.body.style.overflow = '';" class="btn btn-sm btn-ghost" style="color: #EEEEEE;">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                    </svg>
+                </button>
+            </div>
+        `;
+
+        // Preview content
+        const previewContainer = document.createElement('div');
+        previewContainer.className = 'p-4';
+        previewContainer.style.maxHeight = 'calc(90vh - 80px)';
+        previewContainer.style.overflow = 'auto';
+        previewContainer.style.backgroundColor = '#222831';
+
+        // Determine preview type
+        const lowerFileType = fileType.toLowerCase();
+        
+        // Add loading indicator
+        previewContainer.innerHTML = `
+            <div class="flex items-center justify-center py-12">
+                <div class="text-center">
+                    <svg class="animate-spin h-12 w-12 mx-auto mb-4" style="color: #00ADB5;" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                    <p style="color: #EEEEEE;">Loading preview...</p>
+                </div>
+            </div>
+        `;
+        
+        // Use setTimeout to allow modal to render first
+        setTimeout(() => {
+            try {
+                if (lowerFileType === 'pdf') {
+                    // Use object tag as fallback for PDF
+                    previewContainer.innerHTML = `
+                        <object data="${url}" type="application/pdf" class="w-full" style="height: calc(90vh - 100px);">
+                            <div class="text-center py-12">
+                                <p style="color: #EEEEEE;" class="mb-4">PDF preview not available in browser</p>
+                                <a href="${url}" target="_blank" class="btn btn-primary">Open PDF in New Tab</a>
+                            </div>
+                        </object>
+                    `;
+                } else if (['jpg', 'jpeg', 'png', 'gif', 'bmp', 'webp'].includes(lowerFileType)) {
+                    const img = new Image();
+                    img.onload = function() {
+                        previewContainer.innerHTML = `<img src="${url}" class="max-w-full h-auto mx-auto" alt="${title}">`;
+                    };
+                    img.onerror = function() {
+                        previewContainer.innerHTML = `<p class="text-center py-8" style="color: #9CA3AF;">Unable to load image. <a href="${url}" target="_blank" class="text-primary hover:underline">Download instead</a></p>`;
+                    };
+                    img.src = url;
+                } else if (['txt', 'log', 'csv'].includes(lowerFileType)) {
+                    fetch(url, { method: 'GET' })
+                        .then(response => {
+                            if (!response.ok) throw new Error('Network response was not ok');
+                            return response.text();
+                        })
+                        .then(text => {
+                            const escaped = text.replace(/</g, '&lt;').replace(/>/g, '&gt;');
+                            previewContainer.innerHTML = `<pre class="p-4 rounded overflow-auto" style="background-color: #2e3239; color: #EEEEEE; max-height: calc(90vh - 120px); font-family: monospace;">${escaped}</pre>`;
+                        })
+                        .catch(error => {
+                            console.error('Preview error:', error);
+                            previewContainer.innerHTML = `<p class="text-center py-8" style="color: #9CA3AF;">Unable to preview this file. <a href="${url}" target="_blank" class="text-primary hover:underline">Download instead</a></p>`;
+                        });
+                } else {
+                    previewContainer.innerHTML = `
+                        <div class="text-center py-12">
+                            <svg class="w-16 h-16 mx-auto mb-4" style="color: #00ADB5;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"/>
+                            </svg>
+                            <p style="color: #9CA3AF;" class="mb-4">Preview not available for .${fileType} files</p>
+                            <a href="${url}" target="_blank" class="btn btn-primary">Download File</a>
+                        </div>
+                    `;
+                }
+            } catch (error) {
+                console.error('Preview error:', error);
+                previewContainer.innerHTML = `
+                    <div class="text-center py-12">
+                        <p style="color: #ef4444;" class="mb-4">Error loading preview</p>
+                        <a href="${url}" target="_blank" class="btn btn-primary">Open File in New Tab</a>
+                    </div>
+                `;
+            }
+        }, 100);
+
+        content.appendChild(header);
+        content.appendChild(previewContainer);
+        modal.appendChild(content);
+        document.body.appendChild(modal);
+
+        // Prevent body scroll
+        document.body.style.overflow = 'hidden';
+        
+        // Add escape key listener
+        const escapeHandler = function(e) {
+            if (e.key === 'Escape') {
+                closeModal();
+                document.removeEventListener('keydown', escapeHandler);
+            }
+        };
+        document.addEventListener('keydown', escapeHandler);
+    }
+
+    // Show filters if any are active
+    {% if type_filter or access_level_filter or case_filter or confidential_filter or author_filter or date_from or date_to %}
+    document.addEventListener('DOMContentLoaded', function() {
+        document.getElementById('advancedFilters').classList.remove('hidden');
+    });
+    {% endif %}
+</script>
+{% endblock %}
